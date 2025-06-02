@@ -11,6 +11,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Price } from "@/components/price";
+import NavigationComponent from "@/components/navigation";
 
 function HomePage() {
 
@@ -18,6 +19,7 @@ function HomePage() {
     <>
       <main className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 pt-6">
         <Header></Header>
+        <NavigationComponent></NavigationComponent>
         <section className="relative mx-auto  overflow-hidden rounded-2xl text-center">
           <Carousel
             className="mx-auto w-7xl overflow-hidden rounded-2xl"

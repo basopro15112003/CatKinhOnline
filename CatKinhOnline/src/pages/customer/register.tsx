@@ -52,8 +52,6 @@ export function Register({setShowForm}) {
                 <Button variant="ghost" className="w-full text-sm text-gray-500" onClick={() => setShowForm(false)}>Huỷ</Button>
               </CardFooter>
 
-              {/* Phương thức thanh toán */}
-              <Label></Label>
             </form>
           </Card>
         </>
