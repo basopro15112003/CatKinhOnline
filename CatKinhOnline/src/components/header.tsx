@@ -1,8 +1,10 @@
-import { Login } from "@/pages/login";
+import { Login } from "@/pages/customer/login";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { Register } from "@/pages/register";
+import { Register } from "@/pages/customer/register";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
 
 export function Header() {
   const [showForm, setShowForm] = useState(false);
@@ -21,9 +23,25 @@ export function Header() {
               Đặt hàng
             </a>
           </div> */}
-        <Button variant="outline" onClick={() => setShowForm(true)}>
+        {/* <Button variant="outline" onClick={() => setShowForm(true)}>
           Đăng nhập
-        </Button>
+        </Button> */}
+        <div className="flex">
+          <Avatar className="mr-2 h-13 w-13">
+            <Link to="/account">
+              <AvatarImage src="https://github.com/shadcn.png" />
+              <AvatarFallback>User</AvatarFallback>
+            </Link>
+          </Avatar>
+          <div>
+            <Link to="/account">
+              <p className="text-green-700">Nguyễn Quốc Hoàng</p>
+            </Link>
+            <Button variant="outline" size={"sm"}>
+              Đăng xuất
+            </Button>
+          </div>
+        </div>
       </header>
 
       {showForm && (
@@ -34,11 +52,10 @@ export function Header() {
               <TabsTrigger value="password">Đăng ký</TabsTrigger>
             </TabsList>
             <TabsContent className="w-full" value="account">
-              <Login setShowLogin={setShowLogin}/>
+              <Login setShowForm={setShowForm} />
             </TabsContent>
             <TabsContent className="w-full" value="password">
-              <Register  setShowRegister={setShowLogin}
-              />
+              <Register setShowForm={setShowForm} />
             </TabsContent>
           </Tabs>
         </div>

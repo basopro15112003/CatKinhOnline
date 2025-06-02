@@ -1,6 +1,7 @@
 import { BreadcrumbComponent } from "@/components/breadcrumb";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import NavigationComponent from "@/components/navigation";
 import { Price } from "@/components/price";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ function Order() {
     <>
       <main className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 pt-6">
         <Header></Header>
+        <NavigationComponent></NavigationComponent>
         <BreadcrumbComponent></BreadcrumbComponent>
         <Price></Price>
         <section className="mx-auto mb-10 h-auto max-w-7xl rounded-2xl bg-white p-12">
