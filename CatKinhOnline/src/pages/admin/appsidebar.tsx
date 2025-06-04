@@ -11,16 +11,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Link } from "react-router-dom";
 
 const items = [
   {
     title: "Quản lý giá",
-    url: "/CatKinhOnline/admin",
+    url: "/admin",
     icon: CircleDollarSign  ,
   },
   {
     title: "Quản lý Đơn hàng",
-    url: "/admin/orders",
+    url: "/admin/order",
     icon: Receipt,
   },
   {
@@ -28,7 +29,6 @@ const items = [
     url: "/admin/customer",
     icon: Contact ,
   },
-
 ];
 
 export function AppSidebar() {
@@ -42,10 +42,10 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a className="dark:text-black dark:hover:text-white" href={item.url}>
+                    <Link to={item.url} className="dark:text-black dark:hover:text-white" >
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

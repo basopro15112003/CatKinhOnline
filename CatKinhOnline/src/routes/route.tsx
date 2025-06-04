@@ -1,3 +1,4 @@
+import ManageOrder from "@/pages/admin/manageOrder";
 import ManagePrice from "@/pages/admin/managePrice";
 import About from "@/pages/customer/about";
 import Account from "@/pages/customer/account";
@@ -14,8 +15,8 @@ function AppRoute() {
           <Route path="/order" element={<Order />} />
           <Route path="/account" element={<Account />} />
           <Route path="/about" element={<About />} />
-                    <Route path="/admin" element={<ManagePrice/>}  />
-
+          <Route path="/admin" element={<ManagePrice />} />
+          <Route path="/admin/order" element={<ManageOrder />} />
         </Routes>
       </Router>
     </>

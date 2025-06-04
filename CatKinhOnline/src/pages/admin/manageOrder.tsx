@@ -12,15 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -29,8 +20,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { AlignStartVertical } from "lucide-react";
-
-export default function ManagePrice() {
+export default function ManageOrder() {
   const [open, setOpen] = React.useState(true);
   function toggleSidebar() {
     setOpen(!open);
@@ -39,27 +29,6 @@ export default function ManagePrice() {
     { id: 1, name: "Kính cường lực 8 ly", type: "Tempered", price: 260000 },
     { id: 2, name: "Kính trắng 5 ly", type: "Clear5", price: 220000 },
   ];
-
-  // Handlers
-  const addProduct = () => {
-    if (!prName || !prType || !prPrice) return;
-    const newProduct = {
-      id: Date.now(),
-      name: prName,
-      type: prType,
-      price: Number(prPrice),
-    };
-    setProducts([...products, newProduct]);
-    setPrName("");
-    setPrType("");
-    setPrPrice("");
-  };
-  const deleteProduct = (id:number) =>
-    setProducts(products.filter((p) => p.id !== id));
-  const [products, setProducts] = useState(initialProducts);
-  const [prName, setPrName] = useState("");
-  const [prType, setPrType] = useState("");
-  const [prPrice, setPrPrice] = useState("");
 
   return (
     <SidebarProvider open={open} onOpenChange={setOpen} className="gap-5">
@@ -90,48 +59,11 @@ export default function ManagePrice() {
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl text-green-800">
-                Quản lý giá bán
+                Quản lý đơn hàng 
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div>
-                <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label>Tên sản phẩm</Label>
-                    <Input
-                      value={prName}
-                      onChange={(e) => setPrName(e.target.value)}
-                      placeholder="Nhập tên"
-                    />
-                  </div>
-                  <div>
-                    <Label>Loại</Label>
-                    <Select onValueChange={(v) => setPrType(v)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Chọn loại" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Tempered">Tempered</SelectItem>
-                        <SelectItem value="Frosted">Frosted</SelectItem>
-                        <SelectItem value="Clear4">Clear4</SelectItem>
-                        <SelectItem value="Clear5">Clear5</SelectItem>
-                        <SelectItem value="Clear8">Clear8</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Giá (đ)</Label>
-                    <Input
-                      type="number"
-                      value={prPrice}
-                      onChange={(e) => setPrPrice(e.target.value)}
-                      placeholder="Nhập giá"
-                    />
-                  </div>
-                  <div className="flex items-end">
-                    <Button onClick={addProduct}>Thêm sản phẩm</Button>
-                  </div>
-                </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -143,20 +75,14 @@ export default function ManagePrice() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {products.map((prod) => (
+                    {initialProducts.map((prod) => (
                       <TableRow key={prod.id}>
                         <TableCell>{prod.id}</TableCell>
                         <TableCell>{prod.name}</TableCell>
                         <TableCell>{prod.type}</TableCell>
                         <TableCell>{prod.price.toLocaleString()}₫</TableCell>
                         <TableCell className="space-x-2">
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => deleteProduct(prod.id)}
-                          >
-                            Xóa
-                          </Button>
+                          <Button>Xóa</Button>
                           <Button
                             variant="outline"
                             className="bg-blue-200"

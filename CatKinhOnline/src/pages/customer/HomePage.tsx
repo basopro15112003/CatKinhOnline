@@ -103,7 +103,7 @@ function HomePage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {[
               {
-                name: "Anh Minh",
+                name: "Anh Trường",
                 img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7puyx2DAaMt7ejj55Iylp4COOeSf4zPG-mw&s",
               },
               {
