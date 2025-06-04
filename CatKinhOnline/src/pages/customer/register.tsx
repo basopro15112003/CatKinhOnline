@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export function Register({setShowForm}) {
+export function Register({setShowForm} : { setShowForm: (value: boolean) => void }) {
   return (       
      <>
           <Card className="">
