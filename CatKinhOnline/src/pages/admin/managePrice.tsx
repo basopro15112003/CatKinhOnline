@@ -1,6 +1,6 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./appsidebar";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -32,34 +32,28 @@ import { AlignStartVertical } from "lucide-react";
 
 export default function ManagePrice() {
   const [open, setOpen] = React.useState(true);
+  const [statusFilter, setStatusFilter] = React.useState("all");
   function toggleSidebar() {
     setOpen(!open);
   }
-  const initialProducts = [
-    { id: 1, name: "Kính cường lực 8 ly", type: "Tempered", price: 260000 },
-    { id: 2, name: "Kính trắng 5 ly", type: "Clear5", price: 220000 },
-  ];
+  type Product = { id: number; name: string; type: string; price: number };
+  const products: Product[] = useMemo(
+    () => [
+      { id: 1, name: "Kính cường lực 8 ly", type: "Clear6", price: 260000 },
+      { id: 2, name: "Kính trắng 5 ly", type: "Clear5", price: 220000 },
+      { id: 3, name: "Kính trắng 5 ly", type: "Clear7", price: 220000 },
+    ],
+    [],
+  );
 
-  // Handlers
-  const addProduct = () => {
-    if (!prName || !prType || !prPrice) return;
-    const newProduct = {
-      id: Date.now(),
-      name: prName,
-      type: prType,
-      price: Number(prPrice),
-    };
-    setProducts([...products, newProduct]);
-    setPrName("");
-    setPrType("");
-    setPrPrice("");
-  };
-  const deleteProduct = (id:number) =>
-    setProducts(products.filter((p) => p.id !== id));
-  const [products, setProducts] = useState(initialProducts);
-  const [prName, setPrName] = useState("");
-  const [prType, setPrType] = useState("");
-  const [prPrice, setPrPrice] = useState("");
+  const filteredData = useMemo(() => {
+    let data = products;
+
+    if (statusFilter !== "all") {
+      data = data.filter((o) => statusFilter === o.type);
+    }
+    return data;
+  }, [products, statusFilter]);
 
   return (
     <SidebarProvider open={open} onOpenChange={setOpen} className="gap-5">
@@ -95,41 +89,30 @@ export default function ManagePrice() {
             </CardHeader>
             <CardContent>
               <div>
-                <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
                     <Label>Tên sản phẩm</Label>
-                    <Input
-                      value={prName}
-                      onChange={(e) => setPrName(e.target.value)}
-                      placeholder="Nhập tên"
-                    />
+                    <Input placeholder="Tìm sản phẩm theo tên" />
                   </div>
                   <div>
                     <Label>Loại</Label>
-                    <Select onValueChange={(v) => setPrType(v)}>
+                    <Select
+                      value={statusFilter}
+                      onValueChange={(value) => setStatusFilter(value)}
+                    >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Chọn loại" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Tempered">Tempered</SelectItem>
-                        <SelectItem value="Frosted">Frosted</SelectItem>
-                        <SelectItem value="Clear4">Clear4</SelectItem>
-                        <SelectItem value="Clear5">Clear5</SelectItem>
-                        <SelectItem value="Clear8">Clear8</SelectItem>
+                        <SelectItem value="all">Tất cả</SelectItem>
+                        {products.map((cate) => (
+                          <SelectItem value={cate.type}>{cate.type}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
-                    <Label>Giá (đ)</Label>
-                    <Input
-                      type="number"
-                      value={prPrice}
-                      onChange={(e) => setPrPrice(e.target.value)}
-                      placeholder="Nhập giá"
-                    />
-                  </div>
                   <div className="flex items-end">
-                    <Button onClick={addProduct}>Thêm sản phẩm</Button>
+                    <Button>Thêm sản phẩm</Button>
                   </div>
                 </div>
                 <Table>
@@ -143,18 +126,14 @@ export default function ManagePrice() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {products.map((prod) => (
+                    {filteredData.map((prod) => (
                       <TableRow key={prod.id}>
                         <TableCell>{prod.id}</TableCell>
                         <TableCell>{prod.name}</TableCell>
                         <TableCell>{prod.type}</TableCell>
                         <TableCell>{prod.price.toLocaleString()}₫</TableCell>
                         <TableCell className="space-x-2">
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => deleteProduct(prod.id)}
-                          >
+                          <Button variant="destructive" size="sm">
                             Xóa
                           </Button>
                           <Button
