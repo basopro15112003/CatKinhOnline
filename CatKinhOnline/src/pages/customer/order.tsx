@@ -13,7 +13,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
 function Order() {
+  const [glassItems, setGlassItems] = useState([1]); // đầu tiên phải có 1 loại kính trước
+
+  const handleAddGlassItem = () => {
+    setGlassItems((prev) => [...prev, prev.length + 1]);
+  };
+
+  const handleRemoveGlassItem = () => {
+    setGlassItems((prev) => prev.slice(0, -1)); // slice từ 0 , -1  là sẽ lấy tất cả phần tử trừ phần tử cuối
+  };
   return (
     <>
       <main className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 pt-6">
@@ -24,71 +34,54 @@ function Order() {
         <section className="mx-auto mb-10 h-auto max-w-7xl rounded-2xl bg-white p-12">
           <p className="mb-4 text-xl font-bold text-green-700">Đặt kính ngay</p>
           <form>
-            <div className="flex justify-between">
-              <p className="mb-2 font-semibold">Loại kính #1</p>
-              <Button variant="outline" className="">
-                {" "}
-                Xóa
-              </Button>
-            </div>
-            <Label className="mb-2">Loại kính</Label>
-            <Select>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Chọn loại kính" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tempered">Kính cường lực</SelectItem>
-                <SelectItem value="frosted">Kính bông</SelectItem>
-                <SelectItem value="clear4">Kính trắng 4 ly</SelectItem>
-                <SelectItem value="clear5">Kính trắng 5 ly</SelectItem>
-                <SelectItem value="clear8">Kính trắng 8 ly</SelectItem>
-              </SelectContent>
-            </Select>{" "}
-            <div className="mt-4 mb-4 flex space-x-2">
-              <div className="flex-1">
-                <Label className="mb-2">Rộng (m)</Label>
-                <Input className="w-full"></Input>
+             {glassItems.map((item,index) => (
+              <div key={index} className="mb-8 border-b pb-4">
+                <div className="flex justify-between">
+                  <p className="mb-2 font-semibold">Loại kính #{index + 1}</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleRemoveGlassItem}
+                  >
+                    Xóa
+                  </Button>
+                </div>
+                <Label className="mb-2">Loại kính</Label>
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn loại kính" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tempered">Kính cường lực</SelectItem>
+                    <SelectItem value="frosted">Kính bông</SelectItem>
+                    <SelectItem value="clear4">Kính trắng 4 ly</SelectItem>
+                    <SelectItem value="clear5">Kính trắng 5 ly</SelectItem>
+                    <SelectItem value="clear8">Kính trắng 8 ly</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="mt-4 mb-4 flex space-x-2">
+                  <div className="flex-1">
+                    <Label className="mb-2">Rộng (m)</Label>
+                    <Input className="w-full" />
+                  </div>
+                  <div className="flex-1">
+                    <Label className="mb-2">Dài (m)</Label>
+                    <Input className="w-full" />
+                  </div>
+                  <div>
+                    <Label className="mb-2">Số lượng</Label>
+                    <Input className="w-20" type="number" />
+                  </div>
+                </div>
               </div>
-              <div className="flex-1">
-                <Label className="mb-2">Dài (m)</Label>
-                <Input className="w-full"></Input>
-              </div>
-              <div>
-                <Label className="mb-2">Số lượng</Label>
-                <Input className="w-20" type="number"></Input>
-              </div>
-            </div>
-            <div className="mb-8 w-full border-1"></div>
-            <p className="mb-2 font-semibold">Loại kính #2</p>
-            <Label className="mb-2">Loại kính</Label>
-            <Select>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Chọn loại kính" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tempered">Kính cường lực</SelectItem>
-                <SelectItem value="frosted">Kính bông</SelectItem>
-                <SelectItem value="clear4">Kính trắng 4 ly</SelectItem>
-                <SelectItem value="clear5">Kính trắng 5 ly</SelectItem>
-                <SelectItem value="clear8">Kính trắng 8 ly</SelectItem>
-              </SelectContent>
-            </Select>{" "}
-            <div className="mt-4 mb-4 flex space-x-2">
-              <div className="flex-1">
-                <Label className="mb-2">Rộng (m)</Label>
-                <Input className="w-full"></Input>
-              </div>
-              <div className="flex-1">
-                <Label className="mb-2">Dài (m)</Label>
-                <Input className="w-full"></Input>
-              </div>
-              <div>
-                <Label className="mb-2">Số lượng</Label>
-                <Input className="w-20" type="number"></Input>
-              </div>
-            </div>
-            <div className="mb-2 w-full border-1"></div>
-            <Button variant="outline" className="mb-8">
+            ))}
+            {/* Add new grass element */}
+            <Button
+              type="button"
+              variant="outline"
+              className="mb-8"
+              onClick={handleAddGlassItem}
+            >
               Thêm loại kính
             </Button>
             {/* Phương thức thanh toán - Start*/}

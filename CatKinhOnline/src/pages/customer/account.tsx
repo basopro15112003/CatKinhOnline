@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -19,21 +19,276 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BreadcrumbComponent } from "@/components/breadcrumb";
 import NavigationComponent from "@/components/navigation";
+import { DetailOrder } from "@/components/form/detailOrder";
 
 export default function Account() {
+  const [isDetailModalOpen, setIsDetailOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  const openDetail = (order: Order) => {
+    setSelectedOrder(order);
+    setIsDetailOpen(true);
+  };
+
+  const closeDetail = () => {
+    setIsDetailOpen(false);
+  };
+
+  type OrderItem = {
+    id: number;
+    productName: string;
+    width: number;
+    height: number;
+    quantity: number;
+    unitPrice: number;
+    subtotal: number;
+  };
+
+  type Order = {
+    id: string;
+    date: string;
+    status: number;
+    deliveryType: string;
+    shippingAddress?: string;
+    paymentMethod: string;
+    totalAmount: number;
+    items: OrderItem[];
+  };
+
+  //#region  Mock 10 order data
+  const orders: Order[] = useMemo(
+    () => [
+      {
+        id: "DH001",
+        date: "2023-11-01",
+        status: 2,
+        deliveryType: "shipping",
+        shippingAddress: "227 Phong Điền, Cần Thơ",
+        paymentMethod: "cod",
+        items: [
+          {
+            id: 1,
+            productName: "Kính cường lực 8 ly",
+            width: 1.2,
+            height: 0.8,
+            quantity: 2,
+            unitPrice: 260000,
+            subtotal: Math.round(1.2 * 0.8 * 2 * 260000),
+          },
+          {
+            id: 2,
+            productName: "Kính trắng 5 ly",
+            width: 1,
+            height: 1,
+            quantity: 1,
+            unitPrice: 157000,
+            subtotal: Math.round(1 * 1 * 1 * 157000),
+          },
+        ],
+        totalAmount: 2 * 1.2 * 0.8 * 260000 + 1 * 1 * 157000,
+      },
+      {
+        id: "DH002",
+        date: "2023-11-03",
+        status: 1,
+        deliveryType: "pickup",
+        paymentMethod: "online",
+        items: [
+          {
+            id: 1,
+            productName: "Kính bông",
+            width: 0.8,
+            height: 0.8,
+            quantity: 3,
+            unitPrice: 150000,
+            subtotal: Math.round(0.8 * 0.8 * 3 * 150000),
+          },
+        ],
+        totalAmount: Math.round(0.8 * 0.8 * 3 * 150000),
+      },
+      {
+        id: "DH003",
+        date: "2023-11-05",
+        status: 0,
+        deliveryType: "shipping",
+        shippingAddress: "123 Nguyễn Huệ, TP HCM",
+        paymentMethod: "cod",
+        items: [
+          {
+            id: 1,
+            productName: "Kính trắng 4 ly",
+            width: 1,
+            height: 2,
+            quantity: 1,
+            unitPrice: 135000,
+            subtotal: Math.round(1 * 2 * 1 * 135000),
+          },
+        ],
+        totalAmount: Math.round(1 * 2 * 1 * 135000),
+      },
+      {
+        id: "DH004",
+        date: "2023-11-07",
+        status: 4,
+        deliveryType: "pickup",
+        paymentMethod: "online",
+        items: [
+          {
+            id: 1,
+            productName: "Kính trắng 8 ly",
+            width: 1.5,
+            height: 1,
+            quantity: 2,
+            unitPrice: 240000,
+            subtotal: Math.round(1.5 * 1 * 2 * 240000),
+          },
+        ],
+        totalAmount: Math.round(1.5 * 1 * 2 * 240000),
+      },
+      {
+        id: "DH005",
+        date: "2023-11-09",
+        status: 3,
+        deliveryType: "shipping",
+        shippingAddress: "789 Trần Phú, Đà Nẵng",
+        paymentMethod: "cod",
+        items: [
+          {
+            id: 1,
+            productName: "Kính cường lực 8 ly",
+            width: 2,
+            height: 1.5,
+            quantity: 1,
+            unitPrice: 260000,
+            subtotal: Math.round(2 * 1.5 * 1 * 260000),
+          },
+          {
+            id: 2,
+            productName: "Kính bông",
+            width: 1,
+            height: 1,
+            quantity: 2,
+            unitPrice: 150000,
+            subtotal: Math.round(1 * 1 * 2 * 150000),
+          },
+        ],
+        totalAmount: Math.round(2 * 1.5 * 1 * 260000 + 1 * 1 * 2 * 150000),
+      },
+      {
+        id: "DH006",
+        date: "2023-11-10",
+        status: 2,
+        deliveryType: "pickup",
+        paymentMethod: "online",
+        items: [
+          {
+            id: 1,
+            productName: "Kính trắng 5 ly",
+            width: 1.2,
+            height: 0.8,
+            quantity: 2,
+            unitPrice: 157000,
+            subtotal: Math.round(1.2 * 0.8 * 2 * 157000),
+          },
+        ],
+        totalAmount: Math.round(1.2 * 0.8 * 2 * 157000),
+      },
+      {
+        id: "DH007",
+        date: "2023-11-12",
+        status: 3,
+        deliveryType: "shipping",
+        shippingAddress: "456 Lê Lợi, Cần Thơ",
+        paymentMethod: "cod",
+        items: [
+          {
+            id: 1,
+            productName: "Kính bông",
+            width: 0.5,
+            height: 0.5,
+            quantity: 4,
+            unitPrice: 150000,
+            subtotal: Math.round(0.5 * 0.5 * 4 * 150000),
+          },
+        ],
+        totalAmount: Math.round(0.5 * 0.5 * 4 * 150000),
+      },
+      {
+        id: "DH008",
+        date: "2023-11-14",
+        status: 3,
+        deliveryType: "pickup",
+        paymentMethod: "online",
+        items: [
+          {
+            id: 1,
+            productName: "Kính trắng 4 ly",
+            width: 2,
+            height: 1,
+            quantity: 1,
+            unitPrice: 135000,
+            subtotal: Math.round(2 * 1 * 1 * 135000),
+          },
+          {
+            id: 2,
+            productName: "Kính cường lực 8 ly",
+            width: 1,
+            height: 1,
+            quantity: 1,
+            unitPrice: 260000,
+            subtotal: Math.round(1 * 1 * 1 * 260000),
+          },
+        ],
+        totalAmount: Math.round(2 * 1 * 1 * 135000 + 1 * 1 * 1 * 260000),
+      },
+      {
+        id: "DH009",
+        date: "2023-11-15",
+        status: 3,
+        deliveryType: "shipping",
+        shippingAddress: "101 Nguyễn Trãi, Hà Nội",
+        paymentMethod: "cod",
+        items: [
+          {
+            id: 1,
+            productName: "Kính trắng 5 ly",
+            width: 1.5,
+            height: 1.5,
+            quantity: 1,
+            unitPrice: 157000,
+            subtotal: Math.round(1.5 * 1.5 * 1 * 157000),
+          },
+        ],
+        totalAmount: Math.round(1.5 * 1.5 * 1 * 157000),
+      },
+      {
+        id: "DH010",
+        date: "2023-11-17",
+        status: 4,
+        deliveryType: "pickup",
+        paymentMethod: "online",
+        items: [
+          {
+            id: 1,
+            productName: "Kính bông",
+            width: 1,
+            height: 2,
+            quantity: 1,
+            unitPrice: 150000,
+            subtotal: Math.round(1 * 2 * 1 * 150000),
+          },
+        ],
+        totalAmount: Math.round(1 * 2 * 1 * 150000),
+      },
+    ],
+    [],
+  );
+  //#endregion
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 pt-6">
       <Header></Header> <NavigationComponent></NavigationComponent>
@@ -104,47 +359,52 @@ export default function Account() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>DH001</TableCell>
-                    <TableCell>15/11/2003</TableCell>
-                    <TableCell>Đã hoàn thành</TableCell>
-                    <TableCell>500,000₫</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm">
-                        Xem
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                  {orders.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.id}</TableCell>
+                      <TableCell>{item.date}</TableCell>
+                      <TableCell>
+                        {item.status === 0
+                          ? "Chờ xác nhận"
+                          : item.status === 1
+                            ? "Đã xác nhận"
+                            : item.status === 2
+                              ? "Đang thực hiện"
+                              : item.status === 3
+                                ? "Đang giao hàng"
+                                : item.status === 4
+                                  ? "Đã hoàn thành"
+                                  : "Đã hủy"}
+                      </TableCell>
+                      <TableCell>
+                        {item.totalAmount.toLocaleString()} vn₫
+                      </TableCell>
+                      <TableCell className="w-1 space-x-1 text-right">
+                        {item.status === 0 ? (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                          >
+                            Hủy
+                          </Button>
+                        ) : (
+                          <></>
+                        )}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openDetail(item)}
+                        >
+                          Xem
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
-              <div className="mt-4 flex justify-center">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious href="#" />
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink href="#">1</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink href="#" isActive>
-                        2
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink href="#">3</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationNext href="#" />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>{" "}
-              </div>
             </TabsContent>
-
             <TabsContent value="changepass">
               <div className="grid max-w-md gap-4">
                 <div>
@@ -166,6 +426,12 @@ export default function Account() {
         </CardContent>
       </Card>
       <Footer></Footer>
+      {isDetailModalOpen && selectedOrder && (
+        <DetailOrder
+          selectedOrder={selectedOrder}
+          closeDetail={closeDetail}
+        ></DetailOrder>
+      )}
     </div>
   );
 }

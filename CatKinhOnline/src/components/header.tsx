@@ -12,9 +12,9 @@ export function Header() {
   return (
     <>
       <header className="mx-auto mb-10 flex h-15 max-w-7xl items-center justify-between">
-        <p className="text-4xl font-extrabold text-green-800">
+        <Link to={"/"} className="text-4xl font-extrabold text-green-800">
           Tiệm kính Quốc Hoàng
-        </p>
+        </Link>
         {/* <div className="flex space-x-4">
             <a href=""  className="text-black hover:text-blue-800 hover:underline">
               Trang chủ

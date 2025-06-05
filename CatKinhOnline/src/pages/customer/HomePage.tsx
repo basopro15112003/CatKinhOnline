@@ -1,26 +1,25 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Price } from "@/components/price";
 import NavigationComponent from "@/components/navigation";
+import PriceQuoteCard from "@/components/calPrice";
 
 function HomePage() {
+
 
   return (
     <>
       <main className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 pt-6">
         <Header></Header>
         <NavigationComponent></NavigationComponent>
-        <section className="relative mx-auto  overflow-hidden rounded-2xl text-center">
+        <section className="relative mx-auto overflow-hidden rounded-2xl text-center">
           <Carousel
             className="mx-auto w-7xl overflow-hidden rounded-2xl"
             plugins={[
@@ -95,7 +94,7 @@ function HomePage() {
         </section>
 
         <Price></Price>
-        
+        <PriceQuoteCard></PriceQuoteCard>
         <section className="mx-auto mb-12 max-w-7xl">
           <h2 className="mb-6 text-center text-2xl font-bold text-green-800">
             Khách hàng nói gì về dịch vụ của chúng tôi?
