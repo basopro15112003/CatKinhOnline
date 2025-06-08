@@ -19,6 +19,7 @@ namespace CatKinhOnline.Models
 
         [Required]
         public int Status { get; set; }
+
         [ForeignKey(nameof(CategoryId))]
         public virtual Category Category { get; set; } = new Category();
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
