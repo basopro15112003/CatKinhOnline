@@ -16,7 +16,7 @@ namespace CatKinhOnline.Repositories.ProductRepository
             {
             try
                 {
-                using (var context = new MyDbContext())
+                using (MyDbContext? context = new MyDbContext())
                     {
                     return await context.Products.ToListAsync();
                     }
@@ -69,6 +69,7 @@ namespace CatKinhOnline.Repositories.ProductRepository
                 {
                 using (var context = new MyDbContext())
                     {
+                    product.Status = 1; // Assuming 1 means active status
                     context.Products.Add(product);
                     await context.SaveChangesAsync();
                     return product;

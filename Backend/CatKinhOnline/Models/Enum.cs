@@ -4,16 +4,18 @@
         {
         public enum Role
             {
-            Admin = 0,     
-            Customer = 1,    
+            Admin = 0,
+            Customer = 1,
             }
 
         public enum OrderStatus
             {
             Pending = 0,     // Đang xử lý
-            Shipping = 1,    // Đang giao
-            Completed = 2,   // Đã giao
-            Cancelled = 3    // Đã hủy
+            Confirmed = 1,   // Đã xác nhận đơn
+            Processing = 2,  // Đang xử lý đơn
+            Shipping = 3,    // Đang giao
+            Completed = 4,   // Đã giao hàng, đã nhận hàng
+            Cancelled = 5    // Đã hủy
             }
 
         public enum DeliveryType
@@ -26,6 +28,12 @@
             {
             COD = 0,    // Tiền mặt khi nhận
             Online = 1  // Chuyển khoản / online
+            }
+        
+        public enum ProductStatus
+            {
+            Available = 0, // Sản phẩm có sẵn
+            Unavailable = 1 // Sản phẩm hết hàng
             }
         }
     }
