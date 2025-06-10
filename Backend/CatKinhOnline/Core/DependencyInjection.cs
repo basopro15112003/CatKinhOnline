@@ -1,4 +1,6 @@
 ﻿using CatKinhOnline.Repositories.CategoryRepository;
+using CatKinhOnline.Repositories.ProductRepository;
+using CatKinhOnline.Repositories.UserRepository;
 using CatKinhOnline.Services;
 
 namespace CatKinhOnline.Core
@@ -9,10 +11,15 @@ namespace CatKinhOnline.Core
             {
             #region Register the repository
             services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+
             #endregion
 
             #region Register Service
             services.AddScoped<CategoryService>();
+            services.AddScoped<ProductService>();
+            services.AddScoped<UserService>();
 
             services.AddHttpClient();
             services.AddAuthorization();

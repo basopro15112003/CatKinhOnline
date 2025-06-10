@@ -1,25 +1,23 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getProducts, type Product } from "@/services/productService";
 
 export function Price() {
-  type GlassType = "tempered" | "frosted" | "clear4" | "clear5" | "clear8";
+  const [product, setProduct] = useState<Product[]>([]);
 
-  const PRICE_MAP: Record<GlassType, number> = {
-    tempered: 500000,
-    frosted: 150000,
-    clear4: 135000,
-    clear5: 157000,
-    clear8: 240000,
-  };
-
-  const GLASS_NAMES: Record<GlassType, string> = {
-    tempered: "Kính cường lực",
-    frosted: "Kính bông",
-    clear4: "Kính trắng 4 ly",
-    clear5: "Kính trắng 5 ly",
-    clear8: "Kính trắng 8 ly",
-  };
+    useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await getProducts(); // expected shape: { result: Product[] }
+        setProduct(response);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    }
+    fetchData();
+  }, []);
 
   return (
     <>
@@ -30,13 +28,13 @@ export function Price() {
               Bảng giá kính
             </h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {(Object.keys(PRICE_MAP) as GlassType[]).map((type, idx) => (
-                <div key={idx} className="rounded-xl border bg-green-50 p-4">
+              {product.map((product, id) => (
+                <div key={id} className="rounded-xl border bg-green-50 p-4">
                   <h3 className="text-lg font-semibold text-green-800">
-                    {GLASS_NAMES[type]}
+                    {product.productName}
                   </h3>
                   <p className="mt-2 text-green-600">
-                    Giá: {PRICE_MAP[type].toLocaleString()}₫/m²
+                    Giá: {product.pricePerM2.toLocaleString()}₫/m²
                   </p>
                 </div>
               ))}

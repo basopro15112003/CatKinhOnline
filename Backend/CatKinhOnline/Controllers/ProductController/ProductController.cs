@@ -21,7 +21,7 @@ namespace CatKinhOnline.Controllers.ProductController
         public async Task<IActionResult> Get()
             {
             var products = await _productService.GetAllProduct();
-            return Ok();
+            return Ok(products);
             }
 
         // GET api/<ProductController>/5
@@ -40,19 +40,12 @@ namespace CatKinhOnline.Controllers.ProductController
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Product product)
             {
-            if (product==null)
+            if (!ModelState.IsValid)
                 {
-                return BadRequest("Product cannot be null.");
+                return BadRequest(ModelState);
                 }
-            try
-                {
                 var prod = await _productService.AddProduct(product);
                 return CreatedAtAction(nameof(Get), new { id = prod.Id }, prod); // 201 - created
-                }
-            catch (ArgumentNullException ex)
-                {
-                return BadRequest(new { message = ex.Message }); // 400 - bad request
-                }
             }
 
         // PUT api/<ProductController>/5
