@@ -106,11 +106,11 @@ export default function PriceQuoteCard() {
                           value={glassType}
                           onValueChange={(value) => setGlassType(value)}
                         >
-                          <SelectTrigger id="glassType" className="w-full">
+                          <SelectTrigger id="glassType" className="w-full" >
                             <SelectValue placeholder="Chọn loại kính" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="tempered">
+                          <SelectContent className="border-2 border-emerald-200">
+                            <SelectItem value="tempered" >
                               Kính cường lực
                             </SelectItem>
                             <SelectItem value="frosted">Kính bông</SelectItem>
@@ -128,8 +128,8 @@ export default function PriceQuoteCard() {
 
                         <div className="mt-2 flex space-x-1">
                           <div className="w-1/2">
-                            <Label className="mt-4">Chiều rộng</Label>{" "}
-                            <Input
+                            <Label className="mt-4" >Chiều rộng</Label>{" "}
+                            <Input className="border-2 focus:border-emerald-200"
                               id="width"
                               placeholder="Rộng"
                               value={width}

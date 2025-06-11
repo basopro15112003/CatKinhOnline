@@ -31,13 +31,19 @@ import {
 import { AlignStartVertical } from "lucide-react";
 import { getProducts, type Product } from "@/services/productService";
 import { FormAddProduct } from "@/components/form/product/addProduct";
+import { FormUpdateProduct } from "@/components/form/product/updateProduct";
+import { getCategories, type Category } from "@/services/categoryService";
 
 export default function ManagePrice() {
   const [showForm, setShowForm] = useState(false);
   const [open, setOpen] = React.useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = React.useState("0");
+  const [statusFilter, setStatusFilter] = useState<number>(0);
   const [product, setProduct] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -49,27 +55,41 @@ export default function ManagePrice() {
     }
     fetchData();
   }, []);
+
+    useEffect(() => {
+      async function fetchCategories() {
+        try {
+          const data = await getCategories();
+          setCategories(data);
+        } catch (error) {
+          console.error("Error fetching categories:", error);
+        }
+      }
+      fetchCategories();
+    }, []);
+
   //Update bảng mà không cần reload
   const handleReload = async () => {
-        const response = await getProducts();
-        setProduct(response);
+    const response = await getProducts();
+    setProduct(response);
   };
 
   function toggleSidebar() {
     setOpen(!open);
   }
 
-  const filteredData = useMemo(() => {
+   const filteredData = useMemo(() => {
     let data = product;
-    if (searchTerm) {
-      data = data.filter((o) => o.productName.toUpperCase().toString().includes(searchTerm.toUpperCase()));
+    if (searchTerm.trim()) {
+      data = data.filter((o) =>
+        o.productName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
-    if (statusFilter !== "0") {
-      data = data.filter((o) => statusFilter === o.categoryId.toString());
+    if (statusFilter !== 0) {
+      data = data.filter((o) => o.category.id === statusFilter);
     }
     return data;
-  }, [product, searchTerm,statusFilter]);
-
+  }, [product, searchTerm, statusFilter])
   return (
     <SidebarProvider open={open} onOpenChange={setOpen} className="gap-5">
       <AppSidebar />
@@ -115,20 +135,25 @@ export default function ManagePrice() {
                   </div>
                   <div>
                     <Label>Loại</Label>
-                    <Select
-                      value={statusFilter}
-                      onValueChange={(value) => setStatusFilter(value)}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Chọn loại" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">Tất cả</SelectItem>
-                        {/* {product.map((cate, id) => (
-                          <SelectItem key={id} value={cate.categoryId.toString()}>{}</SelectItem>
-                        ))} */}
-                      </SelectContent>
-                    </Select>
+                 <Select
+                    value={statusFilter.toString()}
+                    onValueChange={(value) => setStatusFilter(Number(value))}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Chọn loại" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">Tất cả</SelectItem>
+                      {categories.map((cate) => (
+                        <SelectItem
+                          key={cate.id}
+                          value={cate.id.toString()}
+                        >
+                          {cate.categoryName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   </div>
                   <div className="flex items-end">
                     <Button type="button" onClick={() => setShowForm(true)}>
@@ -165,6 +190,10 @@ export default function ManagePrice() {
                             variant="outline"
                             className="bg-blue-200"
                             size="sm"
+                            onClick={() => {
+                              setSelectedProduct(prod);
+                              setShowForm(true);
+                            }}
                           >
                             Cập nhật
                           </Button>
@@ -184,6 +213,23 @@ export default function ManagePrice() {
           setShowForm={setShowForm}
         ></FormAddProduct>
       )}
+      {showForm && selectedProduct ? (
+  <FormUpdateProduct
+    productId={selectedProduct.id}
+    initialData={{
+      productName: selectedProduct.productName,
+      categoryId: selectedProduct.category.id,
+      pricePerM2: selectedProduct.pricePerM2,
+      status: selectedProduct.status,
+    }}
+    onUpdated={handleReload}
+    setShowForm={(value) => {
+      setShowForm(value);
+      if (!value) setSelectedProduct(null);
+    }}
+  />
+) : null}
+
     </SidebarProvider>
   );
 }

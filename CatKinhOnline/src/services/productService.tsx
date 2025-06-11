@@ -40,4 +40,21 @@ export const AddProduct = async(data:ProductInput ) => {
         console.log(error);
         return null;
     }
+    
 }
+export const updateProduct = async (
+  id: number,
+  data: ProductInput
+): Promise<Product | null> => {
+  try {
+    const response: AxiosResponse<Product> = await request.put(
+      `Product/${id}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    if (error) return null;
+    console.error("Error updating product", error);
+    throw error;
+  }
+};
