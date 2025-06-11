@@ -19,10 +19,10 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { BreadcrumbComponent } from "@/components/breadcrumb";
-import NavigationComponent from "@/components/navigation";
+import { Header } from "@/components/personal/header";
+import { Footer } from "@/components/personal/footer";
+import { BreadcrumbComponent } from "@/components/personal/breadcrumb";
+import NavigationComponent from "@/components/personal/navigation";
 import { DetailOrder } from "@/components/form/detailOrder";
 
 export default function Account() {

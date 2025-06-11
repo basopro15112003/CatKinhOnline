@@ -1,4 +1,5 @@
 ﻿using CatKinhOnline.AppDbContext;
+using CatKinhOnline.ModelDTOs;
 using CatKinhOnline.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +7,7 @@ namespace CatKinhOnline.Repositories.ProductRepository
     {
     public class ProductRepository : IProductRepository
         {
+
         #region Get All Products in DB
         /// <summary>
         /// get all products from the database.
@@ -18,7 +20,7 @@ namespace CatKinhOnline.Repositories.ProductRepository
                 {
                 using (MyDbContext? context = new MyDbContext())
                     {
-                    return await context.Products.ToListAsync();
+                   return await context.Products.Include(c => c.Category).ToListAsync();
                     }
                 }
             catch (Exception ex)

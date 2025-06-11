@@ -1,6 +1,8 @@
-﻿using CatKinhOnline.Models;
+﻿using CatKinhOnline.ModelDTOs;
+using CatKinhOnline.Models;
 using CatKinhOnline.Repositories.CategoryRepository;
 using CatKinhOnline.Repositories.ProductRepository;
+using ISUZU_NEXT.Server.Core.Extentions;
 
 namespace CatKinhOnline.Services
     {
@@ -18,11 +20,28 @@ namespace CatKinhOnline.Services
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<List<Product>> GetAllProduct()
-            {
+        public async Task<List<ProductDTO>> GetAllProduct()
+            {                        
             try
                 {
-                return await _productRepository.GetAllProducts();
+                var models = await _productRepository.GetAllProducts();
+                var modelDTOs = new List<ProductDTO>();
+                foreach (var item in models)
+                    {
+                    var dto = new ProductDTO();
+                    dto.CopyProperties(item);
+                    if (item.Category!=null)
+                        {
+                        dto.Category=new CategoryDTO()
+                            {
+                            Id=item.Category.Id,
+                            CategoryName=item.Category.CategoryName,
+                            Description=item.Category.Description
+                            };
+                        }
+                    modelDTOs.Add(dto);
+                    }
+                return modelDTOs;
                 }
             catch (Exception ex)
                 {

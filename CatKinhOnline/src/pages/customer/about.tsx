@@ -1,12 +1,12 @@
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { BreadcrumbComponent } from "@/components/breadcrumb";
+import { Header } from "@/components/personal/header";
+import { Footer } from "@/components/personal/footer";
+import { BreadcrumbComponent } from "@/components/personal/breadcrumb";
 import { Card, CardContent } from "@/components/ui/card";
-import NavigationComponent from "@/components/navigation";
+import NavigationComponent from "@/components/personal/navigation";
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-200 to-green-300 pt-6">
+    <div className="min-h-screen bg-gradient-to-br from-green-200 to-green-300 ">
       <Header></Header><NavigationComponent></NavigationComponent>
       <BreadcrumbComponent></BreadcrumbComponent>
 

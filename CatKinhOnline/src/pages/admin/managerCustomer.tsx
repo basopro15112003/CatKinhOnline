@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { AlignStartVertical } from "lucide-react";
 
-import PaginationControls from "@/components/Paging";
+import PaginationControls from "@/components/personal/Paging";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

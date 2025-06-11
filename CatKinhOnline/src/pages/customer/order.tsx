@@ -1,8 +1,8 @@
-import { BreadcrumbComponent } from "@/components/breadcrumb";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
-import NavigationComponent from "@/components/navigation";
-import { Price } from "@/components/price";
+import { BreadcrumbComponent } from "@/components/personal/breadcrumb";
+import { Footer } from "@/components/personal/footer";
+import { Header } from "@/components/personal/header";
+import NavigationComponent from "@/components/personal/navigation";
+import { Price } from "@/components/personal/price";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,7 +26,7 @@ function Order() {
   };
   return (
     <>
-      <main className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 pt-6">
+      <main className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 ">
         <Header></Header>
         <NavigationComponent></NavigationComponent>
         <BreadcrumbComponent></BreadcrumbComponent>

@@ -1,6 +1,6 @@
 import "./App.css";
 import AppRoute from "./routes/route";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 
 function App() {
   return (

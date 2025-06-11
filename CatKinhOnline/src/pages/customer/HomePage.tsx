@@ -5,139 +5,205 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { Price } from "@/components/price";
-import NavigationComponent from "@/components/navigation";
-import PriceQuoteCard from "@/components/calPrice";
+import { Header } from "@/components/personal/header";
+import { Footer } from "@/components/personal/footer";
+import { Price } from "@/components/personal/price";
+import NavigationComponent from "@/components/personal/navigation";
+import PriceQuoteCard from "@/components/personal/calPrice";
+import { ArrowRight,  Calculator, Shield,  Star, Truck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 function HomePage() {
+  const [isVisible, setIsVisible] = useState(false);
 
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
+const features = [
+    {
+      icon: <Calculator className="w-8 h-8" />,
+      title: "Báo giá tự động",
+      desc: "Tính toán chi phí nhanh chóng theo diện tích với công nghệ chính xác",
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      icon: <Shield className="w-8 h-8" />,
+      title: "Chất lượng cao",
+      desc: "Sử dụng kính nhập khẩu cao cấp, cắt chuẩn xác đến từng mm",
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      icon: <Truck className="w-8 h-8" />,
+      title: "Giao nhận linh hoạt",
+      desc: "Nhận tại cửa hàng hoặc vận chuyển đến tận nhà trong 24h",
+      color: "from-purple-500 to-pink-500",
+    },
+  ]
+
+   const reviews = [
+    {
+      name: "Anh Trường",
+      role: "Chủ cửa hàng nội thất",
+      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7puyx2DAaMt7ejj55Iylp4COOeSf4zPG-mw&s",
+      rating: 5,
+      comment: "Dịch vụ tuyệt vời! Kính chất lượng cao, giao hàng đúng hẹn. Tôi sẽ tiếp tục sử dụng dịch vụ.",
+    },
+    {
+      name: "Chị Huyền",
+      role: "Kiến trúc sư",
+      img: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474053qxl/anh-nguoi-that-cute-nhat_043412774.jpg",
+      rating: 5,
+      comment: "Báo giá nhanh chóng, chính xác. Đội ngũ tư vấn nhiệt tình và chuyên nghiệp.",
+    },
+    {
+      name: "Bạn Hân",
+      role: "Nhà thầu xây dựng",
+      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHYtDbL_HuXPvfbfTzOzx7BiMXjQ7PbI9mJw&s",
+      rating: 5,
+      comment: "Giá cả hợp lý, chất lượng vượt mong đợi. Đã hợp tác nhiều dự án với tiệm.",
+    },
+  ]
   return (
     <>
-      <main className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 pt-6">
+      <main className="min-h-screen bg-gradient-to-br from-green-200 via-emerald-50 to-green-300">
         <Header></Header>
         <NavigationComponent></NavigationComponent>
-        <section className="relative mx-auto overflow-hidden rounded-2xl text-center">
-          <Carousel
-            className="mx-auto w-7xl overflow-hidden rounded-2xl"
-            plugins={[
-              Autoplay({
-                delay: 2000,
-              }),
-            ]}
-          >
-            <CarouselContent>
-              <CarouselItem className="">
-                <img
-                  src="https://acotecxuanmai.com.vn/storage/du-an/anh-3.jpg"
-                  alt="Banner"
-                  className="h-120 w-full object-cover"
-                />
-              </CarouselItem>
-              <CarouselItem>
-                {" "}
-                <img
-                  src="https://www.gothaibefree.com/wp-content/uploads/2016/01/Pattaya1940x1300.jpg"
-                  alt="Banner"
-                  className="h-120 w-full object-cover"
-                />
-              </CarouselItem>
-              <CarouselItem>
-                {" "}
-                <img
-                  src="https://d2rdhxfof4qmbb.cloudfront.net/wp-content/uploads/20200825140923/iStock-918934132-scaled.jpg"
-                  alt="Banner"
-                  className="h-120 w-full object-cover"
-                />
-              </CarouselItem>
-            </CarouselContent>
-          </Carousel>
-          <div className="absolute top-0 right-0 left-0 mt-50 items-center justify-center">
-            <h2 className="mb-4 text-3xl font-extrabold text-white">
-              Nơi đặt kính nhanh chóng & tiện lợi
-            </h2>
-            <p className="text-lg font-extrabold text-white">
-              Chọn loại kính, nhập kích thước và nhận báo giá ngay lập tức. Cắt
-              kính chính xác, giao hàng tận nơi hoặc nhận tại cửa hàng.
-            </p>
+        <section className="relative mx-auto mb-16 max-w-7xl px-4">
+          <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+            <Carousel className="w-full" plugins={[Autoplay({ delay: 4000 })]}>
+              <CarouselContent>
+                {[
+                  "https://acotecxuanmai.com.vn/storage/du-an/anh-3.jpg",
+                  "https://www.gothaibefree.com/wp-content/uploads/2016/01/Pattaya1940x1300.jpg",
+                  "https://d2rdhxfof4qmbb.cloudfront.net/wp-content/uploads/20200825140923/iStock-918934132-scaled.jpg",
+                ].map((src, idx) => (
+                  <CarouselItem key={idx}>
+                    <div className="relative h-[500px] overflow-hidden">
+                      <img
+                        src={src || "/placeholder.svg"}
+                        alt={`Banner ${idx + 1}`}
+                        className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"></div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+
+            {/* Hero Content Overlay */}
+            <div className="absolute inset-0 flex items-center justify-start pl-12">
+              <div
+                className={`max-w-2xl transform transition-all duration-1000 ${isVisible ? "translate-x-0 opacity-100" : "-translate-x-10 opacity-0"}`}
+              >
+                <h2 className="mb-6 text-5xl leading-tight font-bold text-white">
+                  Nơi đặt kính
+                  <span className="block bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                    nhanh chóng & tiện lợi
+                  </span>
+                </h2>
+                <p className="mb-8 text-xl leading-relaxed text-gray-200">
+                  Chọn loại kính, nhập kích thước và nhận báo giá ngay lập tức.
+                  Cắt kính chính xác, giao hàng tận nơi hoặc nhận tại cửa hàng.
+                </p>
+                <div className="flex space-x-4">
+                  <Button
+                    size="lg"
+                    className="transform bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xl transition-all duration-300 hover:scale-105 hover:from-emerald-700 hover:to-teal-700 hover:shadow-2xl"
+                  >
+                    Đặt kính ngay
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
-        <section className="mx-auto mt-10 mb-12 grid max-w-7xl grid-cols-1 gap-6 md:grid-cols-3">
-          {[
-            {
-              title: "Báo giá tự động",
-              desc: "Tính toán chi phí nhanh chóng theo diện tích",
-            },
-            {
-              title: "Chất lượng cao",
-              desc: "Sử dụng kính nhập khẩu, cắt chuẩn xác",
-            },
-            {
-              title: "Giao nhận linh hoạt",
-              desc: "Nhận tại cửa hàng hoặc vận chuyển đến tận nhà",
-            },
-          ].map((item, idx) => (
+
+         <section className="mx-auto max-w-7xl px-4 mb-16">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-800 mb-4">Tại sao chọn chúng tôi?</h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Chúng tôi cam kết mang đến dịch vụ tốt nhất với công nghệ hiện đại
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {features.map((feature, idx) => (
             <Card
               key={idx}
-              className="relative overflow-hidden rounded-2xl bg-white p-10 shadow-md"
+              className={`group relative overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 ${isVisible ? "animate-fade-in-up" : ""}`}
+              style={{ animationDelay: `${idx * 200}ms` }}
             >
-              <CardContent>
-                <h3 className="mb-2 text-xl font-semibold text-green-700">
-                  {item.title}
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+              ></div>
+              <CardContent className="p-8 relative z-10">
+                <div
+                  className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform duration-300`}
+                >
+                  {feature.icon}
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-emerald-700 transition-colors duration-300">
+                  {feature.title}
                 </h3>
-                <p className="text-green-600">{item.desc}</p>
+                <p className="text-gray-600 leading-relaxed">{feature.desc}</p>
               </CardContent>
             </Card>
           ))}
-        </section>
+        </div>
+      </section>
 
         <Price></Price>
         <PriceQuoteCard></PriceQuoteCard>
-        <section className="mx-auto mb-12 max-w-7xl">
-          <h2 className="mb-6 text-center text-2xl font-bold text-green-800">
-            Khách hàng nói gì về dịch vụ của chúng tôi?
-          </h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {[
-              {
-                name: "Anh Trường",
-                img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7puyx2DAaMt7ejj55Iylp4COOeSf4zPG-mw&s",
-              },
-              {
-                name: "Chị Hoa",
-                img: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474053qxl/anh-nguoi-that-cute-nhat_043412774.jpg",
-              },
-              {
-                name: "Anh Tuấn",
-                img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHYtDbL_HuXPvfbfTzOzx7BiMXjQ7PbI9mJw&s",
-              },
-            ].map((item, idx) => (
-              <Card key={idx} className="rounded-2xl bg-white p-6 shadow-sm">
-                <img
-                  src={item.img}
-                  alt={item.name}
-                  className="mx-auto h-12 w-12 rounded-full"
-                />
-                <CardContent>
-                  <p className="text-green-600 italic">
-                    "Dịch vụ nhanh, chất lượng kính tuyệt vời!"
-                  </p>
-                  <p className="mt-4 text-center font-semibold text-green-700">
-                    - {item.name}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+
+
+              <section className="mx-auto max-w-7xl px-4 mb-16">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-800 mb-4">Khách hàng nói gì về chúng tôi?</h2>
+          <p className="text-xl text-gray-600">Hơn 100+ khách hàng tin tưởng và hài lòng</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {reviews.map((review, idx) => (
+            <Card
+              key={idx}
+              className="group border-0 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-gradient-to-br from-white to-emerald-50/30"
+            >
+              <CardContent className="p-8">
+                <div className="flex items-center mb-6">
+                  <img
+                    src={review.img || "/placeholder.svg"}
+                    alt={review.name}
+                    className="w-16 h-16 rounded-full object-cover border-4 border-emerald-200 group-hover:border-emerald-400 transition-colors duration-300"
+                  />
+                  <div className="ml-4">
+                    <h4 className="font-bold text-gray-800">{review.name}</h4>
+                    <p className="text-sm text-gray-600">{review.role}</p>
+                  </div>
+                </div>
+
+                <div className="flex mb-4">
+                  {[...Array(review.rating)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+
+                <p className="text-gray-700 italic leading-relaxed">"{review.comment}"</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
         <section className="mx-auto mb-12 max-w-7xl overflow-hidden rounded-2xl">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d335.7529973570932!2d105.6776721423215!3d9.994594320910576!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31a08ec8035be43b%3A0x432cb00910505ce1!2zQ8ahIFPhu58gQ-G7rWEgU-G6r3QgUXXhu5FjIFRodeG6p24!5e1!3m2!1sen!2s!4v1748685293274!5m2!1sen!2s"
             className="w-full"
             width="600"
-            height="250"
+            height="300"
             loading="lazy"
           ></iframe>{" "}
         </section>

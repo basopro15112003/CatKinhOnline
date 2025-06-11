@@ -10,7 +10,7 @@ import {
 export function Footer() {
   return (
     <>
-      <footer className="bg-green-800 text-white py-8">
+      <footer className="bg-gradient-to-br from-gray-900 via-emerald-900 to-teal-900 text-white py-8 px-4">
         <div className="max-w-7xl rounded-2xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
           <div>
             <h3 className="text-2xl font-semibold mb-4">
