@@ -1,6 +1,6 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./appsidebar";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -29,32 +29,67 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { AlignStartVertical } from "lucide-react";
+import { getProducts, type Product } from "@/services/productService";
+import { FormAddProduct } from "@/components/form/product/addProduct";
+import { FormUpdateProduct } from "@/components/form/product/updateProduct";
+import { getCategories, type Category } from "@/services/categoryService";
 
 export default function ManagePrice() {
+  const [showForm, setShowForm] = useState(false);
   const [open, setOpen] = React.useState(true);
-  const [statusFilter, setStatusFilter] = React.useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<number>(0);
+  const [product, setProduct] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await getProducts();
+        setProduct(response);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+    fetchData();
+  }, []);
+
+    useEffect(() => {
+      async function fetchCategories() {
+        try {
+          const data = await getCategories();
+          setCategories(data);
+        } catch (error) {
+          console.error("Error fetching categories:", error);
+        }
+      }
+      fetchCategories();
+    }, []);
+
+  //Update bảng mà không cần reload
+  const handleReload = async () => {
+    const response = await getProducts();
+    setProduct(response);
+  };
+
   function toggleSidebar() {
     setOpen(!open);
   }
-  type Product = { id: number; name: string; type: string; price: number };
-  const products: Product[] = useMemo(
-    () => [
-      { id: 1, name: "Kính cường lực 8 ly", type: "Clear6", price: 260000 },
-      { id: 2, name: "Kính trắng 5 ly", type: "Clear5", price: 220000 },
-      { id: 3, name: "Kính trắng 5 ly", type: "Clear7", price: 220000 },
-    ],
-    [],
-  );
 
-  const filteredData = useMemo(() => {
-    let data = products;
-
-    if (statusFilter !== "all") {
-      data = data.filter((o) => statusFilter === o.type);
+   const filteredData = useMemo(() => {
+    let data = product;
+    if (searchTerm.trim()) {
+      data = data.filter((o) =>
+        o.productName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (statusFilter !== 0) {
+      data = data.filter((o) => o.category.id === statusFilter);
     }
     return data;
-  }, [products, statusFilter]);
-
+  }, [product, searchTerm, statusFilter])
   return (
     <SidebarProvider open={open} onOpenChange={setOpen} className="gap-5">
       <AppSidebar />
@@ -92,27 +127,38 @@ export default function ManagePrice() {
                 <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
                     <Label>Tên sản phẩm</Label>
-                    <Input placeholder="Tìm sản phẩm theo tên" />
+                    <Input
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Tìm sản phẩm theo tên"
+                    />
                   </div>
                   <div>
                     <Label>Loại</Label>
-                    <Select
-                      value={statusFilter}
-                      onValueChange={(value) => setStatusFilter(value)}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Chọn loại" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Tất cả</SelectItem>
-                        {products.map((cate) => (
-                          <SelectItem value={cate.type}>{cate.type}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                 <Select
+                    value={statusFilter.toString()}
+                    onValueChange={(value) => setStatusFilter(Number(value))}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Chọn loại" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">Tất cả</SelectItem>
+                      {categories.map((cate) => (
+                        <SelectItem
+                          key={cate.id}
+                          value={cate.id.toString()}
+                        >
+                          {cate.categoryName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   </div>
                   <div className="flex items-end">
-                    <Button>Thêm sản phẩm</Button>
+                    <Button type="button" onClick={() => setShowForm(true)}>
+                      Thêm sản phẩm
+                    </Button>
                   </div>
                 </div>
                 <Table>
@@ -122,6 +168,7 @@ export default function ManagePrice() {
                       <TableHead>Tên</TableHead>
                       <TableHead>Loại</TableHead>
                       <TableHead>Giá</TableHead>
+                      <TableHead>Trạng thái</TableHead>
                       <TableHead>Hành động</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -129,19 +176,26 @@ export default function ManagePrice() {
                     {filteredData.map((prod) => (
                       <TableRow key={prod.id}>
                         <TableCell>{prod.id}</TableCell>
-                        <TableCell>{prod.name}</TableCell>
-                        <TableCell>{prod.type}</TableCell>
-                        <TableCell>{prod.price.toLocaleString()}₫</TableCell>
+                        <TableCell>{prod.productName}</TableCell>
+                        <TableCell>{prod.category.categoryName}</TableCell>
+                        <TableCell>
+                          {prod.pricePerM2.toLocaleString()}₫
+                        </TableCell>
+                        <TableCell>
+                          {prod.status === 1 ? "Còn hàng" : "Hết hàng"}
+                        </TableCell>
+
                         <TableCell className="space-x-2">
-                          <Button variant="destructive" size="sm">
-                            Xóa
-                          </Button>
                           <Button
                             variant="outline"
                             className="bg-blue-200"
                             size="sm"
+                            onClick={() => {
+                              setSelectedProduct(prod);
+                              setShowForm(true);
+                            }}
                           >
-                            Sửa
+                            Cập nhật
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -153,6 +207,29 @@ export default function ManagePrice() {
           </Card>
         </div>
       </main>
+      {showForm && (
+        <FormAddProduct
+          onAdded={handleReload}
+          setShowForm={setShowForm}
+        ></FormAddProduct>
+      )}
+      {showForm && selectedProduct ? (
+  <FormUpdateProduct
+    productId={selectedProduct.id}
+    initialData={{
+      productName: selectedProduct.productName,
+      categoryId: selectedProduct.category.id,
+      pricePerM2: selectedProduct.pricePerM2,
+      status: selectedProduct.status,
+    }}
+    onUpdated={handleReload}
+    setShowForm={(value) => {
+      setShowForm(value);
+      if (!value) setSelectedProduct(null);
+    }}
+  />
+) : null}
+
     </SidebarProvider>
   );
 }

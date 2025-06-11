@@ -58,8 +58,9 @@ namespace CatKinhOnline.Controllers.ProductController
                 }
             try
                 {
+                product.Id=id;
                 var prod = await _productService.UpdateProduct(product);
-                return CreatedAtAction(nameof(Get), new { id = prod.Id }, prod); // 201 - created
+                return Ok(prod); // 201 - created
                 }
             catch (ArgumentNullException ex)
                 {

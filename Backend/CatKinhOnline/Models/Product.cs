@@ -21,8 +21,8 @@ namespace CatKinhOnline.Models
         [Required]
         public int Status { get; set; }
 
-        [JsonIgnore]
         [ForeignKey(nameof(CategoryId))]
+        [JsonIgnore]
         public virtual Category? Category { get; set; }
         [JsonIgnore]
         public virtual ICollection<OrderItem>? OrderItems { get; set; }

@@ -20,11 +20,12 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { AlignStartVertical } from "lucide-react";
-import SearchBar from "@/components/searchbar";
-import FilterBar from "@/components/orderFilterBar";
-import PaginationControls from "@/components/Paging";
+import SearchBar from "@/components/personal/searchbar";
+import FilterBar from "@/components/personal/orderFilterBar";
+import PaginationControls from "@/components/personal/Paging";
 
 export default function ManageOrder() {
+  const [showForm, setShowForm] = useState(false);
   const [open, setOpen] = React.useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");

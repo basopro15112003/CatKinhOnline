@@ -9,8 +9,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.ConfigureDependencyInjection();
-var app = builder.Build();
 
+var app = builder.Build();
+app.UseCors(cors =>
+ cors.AllowAnyOrigin()
+     .AllowAnyMethod()
+     .AllowAnyHeader()
+);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
     {
@@ -24,9 +29,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseCors(cors =>
-    cors.AllowAnyOrigin()
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-);
+
 app.Run();
