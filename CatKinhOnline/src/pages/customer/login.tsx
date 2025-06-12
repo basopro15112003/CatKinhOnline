@@ -13,6 +13,8 @@ type props = {
   setShowForm: (value: boolean) => void;
 };
 export function Login({ setShowForm }: props) {
+    const BE_LOGIN = `https://localhost:7057/api/auth/login?returnUrl=${encodeURIComponent("/auth/callback")}`;
+
   return (
     <>
       <Card className="">
@@ -53,13 +55,21 @@ export function Login({ setShowForm }: props) {
             <Button type="submit" className="w-full">
               Đăng nhập
             </Button>
-            <Button variant="outline" className="w-full">
+                        <a
+              type="button"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 bg-blue-500 py-1 text-center font-medium text-white hover:bg-blue-600"
+              href={BE_LOGIN}
+            >
+              <img
+                src="https://static.vecteezy.com/system/resources/previews/022/613/027/non_2x/google-icon-logo-symbol-free-png.png"
+                className="w-7"
+              ></img>
               Đăng nhập với Google
-            </Button>
+            </a>
             <Button
               variant="ghost"
-              className="w-full text-sm text-gray-500"
-              onClick={() => setShowForm(false)}
+              className="w-full text-sm bg-gray-200 hover:bg-gray-300"
+                            onClick={() => setShowForm(false)}
             >
               Huỷ
             </Button>
