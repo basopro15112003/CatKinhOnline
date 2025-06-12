@@ -178,6 +178,29 @@ namespace CatKinhOnline.Repositories.UserRepository
             }
         #endregion
 
+        #region get user by email
+        /// <summary>
+        /// get a user by their email address from the database.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<User?> GetUserByEmail(string email)
+            {
+            try
+                {
+                using (var _db = new MyDbContext())
+                    {
+                    return await _db.Users.FirstOrDefaultAsync(u => u.Email==email);
+                    }
+                }
+            catch (Exception ex)
+                {
+                throw new Exception(ex.Message);
+                }
+            }
+        #endregion
+
         #region Login
         /// <summary>
         /// login a user by email and password.

@@ -20,6 +20,7 @@ namespace CatKinhOnline.Core
             services.AddScoped<CategoryService>();
             services.AddScoped<ProductService>();
             services.AddScoped<UserService>();
+            services.AddScoped<AuthService>();
 
             services.AddHttpClient();
             services.AddAuthorization();
