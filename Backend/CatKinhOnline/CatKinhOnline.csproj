@@ -31,7 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Repositories\LoginRepository\" />
     <Folder Include="Repositories\OrderItemRepository\" />
   </ItemGroup>
 

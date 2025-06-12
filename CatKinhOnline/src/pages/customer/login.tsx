@@ -1,3 +1,4 @@
+import { getUserFromToken } from "@/components/form/auth/jwtDecode";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,16 +10,42 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LoginJWT, type LoginInput } from "@/services/userService";
+import { jwtDecode } from "jwt-decode";
+import { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 type props = {
   setShowForm: (value: boolean) => void;
 };
 export function Login({ setShowForm }: props) {
-    const BE_LOGIN = `https://localhost:7057/api/auth/login?returnUrl=${encodeURIComponent("/auth/callback")}`;
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const navigate = useNavigate();
 
+  const BE_LOGIN = `https://localhost:7057/api/auth/login?returnUrl=${encodeURIComponent("/auth/callback")}`;
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const payload: LoginInput = {
+        email,
+        password,
+      };
+      const res = await LoginJWT(payload);
+      if (!res) {
+        throw new Error("Token không hợp lệ");
+      }
+      localStorage.setItem("token", res);
+      getUserFromToken();
+      navigate("/about");
+    } catch (error) {
+      alert("Đăng nhập thất bại: " + (error as Error).message);
+    }
+  };
   return (
     <>
       <Card className="">
-        <form>
+        <form onSubmit={handleLogin}>
           <CardHeader className="p-6">
             <CardTitle>Đăng nhập vào tài khoản của bạn</CardTitle>
             <CardDescription>
@@ -33,6 +60,7 @@ export function Login({ setShowForm }: props) {
                 <Input
                   id="email"
                   type="email"
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="quochoangnguyen2003ct@example.com"
                   required
                 />
@@ -47,7 +75,12 @@ export function Login({ setShowForm }: props) {
                     Quên mật khẩu?
                   </a>
                 </div>
-                <Input id="password" type="password" />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
             </div>
           </CardContent>
@@ -55,7 +88,7 @@ export function Login({ setShowForm }: props) {
             <Button type="submit" className="w-full">
               Đăng nhập
             </Button>
-                        <a
+            <a
               type="button"
               className="flex w-full items-center justify-center gap-2 rounded-lg border-2 bg-blue-500 py-1 text-center font-medium text-white hover:bg-blue-600"
               href={BE_LOGIN}
@@ -68,8 +101,8 @@ export function Login({ setShowForm }: props) {
             </a>
             <Button
               variant="ghost"
-              className="w-full text-sm bg-gray-200 hover:bg-gray-300"
-                            onClick={() => setShowForm(false)}
+              className="w-full bg-gray-200 text-sm hover:bg-gray-300"
+              onClick={() => setShowForm(false)}
             >
               Huỷ
             </Button>

@@ -8,5 +8,7 @@ namespace CatKinhOnline.Repositories.UserRepository
         Task<User?> GetUserById(int id);
         Task<User> AddUser(User user);
         Task<User> UpdateUser(User user);
+        Task<User?> GetUserByEmail(string email);
+        Task<User?> Login(string email, string password);
         }
     }

@@ -10,6 +10,8 @@ using System.Text;
 using CatKinhOnline.AppDbContext;
 using CatKinhOnline.Models;
 using Microsoft.EntityFrameworkCore;
+using CatKinhOnline.Services;
+using CatKinhOnline.ModelDTOs;
 
 namespace CatKinhOnline.Controllers.AuthenticationController
     {
@@ -18,10 +20,36 @@ namespace CatKinhOnline.Controllers.AuthenticationController
     public class AuthController : ControllerBase
         {
         private readonly IConfiguration _config;
+        private readonly AuthService _authService;
 
-        public AuthController(IConfiguration config)
+        public AuthController(IConfiguration config, AuthService authService)
             {
             _config=config;
+            _authService=authService;
+            }
+
+ 
+        [HttpPost("loginJWT")]
+        public async Task<IActionResult> Login([FromBody]LoginDTO loginDTO)
+            {
+            try
+                {
+                var user = await _authService.Login(loginDTO.Email, loginDTO.Password);
+                var token = GenerateJwtToken(user.Email,user.FullName);
+                return Ok(token);
+                }
+            catch (ArgumentNullException ex)
+                {
+                return BadRequest(ex.Message);
+                }
+            catch (UnauthorizedAccessException ex)
+                {
+                return Unauthorized(ex.Message);
+                }
+            catch (Exception ex)
+                {
+                return StatusCode(500, "Internal server error: "+ex.Message);
+                }
             }
 
         [HttpGet("login")]
@@ -38,6 +66,31 @@ namespace CatKinhOnline.Controllers.AuthenticationController
             var props = new AuthenticationProperties { RedirectUri=callbackUrl };
             return Challenge(props, GoogleDefaults.AuthenticationScheme);
             }
+        /// <summary>
+        /// generate JWT token for the user
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private string GenerateJwtToken(string email, string fullname)
+            {
+            // Sinh JWT
+            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
+            var creds = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
+            var tokenDesc = new SecurityTokenDescriptor
+                {
+                Subject=new ClaimsIdentity(new[]
+                {
+                new Claim(ClaimTypes.Email, email!),
+                new Claim(ClaimTypes.Name, fullname!),
+            }),
+                Expires=DateTime.UtcNow.AddHours(1),
+                SigningCredentials=creds
+                };
+            JwtSecurityTokenHandler? handler = new JwtSecurityTokenHandler();
+            var jwt = handler.WriteToken(handler.CreateToken(tokenDesc));
+
+            return jwt;
+            }
 
         [HttpGet("signin-google")]
         public async Task<IActionResult> GoogleCallback([FromQuery] string returnUrl)
@@ -47,25 +100,11 @@ namespace CatKinhOnline.Controllers.AuthenticationController
 
             var email = auth.Principal.FindFirstValue(ClaimTypes.Email);
             var name = auth.Principal.FindFirstValue(ClaimTypes.Name);
-
-            // Sinh JWT
-            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
-            var creds = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
-            var tokenDesc = new SecurityTokenDescriptor
-                {
-                Subject=new ClaimsIdentity(new[]
-                {
-                new Claim(ClaimTypes.Email, email!),
-                new Claim(ClaimTypes.Name, name!)
-            }),
-                Expires=DateTime.UtcNow.AddHours(1),
-                SigningCredentials=creds
-                };
             using (var _db = new MyDbContext())
                 {                    // Tìm user
                 var user = await _db.Users
-                    .FirstOrDefaultAsync(u => u.Email==email);
-                // Nếu chưa có thì tạo mới user với email và name của tài khoản 
+                .FirstOrDefaultAsync(u => u.Email==email);
+                if (user==null)
                     {
                     user=new User
                         {
@@ -79,9 +118,10 @@ namespace CatKinhOnline.Controllers.AuthenticationController
                     await _db.SaveChangesAsync();
                     }
                 }
-            var handler = new JwtSecurityTokenHandler();
-            var jwt = handler.WriteToken(handler.CreateToken(tokenDesc));
+            // Sinh JWT
+            var jwt = GenerateJwtToken(email,name);
 
+      
             // Redirect về FE (kèm basename nếu có)
             var front = _config["Frontend:BaseUrl"]!.TrimEnd('/');
             var redirect = $"{front}/CatKinhOnline/auth/callback?token={jwt}";
