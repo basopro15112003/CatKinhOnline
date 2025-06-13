@@ -1,17 +1,36 @@
-import { Login } from "@/pages/customer/login";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import { Register } from "@/pages/customer/register";
+import { Register } from "@/pages/public/register";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, Store } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Link } from "react-router-dom";
+import { getUserProfile, type UserProfile } from "@/services/userService";
+import { Login } from "@/pages/public/login";
+import { toast } from "@/hooks/use-toast";
 
 export function Header() {
   const [showForm, setShowForm] = useState(false);
   const token = localStorage.getItem("token");
-  const name = localStorage.getItem("name");
+  const [userProfile, setUserProfile] = useState<UserProfile>();
 
+  useEffect(() => {
+    async function fetchData() {
+      const email = localStorage.getItem("email");
+      if (!email) {
+        console.error("Không tìm thấy email trong localStorage");
+        return;
+      }
+      try {
+        const response = await getUserProfile(email);
+        if (response) setUserProfile(response);
+      } catch (error) {
+        console.error("Lỗi khi fetch profile:", error);
+      }
+    }
+    fetchData();
+  }, []);
+  
   function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("name");
@@ -51,7 +70,7 @@ export function Header() {
                 </Avatar>
                 <div>
                   <Link to="/account">
-                    <p className="font-bold text-green-700">{name}</p>
+                    <p className="font-bold text-green-700">{userProfile?.fullName}</p>
                   </Link>
                   <Button
                     className="bg-gradient-to-r from-emerald-500 to-teal-700 text-white transition-all duration-300 hover:scale-105 hover:from-green-500 hover:to-green-900 hover:text-white"

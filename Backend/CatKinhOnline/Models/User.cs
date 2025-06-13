@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Text.Json.Serialization;
 
 namespace CatKinhOnline.Models
     {
@@ -26,8 +27,9 @@ namespace CatKinhOnline.Models
         [Required]
         public int Status { get; set; }
 
+        [JsonIgnore]
         public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
-
+        [JsonIgnore]
         public virtual ICollection<Order> Orders { get; set; }  = new List<Order>();
         }
     }

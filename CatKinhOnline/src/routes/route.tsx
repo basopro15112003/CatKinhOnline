@@ -1,11 +1,11 @@
-import GoogleCallback from "@/components/form/auth/googleCallBack";
+import GoogleCallback from "@/components/form/auth/googleCallback";
 import ManageOrder from "@/pages/admin/manageOrder";
 import ManagePrice from "@/pages/admin/managePrice";
 import ManageCustomer from "@/pages/admin/managerCustomer";
-import About from "@/pages/customer/about";
 import Account from "@/pages/customer/account";
-import HomePage from "@/pages/customer/HomePage";
 import Order from "@/pages/customer/order";
+import About from "@/pages/public/about";
+import HomePage from "@/pages/public/HomePage";
 import type { JSX } from "react";
 import {
   BrowserRouter as Router,

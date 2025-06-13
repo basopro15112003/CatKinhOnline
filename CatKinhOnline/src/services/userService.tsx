@@ -1,33 +1,29 @@
 import type { AxiosResponse } from "axios";
 import request from "../../src/utils/baseURL";
 
-type Category = {
-  id: number;
-  categoryName: string;
-  description: string;
-};
-
-export type Product = {
-  id: number;
-  productName: string;
-  categoryId: number;
-  pricePerM2: number;
-  status: number;
-  category: Category;
-};
-
 export type LoginInput = {
   email: string;
   password: string;
 };
 
+export type UserProfile = {
+  id: number;
+  fullName: string;
+  email: string;
+  phone: string;
+  role: number;
+  status: number;
+};
 
-export type ProductInput = Omit<Product, "id" | "category">;
+export type UpdateUserDto = {
+  id: number;
+  fullName: string;
+  phone: string;
+};
 
-export const getProducts = async (): Promise<Product[]> => {
+export const getUsers = async (): Promise<UserProfile[] | null> => {
   try {
-    const response: AxiosResponse<Product[]> = await request.get("Product");
-    console.log(response);
+    const response: AxiosResponse<UserProfile[]> = await request.get("User");
     return response.data;
   } catch (error) {
     console.log(error);
@@ -35,26 +31,10 @@ export const getProducts = async (): Promise<Product[]> => {
   }
 };
 
-export const AddProduct = async (data: ProductInput) => {
+export const LoginJWT = async (data: LoginInput): Promise<string | null> => {
   try {
-    const response: AxiosResponse<ProductInput> = await request.post(
-      "Product",
-      data,
-    );
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
-};
-export const updateProduct = async (
-  id: number,
-  data: ProductInput,
-): Promise<Product | null> => {
-  try {
-    const response: AxiosResponse<Product> = await request.put(
-      `Product/${id}`,
+    const response: AxiosResponse<string> = await request.post(
+      "Auth/LoginJWT",
       data,
     );
     return response.data;
@@ -65,16 +45,24 @@ export const updateProduct = async (
   }
 };
 
-export const LoginJWT = async (data: LoginInput):Promise<string | null> => {
+export const getUserProfile = async (
+  email: string,
+): Promise<UserProfile | null> => {
   try {
-    const response: AxiosResponse<string> = await request.post(
-           "Auth/LoginJWT",
-      data,
+    const response: AxiosResponse<UserProfile> = await request.get(
+      `User/${email}`,
     );
     return response.data;
   } catch (error) {
-    if (error) return null;
-    console.error("Error updating product", error);
-    throw error;
+    console.log(error);
+    return null;
   }
+};
+
+export const updateUserProfile = async (
+  id: number,
+  dto: UpdateUserDto,
+): Promise<UpdateUserDto> => {
+  const response = await request.put<UpdateUserDto>(`User/${id}`, dto);
+  return response.data;
 };

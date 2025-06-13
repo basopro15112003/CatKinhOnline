@@ -1,6 +1,6 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./appsidebar";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -24,75 +24,61 @@ import { AlignStartVertical } from "lucide-react";
 import PaginationControls from "@/components/personal/Paging";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getUsers, type UserProfile } from "@/services/userService";
 
 export default function ManageCustomer() {
+  //#region Variable declaration
   const [open, setOpen] = React.useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
+  const [users, setUser] = useState<UserProfile[]>([]);
+  const pageSize = 10;
+  //#endregion
+
+  //#region Function
+  useEffect(() => {
+    async function FetchUsersData() {
+      try {
+        const response = await getUsers();
+        if (response) {
+          setUser(response.reverse());
+          console.log(response.reverse);
+          return response;
+        } else {
+          console.log("ftech data thất bại");
+          return null;
+        }
+      } catch (error) {
+        console.log(error);
+        return [];
+      }
+    }
+    FetchUsersData();
+  }, []);
 
   function toggleSidebar() {
     setOpen(!open);
   }
-  type Customers = {
-    id: number;
-    name: string;
-    email: string;
-    phone: string;
-    status: number;
-  };
+  //#endregion
 
-  const customer: Customers[] = useMemo(
-    () => [
-      {
-        id: 1,
-        name: "Nguyễn Quốc Hoàng",
-        email: "quochoangnguyen2003ct@gmail.com",
-        phone: "0333744591",
-        status: 1,
-      },
-      {
-        id: 2,
-        name: "Trần Thị Mai",
-        email: "maitran@gmail.com",
-        phone: "0911223344",
-        status: 1,
-      },
-      {
-        id: 3,
-        name: "Lê Văn Nam",
-        email: "namle1990@gmail.com",
-        phone: "0988777666",
-        status: 0,
-      },
-      {
-        id: 4,
-        name: "Phạm Hồng Ánh",
-        email: "anhpham@gmail.com",
-        phone: "0909888777",
-        status: 1,
-      },
-      {
-        id: 5,
-        name: "Võ Minh Trí",
-        email: "minhtri@example.com",
-        phone: "0933332222",
-        status: 0,
-      },
-    ],
-    [],
-  );
-
-  const filteredData = useMemo(() => {
-    let data = customer;
-    if (searchTerm.toLowerCase()) {
+  //#region const handle logic, filter
+   const filteredData = useMemo(() => {
+    let data = users;
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
       data = data.filter(
         (o) =>
-          o.name.toString().toLowerCase().includes(searchTerm) ||
-          o.email.toString().toLowerCase().includes(searchTerm) ||
-          o.phone.toString().includes(searchTerm),
+          o.fullName.toString().toLowerCase().includes(lowerSearch) ||
+          o.email.toString().toLowerCase().includes(lowerSearch) ||
+          o.phone.toString().includes(lowerSearch),
       );
     }
     if (statusFilter !== "all") {
@@ -101,12 +87,14 @@ export default function ManageCustomer() {
       );
     }
     return data;
-  }, [customer, searchTerm, statusFilter]);
+  }, [users, searchTerm, statusFilter]);
 
   const paginatedOrders = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
     return filteredData.slice(start, start + pageSize);
   }, [filteredData, currentPage]);
+
+  //#endregion
 
   return (
     <SidebarProvider open={open} onOpenChange={setOpen} className="gap-5">
@@ -150,7 +138,10 @@ export default function ManageCustomer() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value)} >
+                <Select
+                  value={statusFilter}
+                  onValueChange={(value) => setStatusFilter(value)}
+                >
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Lọc theo trạng thái" />
                   </SelectTrigger>
@@ -176,14 +167,13 @@ export default function ManageCustomer() {
                   {paginatedOrders.map((ord) => (
                     <TableRow key={ord.id}>
                       <TableCell>{ord.id}</TableCell>
-                      <TableCell>{ord.name}</TableCell>
+                      <TableCell>{ord.fullName}</TableCell>
                       <TableCell>{ord.email}</TableCell>
                       <TableCell>{ord.phone}</TableCell>
                       <TableCell>
-                        {ord.status === 1 ? "Đã hoàn thành  " : "Chờ xác nhận"}
+                        {ord.status === 1 ? "Đang hoạt động" : "Đã bị khóa"}
                       </TableCell>
                       <TableCell className="space-x-2">
-                        <Button>Xóa</Button>
                         <Button
                           variant="outline"
                           className="bg-blue-200"
