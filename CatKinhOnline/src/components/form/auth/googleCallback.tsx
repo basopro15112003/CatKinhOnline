@@ -1,21 +1,31 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getUserFromToken } from "./jwtDecode";
+import { toast } from "@/hooks/use-toast";
 
 export default function GoogleCallback() {
   const navigate = useNavigate();
   const { search } = useLocation();
+  const shown = useRef(false);
 
-  useEffect(() => {
+    useEffect(() => {  if (shown.current) return;
+    shown.current = true;
     const token = new URLSearchParams(search).get("token");
-    if (token) {
-      localStorage.setItem("token", token);
-      getUserFromToken(); // ham goi de luu local bien chua name va email
-      navigate("/account");
-    } else {
-      alert("Xác thực thất bại");
-      navigate("/");
-    }
+    try {
+      if (token) {
+        localStorage.setItem("token", token);
+        getUserFromToken();
+              toast.success(
+        "Đăng nhập thành công: Chúc bạn trải nghiệm dịch vụ một cách vui vẻ",
+      );
+        navigate("/");
+      } else {
+        toast.error("Xác thực thất bại");
+        navigate("/");
+      }
+    } catch (error) {
+      console.log(error);
+    } 
   }, [search, navigate]);
 
   return <div>Đang xử lý xác thực Google…</div>;

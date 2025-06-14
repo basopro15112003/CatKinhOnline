@@ -1,7 +1,4 @@
-import { Header } from "@/components/personal/header";
-import { Footer } from "@/components/personal/footer";
 import { Card, CardContent } from "@/components/ui/card";
-import NavigationComponent from "@/components/personal/navigation";
 import { useEffect, useState } from "react";
 import {
   Award,
@@ -18,6 +15,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export default function About() {
   const [isVisible, setIsVisible] = useState(false);
@@ -115,9 +113,7 @@ export default function About() {
     },
   ]
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-200 via-emerald-50 to-green-300">
-      <Header></Header>
-      <NavigationComponent></NavigationComponent>
+    <main>
       <section className="relative mx-auto mb-16 max-w-7xl px-4">
         <div className="mb-12 text-center">
           <Badge className="mb-4 border-emerald-300 bg-emerald-500/20 text-emerald-700">
@@ -296,7 +292,8 @@ export default function About() {
                   ))}
                 </ul>
                 <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700">
-                  Đặt hàng ngay
+                  <Link to={"/order"}>
+                  Đặt hàng ngay</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -334,8 +331,6 @@ export default function About() {
           </CardContent>
         </Card>
       </section>
-
-      <Footer></Footer>
-    </div>
+    </main>
   );
 }

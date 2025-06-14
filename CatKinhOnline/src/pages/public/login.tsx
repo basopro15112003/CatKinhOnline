@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/hooks/use-toast";
 import { LoginJWT, type LoginInput } from "@/services/userService";
-import { jwtDecode } from "jwt-decode";
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 type props = {
   setShowForm: (value: boolean) => void;
 };
@@ -33,11 +33,19 @@ export function Login({ setShowForm }: props) {
       };
       const res = await LoginJWT(payload);
       if (!res) {
-        throw new Error("Token không hợp lệ");
+        toast.error(
+          "Đăng nhập thất bại: vui lòng kiểm tra lại tài khoản và mật khẩu",
+        );
+        return;
+      } else {
+        toast.success(
+          "Đăng nhập thành công: Chúc bạn trải nghiệm dịch vụ một cách vui vẻ",
+        );
+        localStorage.setItem("token", res);
+        getUserFromToken();
+        setShowForm(false);
+        navigate("/about");
       }
-      localStorage.setItem("token", res);
-      getUserFromToken();
-      navigate("/about");
     } catch (error) {
       alert("Đăng nhập thất bại: " + (error as Error).message);
     }

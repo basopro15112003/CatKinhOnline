@@ -1,5 +1,5 @@
-﻿using CatKinhOnline.Models;
-using CatKinhOnline.Repositories.ProductRepository;
+﻿using CatKinhOnline.ModelDTOs;
+using CatKinhOnline.Models;
 using CatKinhOnline.Repositories.UserRepository;
 
 namespace CatKinhOnline.Services
@@ -51,6 +51,26 @@ namespace CatKinhOnline.Services
             }
         #endregion
 
+        #region Get User by Email
+        /// <summary>
+        /// get a user by its email from the database.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<User?> GetUserByEmail(string email)
+            {
+            try
+                {
+                return await _userRepository.GetUserByEmail(email);
+                }
+            catch (Exception ex)
+                {
+                throw new Exception($"Error retrieving user with email {email}: {ex.Message}");
+                }
+            }
+        #endregion
+
         #region Add User
         /// <summary>
         /// add a new user to the database.
@@ -59,20 +79,46 @@ namespace CatKinhOnline.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="Exception"></exception>
-        public async Task<User> AddUser(User user)
+        public async Task<APIResponse> AddUser(User user)
             {
-            if (user==null)
-                {
-                throw new ArgumentNullException(nameof(user), "User cannot be null.");
-                }
             try
                 {
-                var addedUser = await _userRepository.AddUser(user);
-                return addedUser;
+                AuthService authService = new AuthService();
+                APIResponse aPIResponse = new APIResponse();
+                user.Status=1;
+                user.Role=1;
+                user.PasswordHash=authService.HashPassword(user.PasswordHash);
+                #region 1. Validation
+                var checkEmailEsixst = await GetUserByEmail(user.Email);
+                var checkPhoneEsixst = await _userRepository.GetUserByPhone(user.Phone);
+                List<(bool condition, string errorMessage)>? validations = new List<(bool condition, string errorMessage)>
+            {
+                  (user == null, "Người dùng không thể trống"),
+                  (checkEmailEsixst != null, "Email này đã tồn tại trong hệ thống."),
+                  (checkPhoneEsixst != null, "Số điện thoại này đã tồn tại trong hệ thống."),
+            };
+                foreach (var validation in validations)
+                    {
+                    if (validation.condition)
+                        {
+                        return new APIResponse
+                            {
+                            IsSuccess=false,
+                            Message=validation.errorMessage
+                            };
+                        }
+                    }
+                #endregion
+                var addedUser = await _userRepository.AddUser(user!);
+                return aPIResponse;
                 }
             catch (Exception ex)
                 {
-                throw new Exception($"Error adding user: {ex.Message}");
+                return new APIResponse
+                    {
+                    IsSuccess=false,
+                    Message=ex.Message
+                    };
                 }
             }
         #endregion
@@ -85,20 +131,60 @@ namespace CatKinhOnline.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="Exception"></exception>
-        public async Task<User> UpdateUser(User user)
+        public async Task<UpdateUserDto> UpdateUser(UpdateUserDto userDTO)
             {
-            if (user==null)
+            if (userDTO==null)
                 {
-                throw new ArgumentNullException(nameof(user), "User cannot be null.");
+                throw new ArgumentNullException(nameof(userDTO), "User cannot be null.");
                 }
             try
                 {
+                var user = await _userRepository.GetUserById(userDTO.Id)??throw new Exception("User not found");
+                user.FullName=userDTO.FullName;
+                user.Phone=userDTO.Phone;
                 var updatedUser = await _userRepository.UpdateUser(user);
-                return updatedUser;
+
+                return userDTO;
                 }
             catch (Exception ex)
                 {
                 throw new Exception($"Error updating user: {ex.Message}");
+                }
+            }
+        #endregion
+
+        #region Change password
+        /// <summary>
+        /// change password for a user.
+        /// </summary>
+        /// <param name="userDTO"></param>
+        /// <param name="changePasswordDto"></param>
+        /// <returns></returns>
+        public async Task<APIResponse> ChangePassword(string email, ChangePasswordDTO changePasswordDto)
+            {
+            try
+                {
+                AuthService authService = new AuthService();
+                var user = await _userRepository.GetUserByEmail(email);
+                if (user==null)
+                    {
+                    return new APIResponse{IsSuccess=false,Message="Người dùng không tồn tại."};
+                    }
+                changePasswordDto.OldPassword=authService.HashPassword(changePasswordDto.OldPassword);
+                if (user.PasswordHash!=changePasswordDto.OldPassword)
+                    {
+                return new APIResponse { IsSuccess=false, Message="Mật khẩu cũ không đúng." };}
+                user.PasswordHash=authService.HashPassword(changePasswordDto.NewPassword);
+                await _userRepository.UpdateUser(user);
+                return new APIResponse { IsSuccess=true, Message="Đổi mật khẩu thành công."
+                    };
+                }
+            catch (Exception ex)
+                {
+                return new APIResponse {
+                    IsSuccess=false,
+                    Message=ex.Message
+                    };
                 }
             }
         #endregion

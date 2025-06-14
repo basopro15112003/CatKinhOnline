@@ -30,7 +30,7 @@ export default function ManageOrder() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
+  const pageSize = 10;
 
   function toggleSidebar() {
     setOpen(!open);
@@ -61,7 +61,6 @@ const orders: Order[] = useMemo(() => [
     const start = (currentPage - 1) * pageSize;
     return filteredOrders.slice(start, start + pageSize);
   }, [filteredOrders, currentPage]);
-
 
   return (
     <SidebarProvider open={open} onOpenChange={setOpen} className="gap-5">
@@ -99,6 +98,7 @@ const orders: Order[] = useMemo(() => [
                    <div className="flex  gap-2 mb-4">
                 <SearchBar  value={searchTerm} onChange={setSearchTerm} />
                 <FilterBar value={statusFilter} onChange={setStatusFilter} />
+                <Button variant="outline" className="" >Đơn hàng mới nhất</Button>
               </div>
                 <Table>
                   <TableHeader>

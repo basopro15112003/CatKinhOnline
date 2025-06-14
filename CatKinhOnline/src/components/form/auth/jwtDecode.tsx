@@ -14,7 +14,6 @@ export interface JwtPayload {
       const payload = jwtDecode<JwtPayload>(token);
         localStorage.setItem("name",  payload.unique_name );
         localStorage.setItem("email", payload.email);
-
       return { email: payload.email, name: payload.unique_name };
     } catch {
       return null;

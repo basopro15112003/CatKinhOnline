@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { AddProduct, type ProductInput } from "@/services/productService";
 import { getCategories, type Category } from "@/services/categoryService";
+import { toast } from "@/hooks/use-toast";
 
 type Props = {
   setShowForm: (value: boolean) => void;
@@ -41,17 +42,16 @@ export function FormAddProduct({ setShowForm, onAdded }: Props) {
 
  const validate = (): boolean => {
     if (!productName.trim()) {
-      alert("Tên sản phẩm không được để trống.");
+      toast.warning("Tên sản phẩm không được để trống.");
       return false;
     }
     if (productName.length > 100) {
-      alert("Tên sản phẩm không thể dài hơn 100 ký tự.");
+       toast.warning("Tên sản phẩm không thể dài hơn 100 ký tự.");
       return false;
     }
-    if (pricePerM2 <= 0) {
-      alert("Giá phải lớn hơn 0.");
-      return false;
-    }
+       if (pricePerM2 <= 0 || pricePerM2 > 10000000) {
+      toast.warning("Giá của sản phẩm không thể nhỏ hơn 1000 ₫/m² và không thể lớn hơn 10,000,000 ₫/m²")
+      return false;}
     return true;
   };
 
@@ -67,12 +67,13 @@ export function FormAddProduct({ setShowForm, onAdded }: Props) {
       status: 0,
     };
     const result = await AddProduct(payload);
+    toast.success("Thêm sản phẩm mới thành công !")
     setSubmitting(false);
     if (result) {
       onAdded?.(payload);
       setShowForm(false);
     } else {
-      alert("Thêm sản phẩm thất bại");
+      toast.error("Thêm sản phẩm thất bại");
     }
   };
 

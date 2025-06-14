@@ -8,6 +8,10 @@ import {
 } from "@/components/ui/table";
 import { Button } from "../ui/button";
 
+type DetailOrderProps = {
+  closeDetail: boolean
+}
+
 export function DetailOrder({selectedOrder,closeDetail}){
     return(<>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">

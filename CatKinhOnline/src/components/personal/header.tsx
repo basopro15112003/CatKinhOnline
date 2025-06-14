@@ -1,22 +1,53 @@
-import { Login } from "@/pages/customer/login";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { Register } from "@/pages/customer/register";
+import { Register } from "@/pages/public/register";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, Store } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getUserProfile, type UserProfile } from "@/services/userService";
+import { Login } from "@/pages/public/login";
+import { toast } from "@/hooks/use-toast";
 
 export function Header() {
   const [showForm, setShowForm] = useState(false);
   const token = localStorage.getItem("token");
-  const name = localStorage.getItem("name");
+  const [userProfile, setUserProfile] = useState<UserProfile>();
+  const shown = useRef(false);
+  const navigate = useNavigate();
+  const email = localStorage.getItem("email");
+
+  useEffect(() => {
+    async function fetchData() {
+ 
+      if (!email) {
+        return;
+      }
+      try {
+        const response = await getUserProfile(email);
+        if (response) setUserProfile(response);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchData();
+  }, [email]);
+
+  // const handleReloadUser = async () => {
+  //   try {
+  //     const response = await getUserProfile(email!);
+  //     if (response) setUserProfile(response);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("name");
     localStorage.removeItem("email");
-    window.location.href = "/";
+    navigate("/");
+    toast.success("Đang xuất thành công!");
   }
   return (
     <>
@@ -45,13 +76,15 @@ export function Header() {
               <div className="flex">
                 <Avatar className="mr-2 h-13 w-13">
                   <Link to="/account">
-                    <AvatarImage src="https://github.com/shadcn.png" />
+                    <AvatarImage src="https://yt3.googleusercontent.com/OXbxyxi7XaDta1HS8rAUWzgLcegQxXf4clltpIUE3qCzuO3LxFhRqqatphRP788cVqYiRWWKPXQ=s900-c-k-c0x00ffffff-no-rj" />
                     <AvatarFallback>User</AvatarFallback>
                   </Link>
                 </Avatar>
                 <div>
                   <Link to="/account">
-                    <p className="font-bold text-green-700">{name}</p>
+                    <p className="font-bold text-green-700">
+                      {userProfile?.fullName}
+                    </p>
                   </Link>
                   <Button
                     className="bg-gradient-to-r from-emerald-500 to-teal-700 text-white transition-all duration-300 hover:scale-105 hover:from-green-500 hover:to-green-900 hover:text-white"

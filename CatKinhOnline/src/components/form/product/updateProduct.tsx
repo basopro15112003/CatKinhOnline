@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { updateProduct, type ProductInput } from "@/services/productService";
 import { getCategories, type Category } from "@/services/categoryService";
+import { toast } from "@/hooks/use-toast";
 
 type Props = {
   productId: number;
@@ -57,19 +58,22 @@ export function FormUpdateProduct({
   }, []);
 
   const validate = (): boolean => {
-    if (!productName.trim() || productName.length > 100) return false;
-    if (pricePerM2 <= 0) return false;
+    if (!productName.trim() || productName.length > 100) {
+      toast.warning("Tên sản phẩm không thể để trống va độ dài không thể quá 100 ký tự")
+      return false;}
+
+    if (pricePerM2 <= 0 || pricePerM2 > 10000000) {
+      toast.warning("Giá của sản phẩm không thể nhỏ hơn 1000 ₫/m² và không thể lớn hơn 10,000,000 ₫/m²")
+      return false;}
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
-      alert("Vui lòng kiểm tra lại thông tin nhập");
       return;
     }
     setSubmitting(true);
-
     const payload: ProductInput = {
       productName,
       categoryId: parseInt(categoryId, 10),
@@ -79,6 +83,7 @@ export function FormUpdateProduct({
     try {
       await updateProduct(productId, payload);
       onUpdated?.();
+      toast.success("Cập nhật sản phẩm thành công!");
       setShowForm(false);
     } catch (error) {
       console.error(error);
