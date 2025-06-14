@@ -19,21 +19,18 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Header } from "@/components/personal/header";
-import { Footer } from "@/components/personal/footer";
-import { BreadcrumbComponent } from "@/components/personal/breadcrumb";
-import NavigationComponent from "@/components/personal/navigation";
 import { DetailOrder } from "@/components/form/detailOrder";
 import {
+  changePassword,
   getUserProfile,
   updateUserProfile,
+  type ChangePasswordInput,
   type UpdateUserDto,
   type UserProfile,
 } from "@/services/userService";
-import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/hooks/use-toast";
-
 export default function Account() {
+  //#region Variable
   const [isDetailModalOpen, setIsDetailOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile>();
@@ -43,7 +40,17 @@ export default function Account() {
     fullName: "",
     phone: "",
   });
+  const [changePasswordForm, setChangePasswordForm] =
+    useState<ChangePasswordInput>({
+      newPassword: "",
+      oldPassword: "",
+    });
+  const [confirmNewPassword, setConfirmPassword] = useState<string>("");
+  //#endregion
 
+  //#region Fetch Handle Data
+
+  //#region  Fetch Data Account, Update User Data
   useEffect(() => {
     async function fetchData() {
       const email = localStorage.getItem("email");
@@ -67,7 +74,6 @@ export default function Account() {
     }
     fetchData();
   }, []);
-
   const handleChange = (field: keyof UpdateUserDto, value: string) =>
     setForm((f) => ({ ...f, [field]: value }));
 
@@ -103,8 +109,7 @@ export default function Account() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-  setSubmitting(true);
-
+    setSubmitting(true);
     try {
       const updated = await updateUserProfile(userProfile!.id, form);
       if (updated) {
@@ -113,11 +118,71 @@ export default function Account() {
     } catch (err) {
       console.error(err);
       toast.error("Cập nhật tài khoản thất bại");
-    }finally {
-  setTimeout(() => {
-      setSubmitting(false);
-    }, 2000);   }
+    } finally {
+      setTimeout(() => {
+        setSubmitting(false);
+      }, 2000);
+    }
   };
+  //#endregion
+
+  //#region Change Password
+
+  const handleChangePassword = (
+    field: keyof ChangePasswordInput,
+    value: string,
+  ) => setChangePasswordForm((f) => ({ ...f, [field]: value }));
+
+  function validateFormChangePassword() {
+    if (!changePasswordForm.oldPassword.trim()) {
+      toast.warning("Vui lòng nhập mật khẩu cũ");
+      return false;
+    }
+    if (!changePasswordForm.newPassword.trim()) {
+      toast.warning("Vui lòng nhập mật khẩu mới");
+      return false;
+    }
+    if (!confirmNewPassword.trim()) {
+      toast.warning("Vui lòng xác nhận mật khẩu mới");
+      return false;
+    }
+    if (changePasswordForm.newPassword !== confirmNewPassword) {
+      toast.warning("Mật khẩu xác nhận không khớp");
+      return false;
+    }
+    return true;
+  }
+
+  const handleSubmitChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateFormChangePassword()) return;
+    setSubmitting(true);
+    try {
+      const response = await changePassword(
+        userProfile!.email,
+        changePasswordForm,
+      );
+      if (response.isSuccess) {
+        setChangePasswordForm({
+          oldPassword: "",
+          newPassword: "",
+        });
+        setConfirmPassword("");
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setTimeout(() => {
+        setSubmitting(false);
+      }, 2000);
+    }
+  };
+  //#endregion
+
+  //#endregion
 
   const openDetail = (order: Order) => {
     setSelectedOrder(order);
@@ -245,9 +310,8 @@ export default function Account() {
   //#endregion
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-green-200 via-emerald-50 to-green-300 ">
-      <Header></Header> <NavigationComponent></NavigationComponent>
-      <Card className="relative mx-auto mb-13 mt-7 max-w-7xl">
+    <div>
+      <Card className="relative mx-auto mt-7 mb-13 max-w-7xl">
         <CardHeader>
           <CardTitle className="text-2xl text-green-700">
             Tài khoản khách hàng
@@ -290,7 +354,11 @@ export default function Account() {
                         onChange={(e) => handleChange("phone", e.target.value)}
                       />
                     </div>
-                    <Button className="mt-4" type="submit"  disabled={submitting}>
+                    <Button
+                      className="mt-4"
+                      type="submit"
+                      disabled={submitting}
+                    >
                       {submitting ? "Đang lưu..." : "Lưu thay đổi"}
                     </Button>{" "}
                   </div>
@@ -381,36 +449,60 @@ export default function Account() {
             {/* Change Password Start */}
             <>
               {" "}
-              <TabsContent value="changepass">
-                <div className="grid max-w-md gap-4">
-                  <div>
-                    <Label>Mật khẩu cũ</Label>
-                    <Input type="password" />
-                  </div>{" "}
-                  <div>
-                    <Label>Mật khẩu mới</Label>
-                    <Input type="password" />
-                  </div>{" "}
-                  <div>
-                    <Label>Xác nhận ật khẩu mới</Label>
-                    <Input type="password" />
+              <form onSubmit={handleSubmitChangePassword}>
+                <TabsContent value="changepass">
+                  <div className="grid max-w-md gap-4">
+                    <div>
+                      <Label>Mật khẩu cũ</Label>
+                      <Input
+                        type="password"
+                        value={changePasswordForm.oldPassword}
+                        onChange={(e) =>
+                          handleChangePassword("oldPassword", e.target.value)
+                        }
+                      />
+                    </div>{" "}
+                    <div>
+                      <Label>Mật khẩu mới</Label>
+                      <Input
+                        type="password"
+                        name="newPassword"
+                        value={changePasswordForm.newPassword}
+                        onChange={(e) =>
+                          handleChangePassword("newPassword", e.target.value)
+                        }
+                      />
+                    </div>{" "}
+                    <div>
+                      <Label>Xác nhận mật khẩu mới</Label>
+                      <Input
+                        type="password"
+                        name="confirmPassword"
+                        value={confirmNewPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                    </div>
+                    <Button
+                      className="mt-4"
+                      type="submit"
+                      disabled={submitting}
+                    >
+                      {submitting ? "Đang lưu..." : "Lưu thay đổi"}
+                    </Button>{" "}
                   </div>
-                  <Button>Đổi mật khẩu</Button>
-                </div>
-              </TabsContent>
+                </TabsContent>
+              </form>
             </>
             {/* Change Password End */}
           </Tabs>
         </CardContent>
       </Card>
-      <Footer></Footer>
       {isDetailModalOpen && selectedOrder && (
         <DetailOrder
           selectedOrder={selectedOrder}
           closeDetail={closeDetail}
         ></DetailOrder>
       )}
-      <Toaster />
     </div>
   );
 }

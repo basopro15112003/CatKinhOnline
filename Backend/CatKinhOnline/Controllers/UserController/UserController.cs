@@ -55,14 +55,11 @@ namespace CatKinhOnline.Controllers.UserController
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] User user)
             {
-            if (user==null)
-                {
-                return BadRequest("User data is null.");
-                }
             try
                 {
-                var createdUser = await _userService.AddUser(user);
-                return CreatedAtAction(nameof(Get), new { id = createdUser.Id }, createdUser);
+                APIResponse aPIResponse = new APIResponse();
+                aPIResponse=await _userService.AddUser(user);
+                return Ok(aPIResponse);
                 }
             catch (Exception ex)
                 {
@@ -78,6 +75,20 @@ namespace CatKinhOnline.Controllers.UserController
                 {
                 user=await _userService.UpdateUser(user);
                 return Ok(user);
+                }
+            catch (Exception ex)
+                {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+                }
+            }
+        [HttpPut("ChangePassword/{email}")]
+        public async Task<IActionResult> ChangePassword(string email, [FromBody] ChangePasswordDTO dto)
+            {
+            try
+                {
+                APIResponse aPIResponse = new APIResponse();
+                aPIResponse = await _userService.ChangePassword(email, dto);
+                return Ok(aPIResponse);
                 }
             catch (Exception ex)
                 {

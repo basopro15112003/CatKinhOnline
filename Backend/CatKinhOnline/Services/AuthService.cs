@@ -13,10 +13,13 @@ namespace CatKinhOnline.Services
         private readonly IUserRepository _userRepository;
         private readonly IConfiguration _config;
 
-        public AuthService(IConfiguration config)
+        public AuthService(IUserRepository userRepository, IConfiguration config)
             {
-            _userRepository=new UserRepository();
+            _userRepository=userRepository;
             _config=config;
+            }
+        public AuthService()
+            {
             }
 
         #region HashPassword

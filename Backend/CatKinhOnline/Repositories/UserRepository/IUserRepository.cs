@@ -10,5 +10,6 @@ namespace CatKinhOnline.Repositories.UserRepository
         Task<User> UpdateUser(User user);
         Task<User?> GetUserByEmail(string email);
         Task<User?> Login(string email, string password);
+        Task<User?> GetUserByPhone(string phone);
         }
     }

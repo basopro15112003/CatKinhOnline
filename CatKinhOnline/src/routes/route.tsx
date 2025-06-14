@@ -1,4 +1,6 @@
 import GoogleCallback from "@/components/form/auth/googleCallback";
+import { toast } from "@/hooks/use-toast";
+import LayoutUser from "@/layout/userLayout";
 import ManageOrder from "@/pages/admin/manageOrder";
 import ManagePrice from "@/pages/admin/managePrice";
 import ManageCustomer from "@/pages/admin/managerCustomer";
@@ -6,7 +8,7 @@ import Account from "@/pages/customer/account";
 import Order from "@/pages/customer/order";
 import About from "@/pages/public/about";
 import HomePage from "@/pages/public/HomePage";
-import type { JSX } from "react";
+import { useRef, type JSX } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -14,29 +16,51 @@ import {
   Navigate,
 } from "react-router-dom";
 
-function PrivateRoute({ children }: { children: JSX.Element }) {
-  const isAuth = !!localStorage.getItem("token");
-  if (!isAuth) {
-    return <Navigate to="/" />;
-  } else {
-    return children;
+let notAuthToastShown = false;
+
+  function PrivateRoute({ children }: { children: JSX.Element }) {
+    const isAuth = !!localStorage.getItem("token");
+    if (!isAuth) {
+   if (!notAuthToastShown) {
+      toast.warning("Bạn cần phải đăng nhập để thực hiện hành động");
+      notAuthToastShown = true;
+    }      return <Navigate to="/" />;
+    } else {
+      return children;
+    }
   }
-}
+  
 function AppRoute() {
   return (
     <>
       <Router basename="/CatKinhOnline">
         <Routes>
           {/* public route */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<About />} />
+          <Route
+            path="/"
+            element={
+              <LayoutUser>
+                <HomePage />
+              </LayoutUser>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <LayoutUser>
+                <About />
+              </LayoutUser>
+            }
+          />
 
           {/* customer route */}
           <Route
             path="/order"
             element={
               <PrivateRoute>
-                <Order />
+                <LayoutUser>
+                  <Order />
+                </LayoutUser>
               </PrivateRoute>
             }
           />
@@ -44,7 +68,9 @@ function AppRoute() {
             path="/account"
             element={
               <PrivateRoute>
-                <Account />
+                <LayoutUser>
+                  <Account />
+                </LayoutUser>
               </PrivateRoute>
             }
           />

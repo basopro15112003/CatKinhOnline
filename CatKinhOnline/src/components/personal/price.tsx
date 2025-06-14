@@ -32,7 +32,7 @@ export function Price() {
               {product.map((product, id) => (
                 <div
                   key={id}
-                  className="rounded-xl border border-emerald-200 bg-green-50 p-4"
+                  className="rounded-xl border border-emerald-200 bg-green-50 p-4 shadow-lg shadow-emerald-100"
                 >
                   <h4 className="text-lg font-semibold text-green-800">
                     {product.productName}
@@ -55,7 +55,7 @@ export function Price() {
               </Button>
             )}
 
-            <p className="mt-6 text-center text-sm text-gray-500">
+            <p className="mt-6 text-center text-sm text-gray-500 italic">
               * Giá có thể thay đổi theo khu vực hoặc khối lượng đơn hàng
             </p>
           </CardContent>

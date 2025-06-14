@@ -23,7 +23,6 @@ export type ProductInput = Omit<Product, "id" | "category">;
 export const getProducts = async ():Promise<Product[]> => {
     try {
         const response:AxiosResponse<Product[]> = await request.get("Product")
-        console.log(response);
         return response.data;
     } catch (error) {
         console.log(error);
@@ -34,7 +33,6 @@ export const getProducts = async ():Promise<Product[]> => {
 export const AddProduct = async(data:ProductInput ) => {
     try {
         const response:AxiosResponse<ProductInput >= await request.post("Product",data)
-        console.log(response);
         return response.data;
     } catch (error) {
         console.log(error);

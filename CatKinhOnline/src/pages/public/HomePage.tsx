@@ -5,10 +5,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { Header } from "@/components/personal/header";
-import { Footer } from "@/components/personal/footer";
 import { Price } from "@/components/personal/price";
-import NavigationComponent from "@/components/personal/navigation";
 import PriceQuoteCard from "@/components/personal/calPrice";
 import { ArrowRight, Calculator, Shield, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -70,9 +67,7 @@ function HomePage() {
   ];
   return (
     <>
-      <main className="min-h-screen bg-gradient-to-br from-green-200 via-emerald-50 to-green-300">
-        <Header></Header>
-        <NavigationComponent></NavigationComponent>
+      <main>
         <section className="relative mx-auto mb-16 max-w-7xl px-4">
           <div className="relative overflow-hidden rounded-3xl shadow-2xl">
             <Carousel className="w-full" plugins={[Autoplay({ delay: 4000 })]}>
@@ -222,7 +217,6 @@ function HomePage() {
             loading="lazy"
           ></iframe>{" "}
         </section>
-        <Footer></Footer>
       </main>
     </>
   );

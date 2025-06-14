@@ -17,7 +17,7 @@ namespace CatKinhOnline.Models
 
         [Required, MaxLength(20)]
         public string Phone { get; set; } = string.Empty;
-
+                                                                                                            
         [Required, MaxLength(200)]
         public string PasswordHash { get; set; } = string.Empty;
 

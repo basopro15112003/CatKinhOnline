@@ -50,7 +50,7 @@ export default function ManageCustomer() {
         const response = await getUsers();
         if (response) {
           setUser(response.reverse());
-          console.log(response.reverse);
+          console.log(response);
           return response;
         } else {
           console.log("ftech data thất bại");

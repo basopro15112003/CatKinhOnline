@@ -1,6 +1,5 @@
 ﻿using CatKinhOnline.ModelDTOs;
 using CatKinhOnline.Models;
-using CatKinhOnline.Repositories.ProductRepository;
 using CatKinhOnline.Repositories.UserRepository;
 
 namespace CatKinhOnline.Services
@@ -80,22 +79,46 @@ namespace CatKinhOnline.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="Exception"></exception>
-        public async Task<User> AddUser(User user)
+        public async Task<APIResponse> AddUser(User user)
             {
-            if (user==null)
-                {
-                throw new ArgumentNullException(nameof(user), "User cannot be null.");
-                }
             try
                 {
+                AuthService authService = new AuthService();
+                APIResponse aPIResponse = new APIResponse();
                 user.Status=1;
                 user.Role=1;
-                var addedUser = await _userRepository.AddUser(user);
-                return addedUser;
+                user.PasswordHash=authService.HashPassword(user.PasswordHash);
+                #region 1. Validation
+                var checkEmailEsixst = await GetUserByEmail(user.Email);
+                var checkPhoneEsixst = await _userRepository.GetUserByPhone(user.Phone);
+                List<(bool condition, string errorMessage)>? validations = new List<(bool condition, string errorMessage)>
+            {
+                  (user == null, "Người dùng không thể trống"),
+                  (checkEmailEsixst != null, "Email này đã tồn tại trong hệ thống."),
+                  (checkPhoneEsixst != null, "Số điện thoại này đã tồn tại trong hệ thống."),
+            };
+                foreach (var validation in validations)
+                    {
+                    if (validation.condition)
+                        {
+                        return new APIResponse
+                            {
+                            IsSuccess=false,
+                            Message=validation.errorMessage
+                            };
+                        }
+                    }
+                #endregion
+                var addedUser = await _userRepository.AddUser(user!);
+                return aPIResponse;
                 }
             catch (Exception ex)
                 {
-                throw new Exception($"Error adding user: {ex.Message}");
+                return new APIResponse
+                    {
+                    IsSuccess=false,
+                    Message=ex.Message
+                    };
                 }
             }
         #endregion
@@ -126,6 +149,42 @@ namespace CatKinhOnline.Services
             catch (Exception ex)
                 {
                 throw new Exception($"Error updating user: {ex.Message}");
+                }
+            }
+        #endregion
+
+        #region Change password
+        /// <summary>
+        /// change password for a user.
+        /// </summary>
+        /// <param name="userDTO"></param>
+        /// <param name="changePasswordDto"></param>
+        /// <returns></returns>
+        public async Task<APIResponse> ChangePassword(string email, ChangePasswordDTO changePasswordDto)
+            {
+            try
+                {
+                AuthService authService = new AuthService();
+                var user = await _userRepository.GetUserByEmail(email);
+                if (user==null)
+                    {
+                    return new APIResponse{IsSuccess=false,Message="Người dùng không tồn tại."};
+                    }
+                changePasswordDto.OldPassword=authService.HashPassword(changePasswordDto.OldPassword);
+                if (user.PasswordHash!=changePasswordDto.OldPassword)
+                    {
+                return new APIResponse { IsSuccess=false, Message="Mật khẩu cũ không đúng." };}
+                user.PasswordHash=authService.HashPassword(changePasswordDto.NewPassword);
+                await _userRepository.UpdateUser(user);
+                return new APIResponse { IsSuccess=true, Message="Đổi mật khẩu thành công."
+                    };
+                }
+            catch (Exception ex)
+                {
+                return new APIResponse {
+                    IsSuccess=false,
+                    Message=ex.Message
+                    };
                 }
             }
         #endregion

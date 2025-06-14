@@ -1,5 +1,10 @@
 import type { AxiosResponse } from "axios";
 import request from "../../src/utils/baseURL";
+export type APIResponse = {
+  isSuccess: boolean;
+  message: string;
+  result: object;
+};
 
 export type LoginInput = {
   email: string;
@@ -19,6 +24,54 @@ export type UpdateUserDto = {
   id: number;
   fullName: string;
   phone: string;
+};
+
+export type RegisterInput = {
+  id: number;
+  fullName: string;
+  email: string;
+  phone: string;
+  passwordHash: string;
+  role: number;
+  status: number;
+};
+
+export type ChangePasswordInput ={
+  newPassword: string;
+  oldPassword: string;
+}
+
+export const changePassword = async (email: string, data:ChangePasswordInput):Promise<APIResponse> => {
+  try {
+    const response: AxiosResponse<APIResponse> = await request.put(`User/ChangePassword/${email}`, data) 
+      return response.data
+  } catch (error) {
+    console.log(error)
+        return {
+      isSuccess: false,
+      message: "Đã có lỗi xảy ra khi kết nối tới máy chủ.",
+      result: [],
+    };
+  }
+}
+
+export const registerNewUser = async (
+  data: RegisterInput,
+): Promise<APIResponse> => {
+  try {
+    const response: AxiosResponse<APIResponse> = await request.post(
+      "User",
+      data,
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return {
+      isSuccess: false,
+      message: "Đã có lỗi xảy ra khi kết nối tới máy chủ.",
+      result: [],
+    };
+  }
 };
 
 export const getUsers = async (): Promise<UserProfile[] | null> => {

@@ -201,6 +201,29 @@ namespace CatKinhOnline.Repositories.UserRepository
             }
         #endregion
 
+        #region get user by phone number
+        /// <summary>
+        /// get a user by their phone number from the database.
+        /// </summary>
+        /// <param name="phone"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<User?> GetUserByPhone(string phone)
+            {
+            try
+                {
+                using (var _db = new MyDbContext())
+                    {
+                    return await _db.Users.FirstOrDefaultAsync(u => u.Phone==phone);
+                    }
+                }
+            catch (Exception ex)
+                {
+                throw new Exception(ex.Message);
+                }
+            }
+        #endregion
+
         #region Login
         /// <summary>
         /// login a user by email and password.
