@@ -1,25 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import { DetailOrder } from "@/components/form/detailOrder";
 import {
   changePassword,
   getUserProfile,
@@ -29,10 +13,14 @@ import {
   type UserProfile,
 } from "@/services/userService";
 import { toast } from "@/hooks/use-toast";
+import { CustomerOrders } from "@/components/pages/customer/account/orders";
+import { MapPin, Pencil, PlusCircle, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Dialog } from "@/components/ui/dialog";
+import { FromAddress } from "@/components/form/address/address";
+
 export default function Account() {
   //#region Variable
-  const [isDetailModalOpen, setIsDetailOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile>();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<UpdateUserDto>({
@@ -46,6 +34,7 @@ export default function Account() {
       oldPassword: "",
     });
   const [confirmNewPassword, setConfirmPassword] = useState<string>("");
+  const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
   //#endregion
 
   //#region Fetch Handle Data
@@ -184,131 +173,9 @@ export default function Account() {
 
   //#endregion
 
-  const openDetail = (order: Order) => {
-    setSelectedOrder(order);
-    setIsDetailOpen(true);
-  };
+  //#region Open & Close form
 
-  const closeDetail = () => {
-    setIsDetailOpen(false);
-  };
-
-  type OrderItem = {
-    id: number;
-    productName: string;
-    width: number;
-    height: number;
-    quantity: number;
-    unitPrice: number;
-    subtotal: number;
-  };
-
-  type Order = {
-    id: string;
-    date: string;
-    status: number;
-    deliveryType: string;
-    shippingAddress?: string;
-    paymentMethod: string;
-    totalAmount: number;
-    items: OrderItem[];
-  };
-
-  //#region  Mock 10 order data
-  const orders: Order[] = useMemo(
-    () => [
-      {
-        id: "DH001",
-        date: "2023-11-01",
-        status: 2,
-        deliveryType: "shipping",
-        shippingAddress: "227 Phong Điền, Cần Thơ",
-        paymentMethod: "cod",
-        items: [
-          {
-            id: 1,
-            productName: "Kính cường lực 8 ly",
-            width: 1.2,
-            height: 0.8,
-            quantity: 2,
-            unitPrice: 260000,
-            subtotal: Math.round(1.2 * 0.8 * 2 * 260000),
-          },
-          {
-            id: 2,
-            productName: "Kính trắng 5 ly",
-            width: 1,
-            height: 1,
-            quantity: 1,
-            unitPrice: 157000,
-            subtotal: Math.round(1 * 1 * 1 * 157000),
-          },
-        ],
-        totalAmount: 2 * 1.2 * 0.8 * 260000 + 1 * 1 * 157000,
-      },
-      {
-        id: "DH002",
-        date: "2023-11-03",
-        status: 1,
-        deliveryType: "pickup",
-        paymentMethod: "online",
-        items: [
-          {
-            id: 1,
-            productName: "Kính bông",
-            width: 0.8,
-            height: 0.8,
-            quantity: 3,
-            unitPrice: 150000,
-            subtotal: Math.round(0.8 * 0.8 * 3 * 150000),
-          },
-        ],
-        totalAmount: Math.round(0.8 * 0.8 * 3 * 150000),
-      },
-      {
-        id: "DH003",
-        date: "2023-11-05",
-        status: 0,
-        deliveryType: "shipping",
-        shippingAddress: "123 Nguyễn Huệ, TP HCM",
-        paymentMethod: "cod",
-        items: [
-          {
-            id: 1,
-            productName: "Kính trắng 4 ly",
-            width: 1,
-            height: 2,
-            quantity: 1,
-            unitPrice: 135000,
-            subtotal: Math.round(1 * 2 * 1 * 135000),
-          },
-        ],
-        totalAmount: Math.round(1 * 2 * 1 * 135000),
-      },
-      {
-        id: "DH004",
-        date: "2023-11-07",
-        status: 4,
-        deliveryType: "pickup",
-        paymentMethod: "online",
-        items: [
-          {
-            id: 1,
-            productName: "Kính trắng 8 ly",
-            width: 1.5,
-            height: 1,
-            quantity: 2,
-            unitPrice: 240000,
-            subtotal: Math.round(1.5 * 1 * 2 * 240000),
-          },
-        ],
-        totalAmount: Math.round(1.5 * 1 * 2 * 240000),
-      },
-    ],
-    [],
-  );
   //#endregion
-
   return (
     <div>
       <Card className="relative mx-auto mt-7 mb-13 max-w-7xl">
@@ -321,10 +188,10 @@ export default function Account() {
           <Tabs defaultValue="profile" className="w-full">
             <TabsList className="mb-4">
               <TabsTrigger value="profile">Thông tin cá nhân</TabsTrigger>{" "}
+              <TabsTrigger value="address">Địa chỉ</TabsTrigger>
               <TabsTrigger value="changepass">Đổi mật khẩu</TabsTrigger>
               <TabsTrigger value="orders">Quản lý đơn hàng</TabsTrigger>
             </TabsList>
-
             {/* Manage Account Start */}
             <>
               <TabsContent value="profile">
@@ -366,85 +233,6 @@ export default function Account() {
               </TabsContent>
             </>
             {/* Manage Account End */}
-
-            {/* Manage Order Start */}
-            <>
-              {" "}
-              <TabsContent value="orders">
-                <div className="mb-4 flex flex-col items-center gap-4 md:flex-row">
-                  <Input placeholder="Tìm kiếm mã đơn" className="max-w-xs" />
-                  <Select>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Lọc trạng thái" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tất cả</SelectItem>
-                      <SelectItem value="Đang xử lý">Đang xử lý</SelectItem>
-                      <SelectItem value="Đang giao">Đang giao</SelectItem>
-                      <SelectItem value="Đã giao">Đã giao</SelectItem>
-                      <SelectItem value="Đã hủy">Đã hủy</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Table>
-                  <TableHeader className="w-full">
-                    <TableRow>
-                      <TableHead>Mã đơn</TableHead>
-                      <TableHead>Ngày</TableHead>
-                      <TableHead>Trạng thái</TableHead>
-                      <TableHead>Tổng</TableHead>
-                      <TableHead className="text-right">Hành động</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orders.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.id}</TableCell>
-                        <TableCell>{item.date}</TableCell>
-                        <TableCell>
-                          {item.status === 0
-                            ? "Chờ xác nhận"
-                            : item.status === 1
-                              ? "Đã xác nhận"
-                              : item.status === 2
-                                ? "Đang thực hiện"
-                                : item.status === 3
-                                  ? "Đang giao hàng"
-                                  : item.status === 4
-                                    ? "Đã hoàn thành"
-                                    : "Đã hủy"}
-                        </TableCell>
-                        <TableCell>
-                          {item.totalAmount.toLocaleString()} vn₫
-                        </TableCell>
-                        <TableCell className="w-1 space-x-1 text-right">
-                          {item.status === 0 ? (
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="sm"
-                            >
-                              Hủy
-                            </Button>
-                          ) : (
-                            <></>
-                          )}
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openDetail(item)}
-                          >
-                            Xem
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TabsContent>
-            </>
-            {/* Manage Order End */}
 
             {/* Change Password Start */}
             <>
@@ -494,15 +282,84 @@ export default function Account() {
               </form>
             </>
             {/* Change Password End */}
+
+            {/* Tab Địa chỉ */}
+            <TabsContent value="address">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium">Địa chỉ của tôi</h3>
+                  <Button className="bg-gradient-to-br from-emerald-500 to-emerald-700 transition-all duration-300 hover:scale-105 hover:from-emerald-700 hover:to-emerald-700"
+                  onClick={() => setIsAddressFormOpen(true)}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Thêm địa chỉ mới
+                  </Button>
+                </div>
+                <div className="rounded-lg border border-dashed border-gray-300 py-8 text-center">
+                  <MapPin className="mx-auto mb-2 h-12 w-12 text-gray-400" />
+                  <p className="text-gray-500">Bạn chưa có địa chỉ nào</p>
+                  <Button variant="outline" className="mt-4">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Thêm địa chỉ mới
+                  </Button>
+                </div>{" "}
+                <div className="grid gap-4">
+                  <Card className="overflow-hidden">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="mb-1 flex items-center gap-2">
+                            <h4 className="font-medium">Nguyễn Quốc Hoàng</h4>
+                            <Badge className="bg-green-500">Mặc định</Badge>
+                          </div>
+                          <p className="mb-1 text-sm text-gray-500">
+                            0333744591
+                          </p>
+                          <p className="text-sm">
+                            123 Đường Lê Lợi, Phường An Thạnh, Quận Ninh Kiều,
+                            Thành phố Cần Thơ
+                          </p>
+                        </div>
+                        <div className="flex gap-2 ">
+                          <Button variant="outline" size="sm">
+                            <Pencil className="mr-1 h-4 w-4" />
+                            Sửa
+                          </Button>
+                          <>
+                            <Button variant="outline" size="sm">
+                              Đặt mặc định
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-red-200 text-red-500 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+            {/* Manage Order Start */}
+            <>
+              <CustomerOrders></CustomerOrders>
+            </>
+            {/* Manage Order End */}
           </Tabs>
         </CardContent>
       </Card>
-      {isDetailModalOpen && selectedOrder && (
-        <DetailOrder
-          selectedOrder={selectedOrder}
-          closeDetail={closeDetail}
-        ></DetailOrder>
-      )}
+                {!isAddressFormOpen && (
+                  <div className="rounded-lg border border-dashed border-gray-300 py-8 text-center">
+                    <MapPin className="mx-auto mb-2 h-12 w-12 text-gray-400" />
+                    <p className="text-gray-500">Bạn chưa có địa chỉ nào</p>
+                  </div>
+                )}
+
+                {isAddressFormOpen && <FromAddress onClose={() => setIsAddressFormOpen(false)} />}
+
     </div>
   );
 }

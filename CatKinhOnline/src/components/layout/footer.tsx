@@ -6,50 +6,46 @@ import {
   Phone,
   Twitter,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function Footer() {
   return (
     <>
-      <footer className="bg-gradient-to-br from-gray-900 via-emerald-900 to-teal-900 text-white py-8 px-4">
-        <div className="max-w-7xl rounded-2xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
+      <footer className="bg-gradient-to-br from-gray-900 via-emerald-900 to-teal-900 px-4 py-8 text-white">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 rounded-2xl md:grid-cols-4">
           <div>
-            <h3 className="text-2xl font-semibold mb-4">
+            <h3 className="mb-4 text-2xl font-semibold">
               Tiệm kính Quốc Hoàng
             </h3>
-            <p className="flex items-center gap-2 text-sm mb-2">
+            <p className="mb-2 flex items-center gap-2 text-sm">
               <MapPin size={20} />
               227 Phong Điền, TP Cần Thơ, Việt Nam
             </p>
-            <p className="flex items-center gap-2 text-sm mb-2">
+            <p className="mb-2 flex items-center gap-2 text-sm">
               <Mail size={20} /> quochoangnguyen2003ct@gmail.com
             </p>
-            <p className="flex items-center gap-2 text-sm mb-2">
+            <p className="mb-2 flex items-center gap-2 text-sm">
               <Phone size={20} /> 0901 234 567
             </p>
           </div>
 
           <div>
-            <h4 className="text-2xl font-semibold mb-4 ">Liên kết</h4>
+            <h4 className="mb-4 text-2xl font-semibold">Liên kết</h4>
             <ul className="space-y-1 text-sm">
               <li className="mb-2">
-                <a href="#" className="hover:underline">
+                <Link to={"/about"} className="hover:underline">
                   Giới thiệu
-                </a>
+                </Link>
               </li>
               <li className="mb-2">
                 <a href="#" className="hover:underline">
                   Liên hệ
                 </a>
               </li>
-              <li className="mb-2">
-                <a href="#" className="hover:underline">
-                  Chính sách bảo mật
-                </a>
-              </li>
             </ul>
           </div>
           <div>
-            <h4 className="text-2xl font-semibold mb-4 ">Tài khoản</h4>
+            <h4 className="mb-4 text-2xl font-semibold">Tài khoản</h4>
             <ul className="space-y-1 text-base">
               <li className="mb-2">
                 <a href="#" className="hover:underline">
@@ -64,7 +60,7 @@ export function Footer() {
             </ul>
           </div>
           <div className="">
-            <h4 className="text-2xl font-semibold mb-4">
+            <h4 className="mb-4 text-2xl font-semibold">
               Kết nối với chúng tôi
             </h4>
             <div className="flex space-x-4">
@@ -80,7 +76,7 @@ export function Footer() {
             </div>
           </div>
         </div>
-        <div className="text-center text-xs text-white mt-7">
+        <div className="mt-7 text-center text-xs text-white">
           © 2025 QuocHoang. All rights reserved.
         </div>
       </footer>

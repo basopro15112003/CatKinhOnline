@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Register } from "@/pages/public/register";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,7 +13,6 @@ export function Header() {
   const [showForm, setShowForm] = useState(false);
   const token = localStorage.getItem("token");
   const [userProfile, setUserProfile] = useState<UserProfile>();
-  const shown = useRef(false);
   const navigate = useNavigate();
   const email = localStorage.getItem("email");
 
@@ -53,14 +52,14 @@ export function Header() {
     <>
       <header className="sticky top-0 z-50 border-b border-emerald-100 bg-white/80 shadow-sm backdrop-blur-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <div className="flex items-center space-x-3">
+          <Link to={"/"} className="flex items-center space-x-3 ">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600">
               <Store className="h-6 w-6 text-white" />
             </div>
             <h1 className="bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-2xl font-bold text-transparent">
               Tiệm kính Quốc Hoàng
             </h1>
-          </div>
+          </Link>
           {!token ? (
             <>
               <Button
