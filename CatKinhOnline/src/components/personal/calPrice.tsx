@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import  { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
@@ -51,7 +51,7 @@ export default function PriceQuoteCard() {
     <>
       <section className="mx-auto mb-16 max-w-7xl px-4">
         <Card className="overflow-hidden border-0 bg-gradient-to-br from-white to-emerald-50/30 shadow-2xl">
-          <CardContent className="p-12">
+          <CardContent className="lg:p-12 mt-2">
             <div className="mb-10 text-center">
               <h2 className="mb-4 text-4xl font-bold text-gray-800">
                 Tính giá kính thông minh
@@ -61,7 +61,7 @@ export default function PriceQuoteCard() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-emerald-100 bg-white p-8 shadow-lg">
+            <div className="rounded-2xl border border-emerald-100 bg-white p-4 lg:p-8 shadow-lg">
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                 {/* Form inputs would go here */}
                 <div className="col-span-1 space-y-6">
@@ -120,8 +120,8 @@ export default function PriceQuoteCard() {
                     </Select>
 
                     <div className="mt-2 flex space-x-1">
-                      <div className="w-1/2">
-                        <Label className="mt-4">Chiều rộng</Label>{" "}
+                      <div className="w-full">
+                        <Label className="mt-4">Chiều rộng</Label>
                         <Input
                           className="border-2 focus:border-emerald-200"
                           id="width"
@@ -130,7 +130,7 @@ export default function PriceQuoteCard() {
                           onChange={(e) => setWidth(e.target.value)}
                         />
                       </div>
-                      <div className="w-1/2">
+                      <div className="w-full">
                         <Label className="mt-4" htmlFor="dimensions">
                           Chiều dài
                         </Label>
@@ -151,7 +151,7 @@ export default function PriceQuoteCard() {
                           id="quantity"
                           type="number"
                           min={1}
-                          className="w-20"
+                          className="w-14 md:w-full "
                           value={quantity}
                           onChange={(e) => {
                             const v = parseInt(e.target.value, 10);
@@ -168,12 +168,12 @@ export default function PriceQuoteCard() {
                       <p className="text-start text-lg font-medium text-green-700">
                         Tạm tính{" "}
                       </p>
-                      <p className="text-start">
+                      <p className="text-start text-sm md:text-base">
                         {quantity} × {glassType} ({width}m × {height}m) x{" "}
                         {found?.price.toLocaleString()} ₫/m² ={" "}
                         {subtotal.toLocaleString()}₫
                       </p>
-                      <p className="mt-2 text-end text-xl font-bold text-green-900">
+                      <p className="mt-2 text-sx text-end md:text-xl font-bold text-green-900">
                         Tổng: {subtotal.toLocaleString()}₫
                       </p>
                     </div>

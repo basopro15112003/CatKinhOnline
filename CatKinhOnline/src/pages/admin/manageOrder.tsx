@@ -22,7 +22,7 @@ import {
 import { AlignStartVertical } from "lucide-react";
 import SearchBar from "@/components/personal/searchbar";
 import FilterBar from "@/components/personal/orderFilterBar";
-import PaginationControls from "@/components/personal/Paging";
+import PaginationControls from "@/components/layout/Paging";
 
 export default function ManageOrder() {
   const [showForm, setShowForm] = useState(false);

@@ -78,7 +78,7 @@ function HomePage() {
                   "https://d2rdhxfof4qmbb.cloudfront.net/wp-content/uploads/20200825140923/iStock-918934132-scaled.jpg",
                 ].map((src, idx) => (
                   <CarouselItem key={idx}>
-                    <div className="relative h-[500px] overflow-hidden">
+                    <div className="relative h-90 md:h-[500px] overflow-hidden">
                       <img
                         src={src || "/placeholder.svg"}
                         alt={`Banner ${idx + 1}`}
@@ -92,11 +92,11 @@ function HomePage() {
             </Carousel>
 
             {/* Hero Content Overlay */}
-            <div className="absolute inset-0 flex items-center justify-start pl-12">
+            <div className="absolute inset-0 flex items-center justify-start pl-4 md:pl-12">
               <div
                 className={`max-w-2xl transform transition-all duration-1000 ${isVisible ? "translate-x-0 opacity-100" : "-translate-x-10 opacity-0"}`}
               >
-                <h2 className="mb-6 text-5xl leading-tight font-bold text-white">
+                <h2 className="md:mb-6 text-3xl md:text-5xl leading-tight font-bold text-white">
                   Nơi đặt kính
                   <span className="block bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
                     nhanh chóng & tiện lợi

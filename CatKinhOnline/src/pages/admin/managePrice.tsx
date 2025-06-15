@@ -43,7 +43,6 @@ export default function ManagePrice() {
   const [product, setProduct] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const pageSize = 10;
   //#endregion
 
   //#region Fucntion React Hook

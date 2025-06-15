@@ -1,6 +1,6 @@
-import { Footer } from "@/components/personal/footer";
-import { Header } from "@/components/personal/header";
-import NavigationComponent from "@/components/personal/navigation";
+import { Footer } from "@/components/layout/footer";
+import { Header } from "@/components/layout/header";
+import NavigationComponent from "@/components/layout/navigation";
 import { Toaster } from "@/components/ui/toaster";
 import type { ReactNode } from "react";
 
