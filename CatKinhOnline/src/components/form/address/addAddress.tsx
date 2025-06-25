@@ -19,16 +19,26 @@ import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import {
   addressService,
+  createAddress,
   type District,
   type Province,
   type Ward,
 } from "@/services/addressService";
+import { toast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AddressCardFormProps {
+  userId: number;
   onClose: () => void;
+  handleReloadAddress: () => void;
 }
 
-export function FromAddress({ onClose }: AddressCardFormProps) {
+export function FromAddress({
+  userId,
+  onClose,
+  handleReloadAddress,
+}: AddressCardFormProps) {
+  //#region Variable
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [wards, setWards] = useState<Ward[]>([]);
@@ -37,11 +47,16 @@ export function FromAddress({ onClose }: AddressCardFormProps) {
   const [selectedDistrict, setSelectedDistrict] = useState<string>("");
   const [selectedWard, setSelectedWard] = useState<string>("");
   const [finalAddress, setFinalAddress] = useState<string>("");
+  const [contactName, setContactName] = useState<string>("");
+  const [contactPhone, setContactPhone] = useState<string>("");
+  const [isDefault, setIsDefault] = useState<boolean>(false);
+  const [note, setNote] = useState<string>("");
+  //#endregion
 
+  //#region Fetch Data
   useEffect(() => {
     addressService.getProvinces().then(setProvinces);
   }, []);
-
 
   useEffect(() => {
     if (selectedProvince) {
@@ -60,26 +75,87 @@ export function FromAddress({ onClose }: AddressCardFormProps) {
       addressService.getWards(selectedDistrict).then(setWards);
     }
   }, [selectedDistrict]);
+  //#endregion
 
-  const handleSubmit = (e: React.FormEvent) => {
+  //#region Handle Event
+  function validateForm() {
+    if (!contactName.trim()) {
+      toast.warning("Vui lòng nhập tên người nhận");
+      return false;
+    }
+    if (contactName.trim().length < 6) {
+      toast.warning("Tên người nhận quá ngắn (tối thiểu 6 ký tự)");
+      return false;
+    }
+    if (contactName.trim().length > 50) {
+      toast.warning("Tên người nhận quá dài (tối đa 50 ký tự)");
+      return false;
+    }
+    if (!contactPhone.trim()) {
+      toast.warning("Vui lòng nhập số điện thoại");
+      return false;
+    }
+    if (!contactPhone.trim().match(/^0[0-9]{9}$/)) {
+      toast.warning("Số điện thoại không hợp lệ");
+      return false;
+    }
+    if (!finalAddress.trim()) {
+      toast.warning("Vui lòng nhập địa chỉ cụ thể");
+      return false;
+    }
+    return true;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: gọi API lưu địa chỉ
+    if (!validateForm()) {
+      return;
+    }
+    const address = {
+      userId: userId,
+      addressLine: finalAddress,
+      contactName: contactName,
+      contactPhone: contactPhone,
+      note: note,
+      isDefault: isDefault,
+      id: 0,
+    };
+    const response = await createAddress(address);
+    if (response.isSuccess) {
+      onClose();
+      handleReloadAddress();
+      toast.success("Thêm địa chỉ thành công");
+    } else {
+      toast.error("Thêm địa chỉ thất bại");
+    }
   };
-
-     useEffect(() => {
-    const selectedProvinceName = provinces.find(p => p.code.toString() === selectedProvince)?.name || "";
-    const selectedDistrictName = districts.find(p => p.code.toString() === selectedDistrict)?.name || "";
-    const selectedWardName = wards.find(p => p.code.toString() === selectedWard)?.name || "";
-
-    const parts = [selectedWardName, selectedDistrictName, selectedProvinceName].filter(Boolean);
+  useEffect(() => {
+    const selectedProvinceName =
+      provinces.find((p) => p.code.toString() === selectedProvince)?.name || "";
+    const selectedDistrictName =
+      districts.find((p) => p.code.toString() === selectedDistrict)?.name || "";
+    const selectedWardName =
+      wards.find((p) => p.code.toString() === selectedWard)?.name || "";
+    const parts = [
+      selectedWardName,
+      selectedDistrictName,
+      selectedProvinceName,
+    ].filter(Boolean);
     setFinalAddress(parts.join(", "));
-  }, [districts, provinces, wards, selectedDistrict, selectedProvince, selectedWard]);
-
+  }, [
+    districts,
+    provinces,
+    wards,
+    selectedDistrict,
+    selectedProvince,
+    selectedWard,
+  ]);
+  //#endregion
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex w-auto items-center justify-center bg-black/50 backdrop-blur-sm">
-        <Card className="w-xl fixed border-1 border-emerald-300 shadow-sm shadow-emerald-100 overflow-y-auto max-h-screen">
+      <div className="fixed inset-0 z-50 flex w-full items-center justify-center bg-black/50 backdrop-blur-sm md:w-auto">
+        <Card className="fixed max-h-screen w-sm overflow-y-auto border-1 border-emerald-300 shadow-sm shadow-emerald-100 md:w-xl">
           <form onSubmit={handleSubmit}>
             <CardHeader>
               <CardTitle className="mb-2 text-xl">Thêm địa chỉ</CardTitle>
@@ -89,25 +165,36 @@ export function FromAddress({ onClose }: AddressCardFormProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="name">Tên người nhận</Label>
-                    <Input id="name" placeholder="Nhập tên người nhận" />
+                    <Input
+                      id="name"
+                      placeholder="Nhập tên người nhận"
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="phone">Số điện thoại</Label>
-                    <Input id="phone"  placeholder="Nhập số điện thoại" />
+                    <Input
+                      id="phone"
+                      placeholder="Nhập số điện thoại"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                    />
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="city">Tỉnh/Thành phố</Label>
-                  <Select required
+                  <Select
+                    required
                     onValueChange={(value) => setSelectedProvince(value)}
                     value={selectedProvince}
                   >
-                    <SelectTrigger  className="w-full">
-                      <SelectValue  placeholder="Chọn tỉnh/thành phố"></SelectValue>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Chọn tỉnh/thành phố"></SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {provinces.map((p) => (
-                        <SelectItem   value={p.code.toString()}>
+                        <SelectItem value={p.code.toString()}>
                           {p.name}
                         </SelectItem>
                       ))}
@@ -159,7 +246,27 @@ export function FromAddress({ onClose }: AddressCardFormProps) {
                     placeholder="Số nhà, tên đường, tòa nhà, ..."
                     rows={2}
                     value={finalAddress}
-                    onChange={(e)=>setFinalAddress(e.target.value)}
+                    onChange={(e) => setFinalAddress(e.target.value)}
+                  />
+                </div>{" "}
+                <div>
+                  <Label htmlFor="note">Ghi chú</Label>
+                  <Textarea
+                    id="note"
+                    placeholder="Ghi chú (tùy chọn) đi qua mấy cửa hàng, đi qua mấy ngã tư, qua mấy cây cầu, ..."
+                    rows={2}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="isDefault">Đặt làm địa chỉ mặc định</Label>
+                  <Checkbox
+                    id="isDefault"
+                    checked={isDefault}
+                    onCheckedChange={(checked) =>
+                      setIsDefault(checked === true)
+                    }
                   />
                 </div>
               </div>

@@ -85,7 +85,7 @@ export function Register({
 
   return (
     <>
-      <Card className="">
+      <Card className="d:w-full relative mx-auto h-full max-w-7xl">
         <form onSubmit={handleSubmit}>
           <CardHeader className="p-6">
             <CardTitle>Đăng ký </CardTitle>

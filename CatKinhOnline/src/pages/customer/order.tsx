@@ -77,7 +77,7 @@ function Order() {
     }
   };
 
-  const updateGlassItem = (id: number, field: keyof GlassItem, value: any) => {
+  const updateGlassItem = (id: number, field: keyof GlassItem, value: string | number) => {
     setGlassItems(
       glassItems.map((item) => {
         if (item.id === id) {
@@ -113,10 +113,10 @@ function Order() {
     <>
       <main >
         {/* Progress Steps */}
-        <div className="mb-12 flex justify-center">
-          <div className="flex items-center space-x-4 rounded-2xl border border-emerald-100 bg-white/70 p-6 shadow-lg backdrop-blur-md">
+        <div className="mb-12 flex w-full justify-center mx-auto">
+          <div className="flex flex-col md:flex-row items-center md:space-x-4 rounded-2xl border border-emerald-100 bg-white/70 p-6 shadow-lg backdrop-blur-md md:space-y-0 space-y-8">
             {steps.map((step, idx) => (
-              <div key={step.number} className="flex items-center">
+              <div key={step.number} className="flex flex-col md:flex-row items-center">
                 <div className="flex flex-col items-center">
                   <div
                     className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${
@@ -140,9 +140,9 @@ function Order() {
                 </div>
                 {idx < steps.length - 1 && (
                   <div
-                    className={`mx-4 h-1 w-16 rounded-full transition-all duration-300 ${
+                    className={`my-4 h-16 w-1 rounded-full transition-all duration-300 md:mx-4 md:h-1 md:w-16 md:my-0 ${
                       currentStep > step.number
-                        ? "bg-gradient-to-r from-emerald-500 to-teal-500"
+                        ? "bg-gradient-to-b md:bg-gradient-to-r from-emerald-500 to-teal-500"
                         : "bg-gray-200"
                     }`}
                   />
@@ -155,7 +155,7 @@ function Order() {
         <div className="mx-auto mb-16 grid max-w-7xl grid-cols-1 gap-8 px-4 lg:grid-cols-3">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            <Card className="border-0 bg-gradient-to-br from-white to-emerald-50/30 shadow-2xl">
+            <Card className="border-0  bg-gradient-to-br from-white to-emerald-50/30 shadow-2xl">
               <CardContent className="p-8">
                 {/* Step 1: Glass Selection */}
                 {currentStep === 1 && (
@@ -586,7 +586,7 @@ function Order() {
                             Chi tiết đơn hàng
                           </h3>
                           <div className="space-y-3">
-                            {glassItems.map((item, index) => {
+                            {glassItems.map((item) => {
                               const glassType = glassTypes.find(
                                 (t) => t.value === item.type,
                               );

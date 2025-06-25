@@ -42,15 +42,20 @@ ValidateIssuer=false,
 ValidateAudience=false
 };
 });
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => 
+        {
+            policy.AllowAnyOrigin()
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-app.UseCors(cors =>
- cors.AllowAnyOrigin()
-     .AllowAnyMethod()
-     .AllowAnyHeader()
-);
+app.UseCors("AllowAll");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
     {

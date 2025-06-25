@@ -21,7 +21,7 @@ export function Footer() {
               <MapPin size={20} />
               227 Phong Điền, TP Cần Thơ, Việt Nam
             </p>
-            <p className="mb-2 flex items-center gap-2 text-sm">
+            <p className="mb-2 flex items-center gap-2 text-sm  ">
               <Mail size={20} /> quochoangnguyen2003ct@gmail.com
             </p>
             <p className="mb-2 flex items-center gap-2 text-sm">

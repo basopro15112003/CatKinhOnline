@@ -14,10 +14,7 @@ import {
 } from "@/services/userService";
 import { toast } from "@/hooks/use-toast";
 import { CustomerOrders } from "@/components/pages/customer/account/orders";
-import { MapPin, Pencil, PlusCircle, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Dialog } from "@/components/ui/dialog";
-import { FromAddress } from "@/components/form/address/address";
+import Address from "@/components/pages/customer/address/address";
 
 export default function Account() {
   //#region Variable
@@ -34,7 +31,6 @@ export default function Account() {
       oldPassword: "",
     });
   const [confirmNewPassword, setConfirmPassword] = useState<string>("");
-  const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
   //#endregion
 
   //#region Fetch Handle Data
@@ -77,7 +73,6 @@ export default function Account() {
       toast.warning("Họ tên quá ngắn (tối thiểu 6 ký tự)");
       return false;
     }
-
     if (form.fullName.trim().length > 50) {
       toast.warning("Họ tên quá dài (tối đa 50 ký tự)");
       return false;
@@ -185,12 +180,20 @@ export default function Account() {
           </CardTitle>
         </CardHeader>
         <CardContent className="">
-          <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="profile">Thông tin cá nhân</TabsTrigger>{" "}
-              <TabsTrigger value="address">Địa chỉ</TabsTrigger>
-              <TabsTrigger value="changepass">Đổi mật khẩu</TabsTrigger>
-              <TabsTrigger value="orders">Quản lý đơn hàng</TabsTrigger>
+          <Tabs defaultValue="profile" className="">
+            <TabsList className="mx-auto mb-4 grid h-max w-86 grid-cols-2 md:mx-0 md:w-xl md:grid-cols-4">
+              <TabsTrigger className="text-sm md:text-base" value="profile">
+                Thông tin cá nhân
+              </TabsTrigger>{" "}
+              <TabsTrigger className="text-sm md:text-base" value="address">
+                Địa chỉ
+              </TabsTrigger>
+              <TabsTrigger className="text-sm md:text-base" value="changepass">
+                Đổi mật khẩu
+              </TabsTrigger>
+              <TabsTrigger className="text-sm md:text-base" value="orders">
+                Quản lý đơn hàng
+              </TabsTrigger>
             </TabsList>
             {/* Manage Account Start */}
             <>
@@ -284,65 +287,8 @@ export default function Account() {
             {/* Change Password End */}
 
             {/* Tab Địa chỉ */}
-            <TabsContent value="address">
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Địa chỉ của tôi</h3>
-                  <Button className="bg-gradient-to-br from-emerald-500 to-emerald-700 transition-all duration-300 hover:scale-105 hover:from-emerald-700 hover:to-emerald-700"
-                  onClick={() => setIsAddressFormOpen(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Thêm địa chỉ mới
-                  </Button>
-                </div>
-                <div className="rounded-lg border border-dashed border-gray-300 py-8 text-center">
-                  <MapPin className="mx-auto mb-2 h-12 w-12 text-gray-400" />
-                  <p className="text-gray-500">Bạn chưa có địa chỉ nào</p>
-                  <Button variant="outline" className="mt-4">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Thêm địa chỉ mới
-                  </Button>
-                </div>{" "}
-                <div className="grid gap-4">
-                  <Card className="overflow-hidden">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="mb-1 flex items-center gap-2">
-                            <h4 className="font-medium">Nguyễn Quốc Hoàng</h4>
-                            <Badge className="bg-green-500">Mặc định</Badge>
-                          </div>
-                          <p className="mb-1 text-sm text-gray-500">
-                            0333744591
-                          </p>
-                          <p className="text-sm">
-                            123 Đường Lê Lợi, Phường An Thạnh, Quận Ninh Kiều,
-                            Thành phố Cần Thơ
-                          </p>
-                        </div>
-                        <div className="flex gap-2 ">
-                          <Button variant="outline" size="sm">
-                            <Pencil className="mr-1 h-4 w-4" />
-                            Sửa
-                          </Button>
-                          <>
-                            <Button variant="outline" size="sm">
-                              Đặt mặc định
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-red-200 text-red-500 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </TabsContent>
+            {userProfile && <Address userId={userProfile.id} />}
+            {/* Tab Địa chỉ End */}
             {/* Manage Order Start */}
             <>
               <CustomerOrders></CustomerOrders>
@@ -351,15 +297,6 @@ export default function Account() {
           </Tabs>
         </CardContent>
       </Card>
-                {!isAddressFormOpen && (
-                  <div className="rounded-lg border border-dashed border-gray-300 py-8 text-center">
-                    <MapPin className="mx-auto mb-2 h-12 w-12 text-gray-400" />
-                    <p className="text-gray-500">Bạn chưa có địa chỉ nào</p>
-                  </div>
-                )}
-
-                {isAddressFormOpen && <FromAddress onClose={() => setIsAddressFormOpen(false)} />}
-
     </div>
   );
 }
