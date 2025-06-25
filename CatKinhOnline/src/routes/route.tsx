@@ -8,7 +8,7 @@ import Account from "@/pages/customer/account";
 import Order from "@/pages/customer/order";
 import About from "@/pages/public/about";
 import HomePage from "@/pages/public/HomePage";
-import { useRef, type JSX } from "react";
+import { type JSX } from "react";
 import {
   BrowserRouter as Router,
   Route,

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace CatKinhOnline.Models
     {
@@ -25,10 +26,7 @@ namespace CatKinhOnline.Models
 
         public bool IsDefault { get; set; } = false;
 
-        // Navigation property              
-        [ForeignKey(nameof(UserId))]
-        public virtual User User { get; set; } = new User();
-
+        [JsonIgnore]
         public virtual ICollection<Order> OrdersShipping { get; set; }  = new List<Order>();
         }
     }

@@ -1,4 +1,5 @@
-﻿using CatKinhOnline.Repositories.CategoryRepository;
+﻿using CatKinhOnline.Repositories.AddressRepository;
+using CatKinhOnline.Repositories.CategoryRepository;
 using CatKinhOnline.Repositories.ProductRepository;
 using CatKinhOnline.Repositories.UserRepository;
 using CatKinhOnline.Services;
@@ -13,6 +14,7 @@ namespace CatKinhOnline.Core
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IAddressRepository, AddressRepository>();
 
             #endregion
 
@@ -21,6 +23,7 @@ namespace CatKinhOnline.Core
             services.AddScoped<ProductService>();
             services.AddScoped<UserService>();
             services.AddScoped<AuthService>();
+            services.AddScoped<AddressService>();
 
             services.AddHttpClient();
             services.AddAuthorization();

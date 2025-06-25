@@ -56,7 +56,7 @@ export function Header() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600">
               <Store className="h-6 w-6 text-white" />
             </div>
-            <h1 className="bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-2xl font-bold text-transparent">
+            <h1 className="bg-gradient-to-r from-green-600 to-green-800 bg-clip-text md:text-2xl text-base font-bold text-transparent">
               Tiệm kính Quốc Hoàng
             </h1>
           </Link>
@@ -72,8 +72,8 @@ export function Header() {
             </>
           ) : (
             <>
-              <div className="flex">
-                <Avatar className="mr-2 h-13 w-13">
+              <div className="flex items-center">
+                <Avatar className="mr-2 md:h-13 md:w-13 h-10 w-10">
                   <Link to="/account">
                     <AvatarImage src="https://yt3.googleusercontent.com/OXbxyxi7XaDta1HS8rAUWzgLcegQxXf4clltpIUE3qCzuO3LxFhRqqatphRP788cVqYiRWWKPXQ=s900-c-k-c0x00ffffff-no-rj" />
                     <AvatarFallback>User</AvatarFallback>
@@ -81,7 +81,7 @@ export function Header() {
                 </Avatar>
                 <div>
                   <Link to="/account">
-                    <p className="font-bold text-green-700">
+                    <p className="font-bold text-green-700 md:text-base text-sm max-w-30 md:max-w-44 truncate">
                       {userProfile?.fullName}
                     </p>
                   </Link>
@@ -108,10 +108,10 @@ export function Header() {
               <TabsTrigger value="account">Đăng nhập</TabsTrigger>
               <TabsTrigger value="password">Đăng ký</TabsTrigger>
             </TabsList>
-            <TabsContent className="w-full" value="account">
+            <TabsContent className="w-sm md:w-full" value="account">
               <Login setShowForm={setShowForm} />
             </TabsContent>
-            <TabsContent className="w-full" value="password">
+            <TabsContent className="w-sm md:w-full" value="password">
               <Register setShowForm={setShowForm} />
             </TabsContent>
           </Tabs>

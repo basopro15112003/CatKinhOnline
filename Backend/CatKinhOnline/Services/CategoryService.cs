@@ -38,7 +38,7 @@ namespace CatKinhOnline.Services
                 {
                 throw new ArgumentNullException($"Category with ID {id} not found.");
                 }
-            return cate;
+            return cate;                                                                                          
             }
         #endregion
 
