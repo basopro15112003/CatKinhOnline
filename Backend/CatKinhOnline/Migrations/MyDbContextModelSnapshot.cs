@@ -48,6 +48,9 @@ namespace CatKinhOnline.Migrations
                     b.Property<bool>("IsDefault")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -100,8 +103,8 @@ namespace CatKinhOnline.Migrations
                     b.Property<int>("DeliveryType")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("EstimatedDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
@@ -174,7 +177,6 @@ namespace CatKinhOnline.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CategoryId")
-                        .HasMaxLength(50)
                         .HasColumnType("int");
 
                     b.Property<int>("PricePerM2")
@@ -236,13 +238,11 @@ namespace CatKinhOnline.Migrations
 
             modelBuilder.Entity("CatKinhOnline.Models.Address", b =>
                 {
-                    b.HasOne("CatKinhOnline.Models.User", "User")
+                    b.HasOne("CatKinhOnline.Models.User", null)
                         .WithMany("Addresses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CatKinhOnline.Models.Order", b =>
@@ -264,21 +264,17 @@ namespace CatKinhOnline.Migrations
 
             modelBuilder.Entity("CatKinhOnline.Models.OrderItem", b =>
                 {
-                    b.HasOne("CatKinhOnline.Models.Order", "Order")
+                    b.HasOne("CatKinhOnline.Models.Order", null)
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CatKinhOnline.Models.Product", "Product")
+                    b.HasOne("CatKinhOnline.Models.Product", null)
                         .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("CatKinhOnline.Models.Product", b =>

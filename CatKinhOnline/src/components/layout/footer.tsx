@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 export function Footer() {
   return (
     <>
-      <footer className="bg-gradient-to-br from-gray-900 via-emerald-900 to-teal-900 px-4 py-8 text-white">
+      <footer className="bg-gradient-to-br from-gray-900 via-emerald-900 to-teal-900 px-4 py-8 text-white print:hidden">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 rounded-2xl md:grid-cols-4">
           <div>
             <h3 className="mb-4 text-2xl font-semibold">

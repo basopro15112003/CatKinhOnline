@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace CatKinhOnline.Models
     {
@@ -29,11 +30,5 @@ namespace CatKinhOnline.Models
         [Required]
         public int Subtotal { get; set; }     // = WidthM * HeightM * Quantity * UnitPrice
 
-        // Navigation properties
-        [ForeignKey(nameof(OrderId))]
-        public virtual Order Order { get; set; } = new Order();
-
-        [ForeignKey(nameof(ProductId))]
-        public virtual Product Product { get; set; } = new Product();
         }
     }

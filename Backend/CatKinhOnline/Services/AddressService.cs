@@ -12,6 +12,7 @@ namespace CatKinhOnline.Services
             {
             _addressRepository=addressRepository;
             }
+
         #region get all addresses
         /// <summary>
         /// get all addresses from the database.
@@ -38,6 +39,32 @@ namespace CatKinhOnline.Services
             }
         #endregion
 
+        #region get address by id
+        /// <summary>
+        /// get an address by its ID from the database.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<APIResponse> GetAddressById(int id)
+            {
+            try
+                {
+                var address = await _addressRepository.GetAddressById(id);
+                if (address==null)
+                    {
+                    return new APIResponse { IsSuccess=true, Message="Không tìm thấy địa chỉ với ID này" };
+                    }
+                var addressDTO = new AddressDTO();
+                addressDTO.CopyProperties(address);
+                return new APIResponse { IsSuccess=true, Result=addressDTO };
+                }
+            catch (Exception ex)
+                {
+                return new APIResponse { IsSuccess=false, Message="Lỗi không lấy được dữ liệu địa chỉ :"+ex.Message };
+                }
+            }
+        #endregion
+
         #region get address by UserId
         /// <summary>
         /// get an address by its USERID from the database.
@@ -51,7 +78,7 @@ namespace CatKinhOnline.Services
                 var address = await _addressRepository.GetAddressByUserId(userId);
                 if (address==null||!address.Any())
                     {
-                    return new APIResponse { IsSuccess=false, Message="Không tìm thấy địa chỉ cho người dùng này" };
+                    return new APIResponse { IsSuccess=true, Message="Không tìm thấy địa chỉ cho người dùng này" };
                     }
                 List<AddressDTO> addressDTOs = new List<AddressDTO>();
                 foreach (var item in address)
@@ -155,5 +182,6 @@ namespace CatKinhOnline.Services
                 }
             }
         #endregion
+
         }
     }      

@@ -1,23 +1,17 @@
-import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  changePassword,
-  getUserProfile,
-  updateUserProfile,
-  type ChangePasswordInput,
-  type UpdateUserDto,
-  type UserProfile,
-} from "@/services/userService";
+import { CustomerOrders } from "@/components/pages/customer/account/customerOrder";
+import Address from "@/features/address/pages/address";
+import type { ChangePasswordInput, UpdateUserDto, UserProfile } from "@/services/userService";
+import { useState, useEffect } from "react";
+import { changePassword, getUserProfile, updateUserProfile } from "@/services/userService";
 import { toast } from "@/hooks/use-toast";
-import { CustomerOrders } from "@/components/pages/customer/account/orders";
-import Address from "@/components/pages/customer/address/address";
-
+      
 export default function Account() {
-  //#region Variable
+
   const [userProfile, setUserProfile] = useState<UserProfile>();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<UpdateUserDto>({
@@ -25,17 +19,8 @@ export default function Account() {
     fullName: "",
     phone: "",
   });
-  const [changePasswordForm, setChangePasswordForm] =
-    useState<ChangePasswordInput>({
-      newPassword: "",
-      oldPassword: "",
-    });
-  const [confirmNewPassword, setConfirmPassword] = useState<string>("");
-  //#endregion
 
-  //#region Fetch Handle Data
-
-  //#region  Fetch Data Account, Update User Data
+  // Fetch user profile
   useEffect(() => {
     async function fetchData() {
       const email = localStorage.getItem("email");
@@ -46,6 +31,7 @@ export default function Account() {
       try {
         const response = await getUserProfile(email);
         if (response) {
+          console.log("setUserProfile", response); // Thêm log ở đây
           setUserProfile(response);
           setForm({
             id: response.id,
@@ -59,12 +45,12 @@ export default function Account() {
     }
     fetchData();
   }, []);
+
   const handleChange = (field: keyof UpdateUserDto, value: string) =>
     setForm((f) => ({ ...f, [field]: value }));
 
-  function validateForm() {
+  const validateForm = () => {
     if (!userProfile) return false;
-    // Validate form
     if (!form.fullName.trim()) {
       toast.warning("Vui lòng nhập họ tên");
       return false;
@@ -81,14 +67,13 @@ export default function Account() {
       toast.warning("Vui lòng nhập số điện thoại");
       return false;
     }
-    // Validate phone number format (Vietnam)
     const phoneRegex = /^(84|0[35789])[0-9]{8}$/;
     if (!phoneRegex.test(form.phone)) {
       toast.warning("Số điện thoại không hợp lệ");
       return false;
     }
     return true;
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,16 +93,20 @@ export default function Account() {
       }, 2000);
     }
   };
-  //#endregion
-
-  //#region Change Password
+  const [changePasswordSubmitting, setChangePasswordSubmitting] = useState(false);
+  const [changePasswordForm, setChangePasswordForm] =
+    useState<ChangePasswordInput>({
+      newPassword: "",
+      oldPassword: "",
+    });
+  const [confirmNewPassword, setConfirmPassword] = useState<string>("");
 
   const handleChangePassword = (
     field: keyof ChangePasswordInput,
     value: string,
   ) => setChangePasswordForm((f) => ({ ...f, [field]: value }));
 
-  function validateFormChangePassword() {
+  const validateFormChangePassword = () => {
     if (!changePasswordForm.oldPassword.trim()) {
       toast.warning("Vui lòng nhập mật khẩu cũ");
       return false;
@@ -135,17 +124,15 @@ export default function Account() {
       return false;
     }
     return true;
-  }
+  };
 
   const handleSubmitChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateFormChangePassword()) return;
     setSubmitting(true);
     try {
-      const response = await changePassword(
-        userProfile!.email,
-        changePasswordForm,
-      );
+      const response = await changePassword(userProfile!.email, changePasswordForm);
+      console.log(response);
       if (response.isSuccess) {
         setChangePasswordForm({
           oldPassword: "",
@@ -160,17 +147,12 @@ export default function Account() {
       console.log(error);
     } finally {
       setTimeout(() => {
-        setSubmitting(false);
+        setChangePasswordSubmitting(false);
       }, 2000);
     }
   };
-  //#endregion
 
-  //#endregion
 
-  //#region Open & Close form
-
-  //#endregion
   return (
     <div>
       <Card className="relative mx-auto mt-7 mb-13 max-w-7xl">
@@ -276,9 +258,9 @@ export default function Account() {
                     <Button
                       className="mt-4"
                       type="submit"
-                      disabled={submitting}
+                        disabled={changePasswordSubmitting}
                     >
-                      {submitting ? "Đang lưu..." : "Lưu thay đổi"}
+                      {changePasswordSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
                     </Button>{" "}
                   </div>
                 </TabsContent>
@@ -289,10 +271,9 @@ export default function Account() {
             {/* Tab Địa chỉ */}
             {userProfile && <Address userId={userProfile.id} />}
             {/* Tab Địa chỉ End */}
+
             {/* Manage Order Start */}
-            <>
-              <CustomerOrders></CustomerOrders>
-            </>
+            {userProfile && <CustomerOrders userId={userProfile.id}></CustomerOrders>}
             {/* Manage Order End */}
           </Tabs>
         </CardContent>

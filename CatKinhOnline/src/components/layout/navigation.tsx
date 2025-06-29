@@ -12,16 +12,15 @@ function NavigationComponent() {
     const baseClasses = "group relative font-medium transition-colors duration-300";
     const activeClasses = "text-emerald-900 font-semibold";
     const inactiveClasses = "text-emerald-700 hover:text-emerald-900";
-    
     return `${baseClasses} ${isActive(path) ? activeClasses : inactiveClasses}`;
   };
 
   return (
     <>
-      <nav className="mx-auto max-w-7xl px-4 py-6">
+      <nav className="md:sticky top-0 z-50 mx-auto max-w-7xl px-4 py-4 print:hidden">
         <div className="flex justify-center">
-          <div className="rounded-full border border-emerald-100 bg-white/70 px-8 py-3 shadow-lg backdrop-blur-md">
-            <div className="flex space-x-8">
+          <div className="rounded-full border border-emerald-200 bg-white/70 px-8 py-3 shadow-sm backdrop-blur-md ">
+            <div className="flex space-x-3 md:space-x-8">
               <Link
                 to={"/"}
                 className={getLinkClasses("/")}

@@ -18,9 +18,7 @@ namespace CatKinhOnline.Services
             _userRepository=userRepository;
             _config=config;
             }
-        public AuthService()
-            {
-            }
+
 
         #region HashPassword
         /// <summary>

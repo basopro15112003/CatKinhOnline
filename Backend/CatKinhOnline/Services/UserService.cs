@@ -7,9 +7,11 @@ namespace CatKinhOnline.Services
     public class UserService
         {
         private readonly IUserRepository _userRepository;
-        public UserService(IUserRepository userRepository)
+        private readonly AuthService _authService;
+        public UserService(IUserRepository userRepository, AuthService authService)
             {
             _userRepository=userRepository;
+            _authService=authService;
             }
 
         #region Get All Users
@@ -83,11 +85,10 @@ namespace CatKinhOnline.Services
             {
             try
                 {
-                AuthService authService = new AuthService();
                 APIResponse aPIResponse = new APIResponse();
                 user.Status=1;
                 user.Role=1;
-                user.PasswordHash=authService.HashPassword(user.PasswordHash);
+                user.PasswordHash=_authService.HashPassword(user.PasswordHash);
                 #region 1. Validation
                 var checkEmailEsixst = await GetUserByEmail(user.Email);
                 var checkPhoneEsixst = await _userRepository.GetUserByPhone(user.Phone);
@@ -164,17 +165,16 @@ namespace CatKinhOnline.Services
             {
             try
                 {
-                AuthService authService = new AuthService();
                 var user = await _userRepository.GetUserByEmail(email);
                 if (user==null)
                     {
                     return new APIResponse{IsSuccess=false,Message="Người dùng không tồn tại."};
                     }
-                changePasswordDto.OldPassword=authService.HashPassword(changePasswordDto.OldPassword);
+                changePasswordDto.OldPassword=_authService.HashPassword(changePasswordDto.OldPassword);
                 if (user.PasswordHash!=changePasswordDto.OldPassword)
                     {
                 return new APIResponse { IsSuccess=false, Message="Mật khẩu cũ không đúng." };}
-                user.PasswordHash=authService.HashPassword(changePasswordDto.NewPassword);
+                user.PasswordHash=_authService.HashPassword(changePasswordDto.NewPassword);
                 await _userRepository.UpdateUser(user);
                 return new APIResponse { IsSuccess=true, Message="Đổi mật khẩu thành công."
                     };

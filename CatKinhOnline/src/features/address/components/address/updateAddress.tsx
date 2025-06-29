@@ -19,26 +19,29 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import {
-  addressService,
-  updateAddress,
-  getAddressByUserId,
-  type Address,
-  type District,
-  type Province,
-  type Ward,
-} from "@/services/addressService";
+  useGetAddressByUserId,
+  useGetDistricts,
+  useGetProvinces,
+  useGetWards,
+  useUpdateFinalAddress,
+} from "@/features/address/hooks/useAddress";
+import { getAddressByUserId, updateAddress, type Address } from "@/services/addressService";
 import { toast } from "@/hooks/use-toast";
+import { validateForm } from "./validateAddress";
 
 interface UpdateAddressProps {
   address: Address | null;
   onClose: () => void;
-  handleReloadAddress: () => void;
+  reloadAddressHandler: (
+    userId: number,
+    setAddress: (address: Address[]) => void,
+  ) => void;
 }
 
 export function UpdateAddress({
   address,
   onClose,
-  handleReloadAddress,
+  reloadAddressHandler,
 }: UpdateAddressProps) {
   //#region Variable
   const [contactName, setContactName] = useState("");
@@ -48,12 +51,24 @@ export function UpdateAddress({
   const [selectedWard, setSelectedWard] = useState("");
   const [note, setNote] = useState("");
   const [isDefault, setIsDefault] = useState(false);
-  const [provinces, setProvinces] = useState<Province[]>([]);
-  const [districts, setDistricts] = useState<District[]>([]);
-  const [wards, setWards] = useState<Ward[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [finalAddress, setFinalAddress] = useState("");
-  //#endregion  
+  const { setAddress } = useGetAddressByUserId(address!.userId);
+  const { provinces } = useGetProvinces();
+  const { districts } = useGetDistricts(
+    selectedProvince,
+    setSelectedDistrict,
+    setSelectedWard,
+  );
+  const { wards } = useGetWards(selectedDistrict, setSelectedWard);
+  const { finalAddress, setFinalAddress } = useUpdateFinalAddress(
+    provinces,
+    districts,
+    wards,
+    selectedProvince,
+    selectedDistrict,
+    selectedWard,
+  );
+  //#endregion
 
   //#region Initialize data from address prop
   useEffect(() => {
@@ -64,112 +79,68 @@ export function UpdateAddress({
       setIsDefault(address.isDefault || false);
       setFinalAddress(address.addressLine || "");
     }
-  }, [address]);
+  }, [address, setContactName, setContactPhone, setNote, setIsDefault, setFinalAddress]);
   //#endregion
 
-  //#region Update finalAddress based on selected province/district/ward
-  useEffect(() => {
-    const selectedProvinceName =
-      provinces.find((p) => p.code.toString() === selectedProvince)?.name || "";
-    const selectedDistrictName =
-      districts.find((d) => d.code.toString() === selectedDistrict)?.name || "";
-    const selectedWardName =
-      wards.find((w) => w.code.toString() === selectedWard)?.name || "";
+  //#region Update Address Handler
+ const updateAddressHandler = async (
+  e: React.FormEvent) => {
+  e.preventDefault();
+  if (!validateForm(contactName, contactPhone, finalAddress, note)) {
+    return;
+  }
+  setSubmitting(true);
+  try {
+    // Nếu đang set địa chỉ này làm mặc định, thì bỏ mặc định tất cả địa chỉ khác
+    if (isDefault) {
+      // Lấy danh sách tất cả địa chỉ của user
+      const allAddressesResponse = await getAddressByUserId(address!.userId);
+      if (allAddressesResponse.isSuccess) {
+        const allAddresses = allAddressesResponse.result as Address[];
 
-    const parts = [
-      selectedWardName,
-      selectedDistrictName,
-      selectedProvinceName,
-    ].filter(Boolean);
-    if (parts.length > 0) {
-      setFinalAddress(parts.join(", "));
-    }
-  }, [
-    provinces,
-    districts,
-    wards,
-    selectedProvince,
-    selectedDistrict,
-    selectedWard,
-  ]);
-  //#endregion
-
-  //#region Fetch Data
-  useEffect(() => {
-    addressService.getProvinces().then(setProvinces);
-  }, []);
-
-  useEffect(() => {
-    if (selectedProvince) {
-      setSelectedDistrict("");
-      setSelectedWard("");
-      setDistricts([]);
-      setWards([]);
-      addressService.getDistricts(selectedProvince).then(setDistricts);
-    }
-  }, [selectedProvince]);
-
-  useEffect(() => {
-    if (selectedDistrict) {
-      setSelectedWard("");
-      setWards([]);
-      addressService.getWards(selectedDistrict).then(setWards);
-    }
-  }, [selectedDistrict]);
-  //#endregion
-
-  //#region Handle Submit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      // Nếu đang set địa chỉ này làm mặc định, thì bỏ mặc định tất cả địa chỉ khác
-      if (isDefault) {
-        // Lấy danh sách tất cả địa chỉ của user
-        const allAddressesResponse = await getAddressByUserId(address!.userId);
-        if (allAddressesResponse.isSuccess) {
-          const allAddresses = allAddressesResponse.result as Address[];
-          
-          // Bỏ mặc định tất cả địa chỉ khác (trừ địa chỉ hiện tại)
-          for (const addr of allAddresses) {
-            if (addr.id !== address!.id && addr.isDefault) {
-              await updateAddress(addr.id, {
-                ...addr,
-                isDefault: false
-              });
-            }
+        // Bỏ mặc định tất cả địa chỉ khác (trừ địa chỉ hiện tại)
+        for (const addr of allAddresses) {
+          if (addr.id !== address!.id && addr.isDefault) {
+            await updateAddress(addr.id, {
+              ...addr,
+              isDefault: false,
+            });
           }
         }
       }
-
-      const updated = await updateAddress(address!.id, {
-        id: address!.id,
-        userId: address!.userId,
-        contactName,
-        contactPhone,
-        addressLine: finalAddress,
-        note,
-        isDefault,
-      });
-      if (updated) {
-        toast.success("Cập nhật địa chỉ thành công");
-      }
-      handleReloadAddress();
-      onClose();
-    } catch (error) {
-      console.error(error);
-      toast.error("Cập nhật địa chỉ thất bại");
-    } finally {
-      setSubmitting(false);
     }
-  };
-  //#endregion
+    const updated = await updateAddress(address!.id, {
+      id: address!.id,
+      userId: address!.userId,
+      contactName,
+      contactPhone,
+      addressLine: finalAddress,
+      note,
+      isDefault,
+      isDeleted: false,
+    });
+    if (updated) {
+      toast.success("Cập nhật địa chỉ thành công");
+      reloadAddressHandler(address!.userId, setAddress);
+      onClose();
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error("Cập nhật địa chỉ thất bại");
+  } finally {
+    setSubmitting(false);
+  }
+};
+//#endregion
   return (
     <>
       {" "}
       <div className="fixed inset-0 z-50 flex w-full items-center justify-center bg-black/50 backdrop-blur-sm md:w-auto">
         <Card className="fixed max-h-screen w-sm overflow-y-auto border-1 border-emerald-300 shadow-sm shadow-emerald-100 md:w-xl">
-          <form onSubmit={handleSubmit}>
+          <form
+            onSubmit={(e) => updateAddressHandler(e)
+            }
+          >
             <CardHeader>
               <CardTitle className="mb-2 text-xl">Cập nhật địa chỉ</CardTitle>
             </CardHeader>

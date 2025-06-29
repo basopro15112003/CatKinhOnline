@@ -5,9 +5,10 @@ import ManageOrder from "@/pages/admin/manageOrder";
 import ManagePrice from "@/pages/admin/managePrice";
 import ManageCustomer from "@/pages/admin/managerCustomer";
 import Account from "@/pages/customer/account";
-import Order from "@/pages/customer/order";
-import About from "@/pages/public/about";
-import HomePage from "@/pages/public/HomePage";
+import OrderPage from "@/pages/customer/order";
+import ThankYouPage from "@/pages/customer/thankyou";
+import About from "@/pages/common/about";
+import HomePage from "@/pages/common/HomePage";
 import { type JSX } from "react";
 import {
   BrowserRouter as Router,
@@ -18,18 +19,19 @@ import {
 
 let notAuthToastShown = false;
 
-  function PrivateRoute({ children }: { children: JSX.Element }) {
-    const isAuth = !!localStorage.getItem("token");
-    if (!isAuth) {
-   if (!notAuthToastShown) {
+function PrivateRoute({ children }: { children: JSX.Element }) {
+  const isAuth = !!localStorage.getItem("token");
+  if (!isAuth) {
+    if (!notAuthToastShown) {
       toast.warning("Bạn cần phải đăng nhập để thực hiện hành động");
       notAuthToastShown = true;
-    }      return <Navigate to="/" />;
-    } else {
-      return children;
     }
+    return <Navigate to="/" />;
+  } else {
+    return children;
   }
-  
+}
+
 function AppRoute() {
   return (
     <>
@@ -57,21 +59,31 @@ function AppRoute() {
           <Route
             path="/order"
             element={
-              <PrivateRoute>
-                <LayoutUser>
-                  <Order />
-                </LayoutUser>
-              </PrivateRoute>
+              <LayoutUser>
+                <PrivateRoute>
+                  <OrderPage />
+                </PrivateRoute>
+              </LayoutUser>
             }
           />
           <Route
             path="/account"
             element={
-              <PrivateRoute>
-                <LayoutUser>
+              <LayoutUser>
+                <PrivateRoute>
                   <Account />
-                </LayoutUser>
-              </PrivateRoute>
+                </PrivateRoute>
+              </LayoutUser>
+            }
+          />
+          <Route
+            path="/thankyou/:id"
+            element={
+              <LayoutUser>
+                <PrivateRoute>
+                  <ThankYouPage />
+                </PrivateRoute>
+              </LayoutUser>
             }
           />
 

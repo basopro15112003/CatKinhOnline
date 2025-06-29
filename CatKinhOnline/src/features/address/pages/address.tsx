@@ -1,15 +1,8 @@
-import { FromAddress } from "@/components/form/address/addAddress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
-import { toast } from "@/hooks/use-toast";
-import {
-  deleteAddress,
-  getAddressByUserId,
-  type Address,
-  updateAddress,
-} from "@/services/addressService";
+import { deleteAddress, type Address } from "@/services/addressService";
 import { MapPin, Pencil, PlusCircle, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -23,82 +16,51 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { UpdateAddress } from "@/components/form/address/updateAddress";
+import {
+  reloadAddressHandler,
+  useGetAddressByUserId,
+} from "@/features/address/hooks/useAddress";
+import { updateAddress } from "@/services/addressService";
+import { toast } from "@/hooks/use-toast";
+import { FromAddress } from "../components/address/addAddress";
+import { UpdateAddress } from "../components/address/updateAddress";
 
 export default function Address({ userId }: { userId: number }) {
+  
   //#region Variable
   const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
   const [isUpdateAddressFormOpen, setIsUpdateAddressFormOpen] = useState(false);
-  const [address, setAddress] = useState<Address[]>([]);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [addressUpdate, setAddressUpdate] = useState<Address | null>(null);
+  const { address, setAddress } = useGetAddressByUserId(userId);
 
   //#endregion
 
-  //#region Fetch Data
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await getAddressByUserId(userId);
-        console.log(response);
-        if (response.isSuccess) {
-          setAddress(response.result as Address[]);
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    }
-    fetchData();
-  }, [userId]);
-
-  const handleReloadAddress = async () => {
-    const response = await getAddressByUserId(userId);
-    if (response.isSuccess) {
-      setAddress(response.result as Address[]);
-    }
-  };
-  const handleDeleteAddress = async (id: number) => {
-    const response = await deleteAddress(id);
-    if (response.isSuccess) {
-      setAddress(address.filter((item) => item.id !== id));
-      handleReloadAddress();
-      toast.success("Xóa địa chỉ thành công");
-    } else {
-      toast.error("Xóa địa chỉ thất bại");
-    }
-  };
-
-  const handleSetDefaultAddress = async (addressId: number) => {
+  //#region Set Default Address Handler
+  const setDefaultAddressHandler = async (addressId: number) => {
     try {
       // Lấy danh sách tất cả địa chỉ của user
-      const allAddressesResponse = await getAddressByUserId(userId);
-      if (allAddressesResponse.isSuccess) {
-        const allAddresses = allAddressesResponse.result as Address[];
-        
-        // Bỏ mặc định tất cả địa chỉ khác (trừ địa chỉ được chọn)
-        for (const addr of allAddresses) {
-          if (addr.id !== addressId && addr.isDefault) {
-            await updateAddress(addr.id, {
-              ...addr,
-              isDefault: false,
-            });
-          }
-        }
-        
-        // Set địa chỉ được chọn làm mặc định
-        const targetAddress = allAddresses.find(addr => addr.id === addressId);
-        if (targetAddress) {
-          const response = await updateAddress(addressId, {
-            ...targetAddress,
-            isDefault: true,
+      // Bỏ mặc định tất cả địa chỉ khác (trừ địa chỉ được chọn)
+      for (const addr of address) {
+        if (addr.id !== addressId && addr.isDefault) {
+          await updateAddress(addr.id, {
+            ...addr,
+            isDefault: false,
           });
-          
-          if (response.isSuccess) {
-            toast.success("Đặt địa chỉ mặc định thành công");
-            handleReloadAddress();
-          } else {
-            toast.error("Đặt địa chỉ mặc định thất bại");
-          }
+        }
+      }
+      // Set địa chỉ được chọn làm mặc định
+      const targetAddress = address.find((addr) => addr.id === addressId);
+      if (targetAddress) {
+        const response = await updateAddress(addressId, {
+          ...targetAddress,
+          isDefault: true,
+        });
+        if (response.isSuccess) {
+          toast.success("Đặt địa chỉ mặc định thành công");
+          reloadAddressHandler(userId, setAddress);
+        } else {
+          toast.error("Đặt địa chỉ mặc định thất bại");
         }
       }
     } catch (error) {
@@ -106,7 +68,41 @@ export default function Address({ userId }: { userId: number }) {
       toast.error("Đặt địa chỉ mặc định thất bại");
     }
   };
+  useEffect(() => {
+    reloadAddressHandler(userId, setAddress);
+  }, [userId]);
+  //#endregion
 
+  //#region Delete Address Handler
+
+  const deleteAddressHandler = async (id: number) => {
+    const deletedAddr = address.find((item) => item.id === id);
+    const response = await deleteAddress(id);
+
+    if (response.isSuccess) {
+      const newAddressList = address.filter((item) => item.id !== id); // Tìm ra những địa chỉ khác có id khác với id địa chỉ bị xóa
+      if (deletedAddr?.isDefault && newAddressList.length > 0) {
+        const oldest = newAddressList.reduce(
+          (
+            prev,
+            curr, // tìm địa chỉ cũ nhất trong danh sách địa chỉ còn lại bằng cách so sánh id prev với curr
+          ) => (prev.id < curr.id ? prev : curr),
+        );
+        // cập nhật lại địa chỉ mặc định
+        await updateAddress(oldest.id, {
+          ...oldest,
+          isDefault: true,
+        });
+      }
+      setAddress(newAddressList);
+      reloadAddressHandler(userId, setAddress);
+      toast.success("Xóa địa chỉ thành công");
+    } else {
+      toast.error("Xóa địa chỉ thất bại");
+    }
+  };
+  //#endregion
+ 
   return (
     <>
       <TabsContent value="address">
@@ -157,9 +153,11 @@ export default function Address({ userId }: { userId: number }) {
                         )}
                       </div>
                       <p className="mb-1 text-sm text-gray-500 italic md:text-base">
+                        <span className="font-bold">Số điện thoại : </span>{" "}
                         {item.contactPhone}
                       </p>
                       <p className="text-sm italic md:text-base">
+                        <span className="font-bold">Địa chỉ : </span>{" "}
                         {item.addressLine}
                       </p>
                       {item.note && (
@@ -183,10 +181,10 @@ export default function Address({ userId }: { userId: number }) {
                       </Button>
                       <>
                         {!item.isDefault && (
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
-                            onClick={() => handleSetDefaultAddress(item.id)}
+                            onClick={() => setDefaultAddressHandler(item.id)}
                           >
                             Đặt mặc định
                           </Button>
@@ -216,7 +214,7 @@ export default function Address({ userId }: { userId: number }) {
                               <AlertDialogCancel>Hủy</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => {
-                                  if (deleteId) handleDeleteAddress(deleteId);
+                                  if (deleteId) deleteAddressHandler(deleteId);
                                   setDeleteId(null);
                                 }}
                               >
@@ -240,7 +238,7 @@ export default function Address({ userId }: { userId: number }) {
         <FromAddress
           userId={userId}
           onClose={() => setIsAddressFormOpen(false)}
-          handleReloadAddress={handleReloadAddress}
+          reloadAddressHandler={reloadAddressHandler}
         />
       )}
 
@@ -249,7 +247,7 @@ export default function Address({ userId }: { userId: number }) {
         <UpdateAddress
           address={addressUpdate}
           onClose={() => setIsUpdateAddressFormOpen(false)}
-          handleReloadAddress={handleReloadAddress}
+          reloadAddressHandler={reloadAddressHandler}
         />
       )}
     </>

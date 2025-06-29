@@ -32,9 +32,17 @@ namespace CatKinhOnline.Controllers.AuthenticationController
         [HttpPost("loginJWT")]
         public async Task<IActionResult> Login([FromBody]LoginDTO loginDTO)
             {
+            if(loginDTO ==null)
+                {
+                return BadRequest("Tài khoản mật khẩu không thể để trống");
+                }
             try
                 {
                 var user = await _authService.Login(loginDTO.Email, loginDTO.Password);
+                if(user ==null)
+                    {
+                    return BadRequest("Lỗi không tìm thấy người dùng khi đăng nhập");
+                    }
                 var token = GenerateJwtToken(user.Email,user.FullName);
                 return Ok(token);
                 }
@@ -119,7 +127,7 @@ namespace CatKinhOnline.Controllers.AuthenticationController
                     }
                 }
             // Sinh JWT
-            var jwt = GenerateJwtToken(email,name);
+            var jwt = GenerateJwtToken(email!,name!);
 
       
             // Redirect về FE (kèm basename nếu có)

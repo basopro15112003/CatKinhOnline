@@ -8,16 +8,17 @@ export default function GoogleCallback() {
   const { search } = useLocation();
   const shown = useRef(false);
 
-    useEffect(() => {  if (shown.current) return;
+  useEffect(() => {
+    if (shown.current) return;
     shown.current = true;
     const token = new URLSearchParams(search).get("token");
     try {
       if (token) {
         localStorage.setItem("token", token);
         getUserFromToken();
-              toast.success(
-        "Đăng nhập thành công: Chúc bạn trải nghiệm dịch vụ một cách vui vẻ",
-      );
+        toast.success(
+          "Đăng nhập thành công: Chúc bạn trải nghiệm dịch vụ một cách vui vẻ",
+        );
         navigate("/");
       } else {
         toast.error("Xác thực thất bại");
@@ -25,7 +26,7 @@ export default function GoogleCallback() {
       }
     } catch (error) {
       console.log(error);
-    } 
+    }
   }, [search, navigate]);
 
   return <div>Đang xử lý xác thực Google…</div>;

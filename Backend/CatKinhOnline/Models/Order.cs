@@ -1,6 +1,6 @@
-﻿using static CatKinhOnline.Models.Enum;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace CatKinhOnline.Models
     {
@@ -18,25 +18,28 @@ namespace CatKinhOnline.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [Required]
-        public OrderStatus Status { get; set; } = OrderStatus.Pending;
+        public int Status { get; set; }
 
         [Required]
-        public DeliveryType DeliveryType { get; set; } = DeliveryType.Pickup;
+        public int DeliveryType { get; set; }
 
         [Required]
-        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.COD;
+        public int PaymentMethod { get; set; } 
 
-        public DateTime? EstimatedDate { get; set; }
+        public string? Note { get; set; }
 
         [Required]
         public int TotalAmount { get; set; }
 
         [ForeignKey(nameof(UserId))]
-        public virtual User User { get; set; } = new User();
+        [JsonIgnore]
+        public virtual User? User { get; set; }
 
         [ForeignKey(nameof(ShippingAddressId))]
-        public virtual Address ShippingAddress { get; set; } = new Address();
+        [JsonIgnore]
+        public virtual Address? ShippingAddress { get; set; }
 
-        public virtual ICollection<OrderItem> OrderItems { get; set; }  = new List<OrderItem>();
+        [JsonIgnore]
+        public virtual ICollection<OrderItem>? OrderItems { get; set; }
         }
     }

@@ -16,99 +16,68 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
-  addressService,
   createAddress,
-  type District,
-  type Province,
-  type Ward,
+  getAddressByUserId,
+  updateAddress,
+  type Address,
 } from "@/services/addressService";
 import { toast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import { validateForm } from "./validateAddress";
+import {
+  useGetAddressByUserId,
+  useGetDistricts,
+  useGetProvinces,
+  useGetWards,
+  useUpdateFinalAddress,
+} from "@/features/address/hooks/useAddress";
 
 interface AddressCardFormProps {
   userId: number;
   onClose: () => void;
-  handleReloadAddress: () => void;
+  reloadAddressHandler: (
+    userId: number,
+    setAddress: (address: Address[]) => void,
+  ) => void;
 }
 
 export function FromAddress({
   userId,
   onClose,
-  handleReloadAddress,
+  reloadAddressHandler,
 }: AddressCardFormProps) {
   //#region Variable
-  const [provinces, setProvinces] = useState<Province[]>([]);
-  const [districts, setDistricts] = useState<District[]>([]);
-  const [wards, setWards] = useState<Ward[]>([]);
-
   const [selectedProvince, setSelectedProvince] = useState<string>("");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("");
   const [selectedWard, setSelectedWard] = useState<string>("");
-  const [finalAddress, setFinalAddress] = useState<string>("");
   const [contactName, setContactName] = useState<string>("");
   const [contactPhone, setContactPhone] = useState<string>("");
   const [isDefault, setIsDefault] = useState<boolean>(false);
   const [note, setNote] = useState<string>("");
-  //#endregion
-
-  //#region Fetch Data
-  useEffect(() => {
-    addressService.getProvinces().then(setProvinces);
-  }, []);
-
-  useEffect(() => {
-    if (selectedProvince) {
-      setSelectedDistrict("");
-      setSelectedWard("");
-      setDistricts([]);
-      setWards([]);
-      addressService.getDistricts(selectedProvince).then(setDistricts);
-    }
-  }, [selectedProvince]);
-
-  useEffect(() => {
-    if (selectedDistrict) {
-      setSelectedWard("");
-      setWards([]);
-      addressService.getWards(selectedDistrict).then(setWards);
-    }
-  }, [selectedDistrict]);
+  const { setAddress } = useGetAddressByUserId(userId);
+  const { provinces } = useGetProvinces();
+  const { districts } = useGetDistricts(
+    selectedProvince,
+    setSelectedDistrict,
+    setSelectedWard,
+  );
+  const { wards } = useGetWards(selectedDistrict, setSelectedWard);
+  const { finalAddress, setFinalAddress } = useUpdateFinalAddress(
+    provinces,
+    districts,
+    wards,
+    selectedProvince,
+    selectedDistrict,
+    selectedWard,
+  );
   //#endregion
 
   //#region Handle Event
-  function validateForm() {
-    if (!contactName.trim()) {
-      toast.warning("Vui lòng nhập tên người nhận");
-      return false;
-    }
-    if (contactName.trim().length < 6) {
-      toast.warning("Tên người nhận quá ngắn (tối thiểu 6 ký tự)");
-      return false;
-    }
-    if (contactName.trim().length > 50) {
-      toast.warning("Tên người nhận quá dài (tối đa 50 ký tự)");
-      return false;
-    }
-    if (!contactPhone.trim()) {
-      toast.warning("Vui lòng nhập số điện thoại");
-      return false;
-    }
-    if (!contactPhone.trim().match(/^0[0-9]{9}$/)) {
-      toast.warning("Số điện thoại không hợp lệ");
-      return false;
-    }
-    if (!finalAddress.trim()) {
-      toast.warning("Vui lòng nhập địa chỉ cụ thể");
-      return false;
-    }
-    return true;
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) {
+    if (!validateForm(contactName, contactPhone, finalAddress, note)) {
       return;
     }
     const address = {
@@ -118,38 +87,39 @@ export function FromAddress({
       contactPhone: contactPhone,
       note: note,
       isDefault: isDefault,
+      isDeleted: false,
       id: 0,
     };
+
+    // Lấy danh sách tất cả địa chỉ của user
+    const allAddressesResponse = await getAddressByUserId(address!.userId);
+    if (allAddressesResponse.isSuccess) {
+      const allAddresses = (allAddressesResponse.result as Address[]) || [];
+      console.log(allAddresses);
+      if (isDefault) {
+        // Bỏ mặc định tất cả địa chỉ khác (trừ địa chỉ hiện tại)
+        for (const addr of allAddresses) {
+          if (addr.id !== address!.id && addr.isDefault) {
+            await updateAddress(addr.id, {
+              ...addr,
+              isDefault: false,
+            });
+          }
+        }
+      }
+      if (allAddresses.length === 0) {
+        address.isDefault = true;
+      }
+    }
     const response = await createAddress(address);
     if (response.isSuccess) {
       onClose();
-      handleReloadAddress();
+      reloadAddressHandler(userId, setAddress);
       toast.success("Thêm địa chỉ thành công");
     } else {
       toast.error("Thêm địa chỉ thất bại");
     }
   };
-  useEffect(() => {
-    const selectedProvinceName =
-      provinces.find((p) => p.code.toString() === selectedProvince)?.name || "";
-    const selectedDistrictName =
-      districts.find((p) => p.code.toString() === selectedDistrict)?.name || "";
-    const selectedWardName =
-      wards.find((p) => p.code.toString() === selectedWard)?.name || "";
-    const parts = [
-      selectedWardName,
-      selectedDistrictName,
-      selectedProvinceName,
-    ].filter(Boolean);
-    setFinalAddress(parts.join(", "));
-  }, [
-    districts,
-    provinces,
-    wards,
-    selectedDistrict,
-    selectedProvince,
-    selectedWard,
-  ]);
   //#endregion
 
   return (

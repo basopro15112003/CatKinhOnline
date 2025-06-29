@@ -30,6 +30,16 @@ export const getProducts = async ():Promise<Product[]> => {
     }
 }
 
+export const getProductById = async (id: number): Promise<Product | null> => {
+  try {
+    const response: AxiosResponse<Product> = await request.get(`Product/${id}`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
 export const AddProduct = async(data:ProductInput ) => {
     try {
         const response:AxiosResponse<ProductInput >= await request.post("Product",data)
