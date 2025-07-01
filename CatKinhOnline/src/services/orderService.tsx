@@ -52,11 +52,32 @@ export interface OrderItems {
         console.log(error);
         return null;
     }
+  } 
+   export const getOrderById = async (id: number):Promise<APIResponse> => {
+    try {
+        const response:AxiosResponse<APIResponse> = await request.get(`Order/${id}`);
+        if (response.data.isSuccess) {
+            return response.data;
+        } else {
+            return {
+                isSuccess: false,
+                message: response.data.message,
+                result: [],
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            isSuccess: false,
+            message: "Đã có lỗi xảy ra khi kết nối tới máy chủ.",
+            result: [],
+        };
+    }
   }
 
   export const getOrderByUserId = async (userId: number):Promise<APIResponse> => {
     try {
-        const response:AxiosResponse<APIResponse> = await request.get(`Order/${userId}`);
+        const response:AxiosResponse<APIResponse> = await request.get(`Order/user/${userId}`);
         if (response.data.isSuccess) {
             return response.data;
         } else {

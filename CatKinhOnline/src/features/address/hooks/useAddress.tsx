@@ -21,11 +21,12 @@ export const useGetAddressByUserId = (userId: number) => {
         const response = await getAddressByUserId(userId);
         if (response.isSuccess) {
           setAddress((response.result as Address[]) || []);
-        }else{
+        } else {
           setAddress([]);
         }
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching addresses:", error);
+        setAddress([]);
       }
     }
     fetchData();
@@ -39,9 +40,16 @@ export const reloadAddressHandler = async (
   userId: number,
   setAddress: (address: Address[]) => void,
 ) => {
-  const response = await getAddressByUserId(userId);
-  if (response.isSuccess) {
-    setAddress(response.result as Address[]);
+  try {
+    const response = await getAddressByUserId(userId);
+    if (response.isSuccess) {
+      setAddress(response.result as Address[]);
+    } else {
+      setAddress([]);
+    }
+  } catch (error) {
+    console.error("Error reloading addresses:", error);
+    setAddress([]);
   }
 };
 //#endregion

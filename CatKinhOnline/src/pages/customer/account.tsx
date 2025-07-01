@@ -7,7 +7,7 @@ import { CustomerOrders } from "@/components/pages/customer/account/customerOrde
 import Address from "@/features/address/pages/address";
 import type { ChangePasswordInput, UpdateUserDto, UserProfile } from "@/services/userService";
 import { useState, useEffect } from "react";
-import { changePassword, getUserProfile, updateUserProfile } from "@/services/userService";
+import { changePassword,  getUserProfileByEmail, updateUserProfile } from "@/services/userService";
 import { toast } from "@/hooks/use-toast";
       
 export default function Account() {
@@ -29,14 +29,14 @@ export default function Account() {
         return;
       }
       try {
-        const response = await getUserProfile(email);
-        if (response) {
-          console.log("setUserProfile", response); // Thêm log ở đây
-          setUserProfile(response);
+        const response = await getUserProfileByEmail(email);
+        if (response && response.isSuccess) {
+          console.log("setUserProfile", response);
+              setUserProfile(response.result as UserProfile);
           setForm({
-            id: response.id,
-            fullName: response.fullName,
-            phone: response.phone,
+            id: (response.result as UserProfile).id,
+            fullName: (response.result as UserProfile).fullName,
+            phone: (response.result as UserProfile).phone,
           });
         }
       } catch (error) {
@@ -154,8 +154,8 @@ export default function Account() {
 
 
   return (
-    <div>
-      <Card className="relative mx-auto mt-7 mb-13 max-w-7xl">
+    <div className="px-1 md:px-4">
+      <Card className="relative mx-auto mb-13 max-w-7xl">
         <CardHeader>
           <CardTitle className="text-2xl text-green-700">
             Tài khoản khách hàng

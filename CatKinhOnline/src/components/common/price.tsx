@@ -11,8 +11,10 @@ export function Price() {
     async function fetchData() {
       try {
         const response = await getProducts();
-        const filtered = response.filter((item) => item.status === 1); // lọc ra những sản phẩm có status là đang còn hàng
-        setProduct(filtered);
+        if (response.isSuccess && Array.isArray(response.result)) { // kiểm tra xem response có phải là một mảng không
+          const filtered = response.result.filter((item: Product) => item.status === 1); // lọc ra những sản phẩm có status là đang còn hàng
+          setProduct(filtered);
+        }
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -22,22 +24,22 @@ export function Price() {
 
   return (
     <>
-      <section className="mx-auto mb-12 max-w-7xl px-4">
-        <Card className="rounded-2xl bg-white p-6 shadow-lg">
+      <section className="mx-auto mb-12 max-w-7xl px-1 md:px-4">
+        <Card className="rounded-2xl bg-gradient-to-br from-white to-emerald-50/30 md:p-6 shadow-lg">
           <CardContent>
             <h2 className="mb-8 text-center text-4xl font-bold text-gray-800">
               Bảng giá kính
             </h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 w-full md:w-auto md:gap-4 sm:grid-cols-2">
               {product.map((product, id) => (
                 <div
                   key={id}
-                  className="rounded-xl border border-emerald-200 bg-green-50 p-4 shadow-lg shadow-emerald-100"
+                  className="rounded-xl border border-emerald-400 bg-white/60 p-2 md:p-4  shadow-lg shadow-emerald-100"
                 >
-                  <h4 className="text-lg font-semibold text-green-800">
+                  <h4 className="text-lg font-semibold text-black">
                     {product.productName}
                   </h4>
-                  <p className="mt-2 text-green-600">
+                  <p className="md:mt-2 text-green-900">
                     Giá: {product.pricePerM2.toLocaleString()}₫/m²
                   </p>
                 </div>

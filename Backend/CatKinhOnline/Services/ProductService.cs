@@ -20,8 +20,8 @@ namespace CatKinhOnline.Services
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<List<ProductDTO>> GetAllProduct()
-            {                        
+        public async Task<APIResponse> GetAllProduct()
+            {
             try
                 {
                 var models = await _productRepository.GetAllProducts();
@@ -41,7 +41,7 @@ namespace CatKinhOnline.Services
                         }
                     modelDTOs.Add(dto);
                     }
-                return modelDTOs;
+                return new APIResponse { IsSuccess=true, Message="Lấy danh sách sản phẩm thành công", Result=modelDTOs };
                 }
             catch (Exception ex)
                 {
@@ -57,11 +57,19 @@ namespace CatKinhOnline.Services
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<Product?> GetProductById(int id)
+        public async Task<APIResponse> GetProductById(int id)
             {
             try
                 {
-                return await _productRepository.GetProductById(id);
+                var product = await _productRepository.GetProductById(id);
+                if (product==null)
+                    {
+                    return new APIResponse { IsSuccess=true, Message="Không tìm thấy sản phẩm" };
+                    }
+                var productDTO = new ProductDTO();
+                productDTO.CopyProperties(product);
+                return new APIResponse
+                    {IsSuccess=true,Message="Lấy sản phẩm thành công", Result=productDTO};
                 }
             catch (Exception ex)
                 {

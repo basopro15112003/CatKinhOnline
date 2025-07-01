@@ -19,23 +19,23 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import {
-  useGetAddressByUserId,
   useGetDistricts,
   useGetProvinces,
   useGetWards,
   useUpdateFinalAddress,
 } from "@/features/address/hooks/useAddress";
-import { getAddressByUserId, updateAddress, type Address } from "@/services/addressService";
+import {
+  getAddressByUserId,
+  updateAddress,
+  type Address,
+} from "@/services/addressService";
 import { toast } from "@/hooks/use-toast";
 import { validateForm } from "./validateAddress";
 
 interface UpdateAddressProps {
   address: Address | null;
   onClose: () => void;
-  reloadAddressHandler: (
-    userId: number,
-    setAddress: (address: Address[]) => void,
-  ) => void;
+  reloadAddressHandler: () => void;
 }
 
 export function UpdateAddress({
@@ -52,7 +52,6 @@ export function UpdateAddress({
   const [note, setNote] = useState("");
   const [isDefault, setIsDefault] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const { setAddress } = useGetAddressByUserId(address!.userId);
   const { provinces } = useGetProvinces();
   const { districts } = useGetDistricts(
     selectedProvince,
@@ -79,68 +78,71 @@ export function UpdateAddress({
       setIsDefault(address.isDefault || false);
       setFinalAddress(address.addressLine || "");
     }
-  }, [address, setContactName, setContactPhone, setNote, setIsDefault, setFinalAddress]);
+  }, [
+    address,
+    setContactName,
+    setContactPhone,
+    setNote,
+    setIsDefault,
+    setFinalAddress,
+  ]);
   //#endregion
 
   //#region Update Address Handler
- const updateAddressHandler = async (
-  e: React.FormEvent) => {
-  e.preventDefault();
-  if (!validateForm(contactName, contactPhone, finalAddress, note)) {
-    return;
-  }
-  setSubmitting(true);
-  try {
-    // Nếu đang set địa chỉ này làm mặc định, thì bỏ mặc định tất cả địa chỉ khác
-    if (isDefault) {
-      // Lấy danh sách tất cả địa chỉ của user
-      const allAddressesResponse = await getAddressByUserId(address!.userId);
-      if (allAddressesResponse.isSuccess) {
-        const allAddresses = allAddressesResponse.result as Address[];
+  const updateAddressHandler = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm(contactName, contactPhone, finalAddress, note)) {
+      return;
+    }
+    setSubmitting(true);
+    try {
+      // Nếu đang set địa chỉ này làm mặc định, thì bỏ mặc định tất cả địa chỉ khác
+      if (isDefault) {
+        // Lấy danh sách tất cả địa chỉ của user
+        const allAddressesResponse = await getAddressByUserId(address!.userId);
+        if (allAddressesResponse.isSuccess) {
+          const allAddresses = allAddressesResponse.result as Address[];
 
-        // Bỏ mặc định tất cả địa chỉ khác (trừ địa chỉ hiện tại)
-        for (const addr of allAddresses) {
-          if (addr.id !== address!.id && addr.isDefault) {
-            await updateAddress(addr.id, {
-              ...addr,
-              isDefault: false,
-            });
+          // Bỏ mặc định tất cả địa chỉ khác (trừ địa chỉ hiện tại)
+          for (const addr of allAddresses) {
+            if (addr.id !== address!.id && addr.isDefault) {
+              await updateAddress(addr.id, {
+                ...addr,
+                isDefault: false,
+              });
+            }
           }
         }
       }
+      const updated = await updateAddress(address!.id, {
+        id: address!.id,
+        userId: address!.userId,
+        contactName,
+        contactPhone,
+        addressLine: finalAddress,
+        note,
+        isDefault,
+        isDeleted: false,
+      });
+      if (updated) {
+        onClose();
+        reloadAddressHandler();
+        toast.success("Cập nhật địa chỉ thành công");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Cập nhật địa chỉ thất bại");
+    } finally {
+      setSubmitting(false);
     }
-    const updated = await updateAddress(address!.id, {
-      id: address!.id,
-      userId: address!.userId,
-      contactName,
-      contactPhone,
-      addressLine: finalAddress,
-      note,
-      isDefault,
-      isDeleted: false,
-    });
-    if (updated) {
-      toast.success("Cập nhật địa chỉ thành công");
-      reloadAddressHandler(address!.userId, setAddress);
-      onClose();
-    }
-  } catch (error) {
-    console.error(error);
-    toast.error("Cập nhật địa chỉ thất bại");
-  } finally {
-    setSubmitting(false);
-  }
-};
-//#endregion
+  };
+  //#endregion
   return (
     <>
       {" "}
       <div className="fixed inset-0 z-50 flex w-full items-center justify-center bg-black/50 backdrop-blur-sm md:w-auto">
         <Card className="fixed max-h-screen w-sm overflow-y-auto border-1 border-emerald-300 shadow-sm shadow-emerald-100 md:w-xl">
-          <form
-            onSubmit={(e) => updateAddressHandler(e)
-            }
-          >
+          <form onSubmit={(e) => updateAddressHandler(e)}>
             <CardHeader>
               <CardTitle className="mb-2 text-xl">Cập nhật địa chỉ</CardTitle>
             </CardHeader>
@@ -226,22 +228,45 @@ export function UpdateAddress({
                 <div>
                   <Label htmlFor="specificAddress">Địa chỉ cụ thể</Label>
                   <Textarea
+                  className="w-full max-w-[530px]"
                     id="specificAddress"
                     placeholder="Số nhà, tên đường, tòa nhà, ..."
-                    rows={2}
+                    rows={3}
+                    maxLength={200}
                     value={finalAddress}
                     onChange={(e) => setFinalAddress(e.target.value)}
-                  />
+                  /> <div className="mt-1 flex justify-between text-xs">
+                  <span className="text-gray-500">
+                    Ghi chú tối đa 200 ký tự
+                  </span>
+                  <span
+                    className={`${finalAddress.length > 200 ? "text-red-500" : "text-gray-500"}`}
+                  >
+                    {finalAddress.length}/200
+                  </span>
+                </div>
                 </div>{" "}
                 <div>
                   <Label htmlFor="note">Ghi chú</Label>
                   <Textarea
+                    className="w-full max-w-[530px]"
+                    maxLength={300}
                     id="note"
                     placeholder="Ghi chú (tùy chọn) đi qua mấy cửa hàng, đi qua mấy ngã tư, qua mấy cây cầu, ..."
-                    rows={2}
+                    rows={3}
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                  />
+                  />{" "}
+                  <div className="mt-1 flex justify-between text-xs">
+                    <span className="text-gray-500">
+                      Ghi chú tối đa 300 ký tự
+                    </span>
+                    <span
+                      className={`${note.length > 300 ? "text-red-500" : "text-gray-500"}`}
+                    >
+                      {note.length}/300
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Label htmlFor="isDefault">Đặt làm địa chỉ mặc định</Label>

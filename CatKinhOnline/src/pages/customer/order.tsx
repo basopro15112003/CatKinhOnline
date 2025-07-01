@@ -34,7 +34,10 @@ import {
   type OrderCreateRequest,
   type OrderItems,
 } from "@/services/orderService";
-import { getUserProfile, type UserProfile } from "@/services/userService";
+import {
+  getUserProfileByEmail,
+  type UserProfile,
+} from "@/services/userService";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -99,7 +102,7 @@ function OrderPage() {
     userId: 0,
     shippingAddressId: 0,
     createdAt: new Date().toISOString(),
-    status: 1,
+    status: 0,
     deliveryType: 0,
     paymentMethod: 0,
     note: "",
@@ -133,8 +136,13 @@ function OrderPage() {
     async function fetchData() {
       try {
         const response = await getProducts();
-        const filtered = response.filter((item) => item.status === 1); // lọc ra những sản phẩm có status là đang còn hàng
-        setProduct(filtered);
+        if (response.isSuccess && Array.isArray(response.result)) {
+          // kiểm tra xem response có phải là một mảng không
+          const filtered = response.result.filter(
+            (item: Product) => item.status === 1,
+          ); // lọc ra những sản phẩm có status là đang còn hàng
+          setProduct(filtered);
+        }
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -192,9 +200,9 @@ function OrderPage() {
     // Tạo danh sách mới với mục được cập nhật
     const updatedItems = orderItems.map((item) => {
       // Nếu đây là mục cần cập nhật
-      if (item.id === id) {
+        if (item.id === id) {
         // Tạo bản sao của mục với giá trị mới
-        const updatedItem = { ...item, [field]: value };
+          const updatedItem = { ...item, [field]: value };
 
         // Nếu đang cập nhật productId, tính lại unitPrice
         if (field === "productId") {
@@ -202,11 +210,11 @@ function OrderPage() {
           updatedItem.unitPrice = selectedProduct
             ? selectedProduct.pricePerM2
             : 0;
+          }
+          return updatedItem;
         }
-        return updatedItem;
-      }
       // Nếu không phải mục cần cập nhật, giữ nguyên
-      return item;
+        return item;
     });
     setOrderItems(updatedItems);
   };
@@ -215,12 +223,11 @@ function OrderPage() {
 
   //#region  Step 2 - Select Address
 
-
   const [address, setAddress] = useState<Address | null>(null);
 
   useEffect(() => {
     const findAddress = addresses.find((addr) => addr.id === selectedAddressId);
-    setAddress(findAddress || null);  
+    setAddress(findAddress || null);
   }, [selectedAddressId, addresses]);
   // Get User Profile
   useEffect(() => {
@@ -231,12 +238,12 @@ function OrderPage() {
         return;
       }
       try {
-        const response = await getUserProfile(email);
-        if (response) {
-          setUserProfile(response);
+        const response = await getUserProfileByEmail(email);
+        if (response && response.isSuccess) {
+          setUserProfile(response.result as UserProfile);
           setOrder({
             ...order,
-            userId: response.id,
+            userId: (response.result as UserProfile).id,
           });
         }
       } catch (error) {
@@ -372,7 +379,6 @@ function OrderPage() {
   useEffect(() => {
     if (newOrder) {
       navigate("/thankyou/" + newOrder?.id);
-      console.log("newOrder đã cập nhật: ", newOrder);
     }
   }, [newOrder]);
 
@@ -420,7 +426,7 @@ function OrderPage() {
       }
       if (item.quantity > 100) {
         toast.warning(
-          `Kính #${index}: Số lượng kính không được lớn hơn 100 tấm! Nếu bạn muốn đặt số lượng lớn hơn, hãy liên hệ số điện thoại 0333744591 hoặc đặt thêm kính`,
+          `Kính #${index}: Số lượng kính không được lớn hơn 100 tấm! Nếu bạn muốn đặt số lượng lớn hơn, hãy liên hệ số điện thoại 0939 105 522 hoặc đặt thêm kính`,
         );
         return false;
       }
@@ -440,27 +446,40 @@ function OrderPage() {
       "An Giang",
     ];
 
-    if (
-      selectedAddress &&
-      !allowedProvinces.some((province) =>
-        selectedAddress.addressLine.includes(province),
-      )
-    ) {
-      toast.warning(
-        "Shop chỉ nhận giao kính tại khu vực Cần Thơ và các tỉnh thành phố lân cận: Vĩnh Long, Hậu Giang, Kiên Giang, An Giang. Vui lòng chọn địa chỉ khác hoặc liên hệ hotline : 0333744591 để được hỗ trợ.",
-      );
-      return false;
-    }
+    if (selectedAddress) {
+      // sử dụng normalize để chuyển đổi các ký tự có dấu thành ký tự không dấu và chuyển đổi thành chữ thường
+      const normalize = (str: string) =>
+        str
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase();
 
-    if (!selectedAddress) {
+      const addressLineNormalized = normalize(selectedAddress.addressLine);
+
+      const isAllowed = allowedProvinces.some((province) => {
+        const provinceNormalized = normalize(province);
+        return addressLineNormalized.includes(provinceNormalized);
+      });
+
+      if (!isAllowed) {
+        toast.warning(
+          "Shop chỉ nhận giao kính tại khu vực Cần Thơ và các tỉnh thành phố lân cận: Vĩnh Long, Hậu Giang, Kiên Giang, An Giang. Vui lòng chọn địa chỉ khác hoặc liên hệ hotline : 0939 105 522 để được hỗ trợ.",
+        );
+        return false;
+      }
+    } else {
       toast.warning("Vui lòng chọn địa chỉ giao hàng");
       return false;
     }
+
     if (selectedAddress.note.length > 300) {
       toast.warning("Ghi chú quá dài (tối đa 300 ký tự)");
       return false;
     }
-
+    if (note.length > 300) {
+      toast.warning("Ghi chú quá dài (tối đa 300 ký tự)");
+      return false;
+    }
     return true;
   };
 
@@ -498,347 +517,345 @@ function OrderPage() {
       <main>
         {/* Progress Steps Start*/}
         <>
-          <div className="mx-auto mb-12 flex w-full justify-center">
-            <div className="flex flex-col items-center space-y-8 rounded-2xl border border-emerald-100 bg-white/70 p-6 shadow-lg backdrop-blur-md md:flex-row md:space-y-0 md:space-x-4">
-              {steps.map((step, idx) => (
+          <div className="mx-auto mb-12 flex w-full justify-center p-4">
+            <div className="flex w-xs flex-col items-center space-y-4 rounded-2xl border border-emerald-100 bg-white/70 p-4 shadow-lg backdrop-blur-md md:w-auto md:flex-row md:space-y-0 md:space-x-4 md:p-6">
+            {steps.map((step, idx) => (
                 <div
                   key={step.number}
                   className="flex flex-col items-center md:flex-row"
                 >
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${
-                        currentStep >= step.number
-                          ? "bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg"
-                          : "bg-gray-200 text-gray-500"
-                      }`}
-                    >
-                      {currentStep > step.number ? (
-                        <CheckCircle className="h-6 w-6" />
-                      ) : (
-                        step.number
-                      )}
-                    </div>
-                    <div className="text-center md:mt-2">
-                      <div className="text-sm font-semibold text-gray-800">
-                        {step.title}
-                      </div>
-                      <div className="text-xs text-gray-500">{step.desc}</div>
-                    </div>
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${
+                      currentStep >= step.number
+                        ? "bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg"
+                        : "bg-gray-200 text-gray-500"
+                    }`}
+                  >
+                    {currentStep > step.number ? (
+                      <CheckCircle className="h-6 w-6" />
+                    ) : (
+                      step.number
+                    )}
                   </div>
-                  {idx < steps.length - 1 && (
-                    <div
-                      className={`mx-20 mt-5 h-10 w-1 rounded-full transition-all duration-300 md:mx-4 md:my-0 md:mt-0 md:h-1 md:w-16 ${
-                        currentStep > step.number
-                          ? "bg-gradient-to-b from-emerald-500 to-teal-500 md:bg-gradient-to-r"
-                          : "bg-gray-200"
-                      }`}
-                    />
-                  )}
+                    <div className="text-center md:mt-2">
+                    <div className="text-sm font-semibold text-gray-800">
+                      {step.title}
+                    </div>
+                    <div className="text-xs text-gray-500">{step.desc}</div>
+                  </div>
                 </div>
-              ))}
-            </div>
+                {idx < steps.length - 1 && (
+                  <div
+                      className={`mx-20 mt-2 h-10 w-1 rounded-full transition-all duration-300 md:mx-4 md:my-0 md:mt-0 md:h-1 md:w-16 ${
+                      currentStep > step.number
+                          ? "bg-gradient-to-b from-emerald-500 to-teal-500 md:bg-gradient-to-r"
+                        : "bg-gray-200"
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
           </div>
+        </div>
         </>
         {/* Progress Steps End*/}
 
-        <div className="mx-auto mb-16 grid max-w-7xl grid-cols-1 gap-8 px-4 lg:grid-cols-3">
+        <div className="mx-auto mb-16 grid max-w-7xl grid-cols-1 gap-8 px-1 md:px-4 lg:grid-cols-3">
           {/* Main Content */}
           <div className="lg:col-span-2">
             <Card className="border-0 bg-gradient-to-br from-white to-emerald-50/30 shadow-2xl">
-              <CardContent className="p-8">
+              <CardContent className="p-2 md:p-8">
                 {/* Step 1: Glass Selection */}
                 <>
-                  {currentStep === 1 && (
-                    <div>
-                      <div className="mb-8 flex items-center">
-                        <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
-                          <Package className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <h2 className="text-3xl font-bold text-gray-800">
-                            Chọn loại kính
-                          </h2>
-                          <p className="text-gray-600">
-                            Thêm các loại kính bạn muốn đặt
-                          </p>
-                        </div>
+                {currentStep === 1 && (
+                  <div>
+                      <div className="mb-4 flex items-center md:mb-9">
+                      <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+                        <Package className="h-6 w-6" />
                       </div>
+                      <div>
+                        <h2 className="text-3xl font-bold text-gray-800">
+                          Chọn loại kính
+                        </h2>
+                        <p className="text-gray-600">
+                          Thêm các loại kính bạn muốn đặt
+                        </p>
+                      </div>
+                    </div>
                       <div className="space-y-3">
                         {orderItems.map((item, index) => (
-                          <Card
-                            key={item.id}
-                            className="border border-emerald-200 shadow-lg transition-all duration-300 hover:shadow-xl"
-                          >
+                        <Card
+                          key={item.id}
+                          className="border border-emerald-200 shadow-lg transition-all duration-300 hover:shadow-xl"
+                        >
                             <CardContent className="">
                               <div className="mb-2 flex items-center justify-between">
-                                <h3 className="text-lg font-semibold text-emerald-700">
-                                  Kính #{index + 1}
-                                </h3>
+                              <h3 className="text-lg font-semibold text-emerald-700">
+                                Kính #{index + 1}
+                              </h3>
                                 {orderItems.length > 1 && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => removeGlassItem(item.id)}
-                                    className="border-red-200 text-red-600 hover:bg-red-50"
-                                  >
-                                    <Trash2 className="mr-1 h-4 w-4" />
-                                    Xóa
-                                  </Button>
-                                )}
-                              </div>
-                              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div>
-                                  <Label className="mb-2 block text-sm font-medium text-gray-700">
-                                    Loại kính
-                                  </Label>
-                                  <Select
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => removeGlassItem(item.id)}
+                                  className="border-red-200 text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="mr-1 h-4 w-4" />
+                                  Xóa
+                                </Button>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                              <div>
+                                <Label className="mb-2 block text-sm font-medium text-gray-700">
+                                  Loại kính
+                                </Label>
+                                <Select
                                     value={
                                       item.productId
                                         ? item.productId.toString()
                                         : ""
                                     }
-                                    onValueChange={(value) =>
+                                  onValueChange={(value) =>
                                       updateGlassItem(
                                         item.id,
                                         "productId",
                                         Number(value),
                                       )
-                                    }
-                                  >
-                                    <SelectTrigger className="border-emerald-200 focus:border-emerald-500">
-                                      <SelectValue placeholder="Chọn loại kính" />
-                                    </SelectTrigger>
-                                    <SelectContent>
+                                  }
+                                >
+                                  <SelectTrigger className="border-emerald-200 focus:border-emerald-500">
+                                    <SelectValue placeholder="Chọn loại kính" />
+                                  </SelectTrigger>
+                                  <SelectContent>
                                       {product.map((type) => (
-                                        <SelectItem
+                                      <SelectItem
                                           key={type.id}
                                           value={type.id.toString()}
-                                        >
-                                          <div className="flex w-full items-center justify-between">
+                                      >
+                                        <div className="flex w-full items-center justify-between">
                                             <span>{type.productName}</span>
-                                            <span className="ml-4 font-semibold text-emerald-600">
+                                          <span className="ml-4 font-semibold text-emerald-600">
                                               {type.pricePerM2.toLocaleString()}
                                               ₫/m
-                                            </span>
-                                          </div>
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
+                                          </span>
+                                        </div>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
 
-                                <div className="grid grid-cols-3 gap-2">
-                                  <div>
-                                    <Label className="mb-2 block text-sm font-medium text-gray-700">
-                                      Rộng (m)
-                                    </Label>
-                                    <Input
-                                      type="number"
+                              <div className="grid grid-cols-3 gap-2">
+                                <div>
+                                  <Label className="mb-2 block text-sm font-medium text-gray-700">
+                                    Rộng (m)
+                                  </Label>
+                                  <Input
+                                    type="number"
                                       max={2.7}
-                                      placeholder="0.0"
+                                    placeholder="0.0"
                                       value={item.widthM}
                                       onChange={(e) => {
                                         let value = Number(e.target.value);
                                         if (value > 2.7) value = 2.7;
                                         if (value < 0.1) value = 0.1;
                                         value = Math.round(value * 1000) / 1000;
-                                        updateGlassItem(
-                                          item.id,
+                                      updateGlassItem(
+                                        item.id,
                                           "widthM",
                                           value,
                                         );
                                       }}
-                                      className="border-emerald-200 focus:border-emerald-500"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label className="mb-2 block text-sm font-medium text-gray-700">
-                                      Dài (m)
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      step="0.1"
+                                    className="border-emerald-200 focus:border-emerald-500"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="mb-2 block text-sm font-medium text-gray-700">
+                                    Dài (m)
+                                  </Label>
+                                  <Input
+                                    type="number"
+                                    step="0.1"
                                       min={0.1}
                                       max={4.8}
-                                      placeholder="0.0"
+                                    placeholder="0.0"
                                       value={item.heightM}
                                       onChange={(e) => {
                                         let value = Number(e.target.value);
                                         if (value > 4.8) value = 4.8;
                                         if (value < 0.1) value = 0.1;
                                         value = Math.round(value * 1000) / 1000;
-                                        updateGlassItem(
-                                          item.id,
+                                      updateGlassItem(
+                                        item.id,
                                           "heightM",
                                           value,
                                         );
                                       }}
-                                      className="border-emerald-200 focus:border-emerald-500"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label className="mb-2 block text-sm font-medium text-gray-700">
-                                      Số lượng
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      min="1"
-                                      max="101"
-                                      value={item.quantity}
+                                    className="border-emerald-200 focus:border-emerald-500"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="mb-2 block text-sm font-medium text-gray-700">
+                                    Số lượng
+                                  </Label>
+                                  <Input
+                                    type="number"
+                                    value={item.quantity}
                                       onChange={(e) => {
                                         let value = Number(e.target.value);
                                         if (value > 101) value = 101;
                                         if (value < 1) value = 1;
-                                        updateGlassItem(
-                                          item.id,
-                                          "quantity",
+                                      updateGlassItem(
+                                        item.id,
+                                        "quantity",
                                           value,
                                         );
                                       }}
-                                      className="border-emerald-200 focus:border-emerald-500"
-                                    />
-                                  </div>
+                                    className="border-emerald-200 focus:border-emerald-500"
+                                  />
                                 </div>
                               </div>
+                            </div>
 
                               {item.productId !== 0 &&
                                 item.widthM &&
                                 item.heightM && (
-                                  <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-sm text-emerald-700">
+                                  <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-2 md:p-3">
+                                <div className="flex items-center justify-between">
+                                      <span className="text-xs text-emerald-700 md:text-sm">
                                         {
                                           product.find(
                                             (type) =>
                                               type.id ===
                                               Number(item.productId),
                                           )?.productName
-                                        }{" "}
+                                    }{" "}
                                         ({item.widthM}m × {item.heightM}m) ={" "}
                                         {item.quantity} Tấm
-                                      </span>
-                                      <span className="font-semibold text-emerald-800">
-                                        {(
+                                  </span>
+                                      <span className="text-sm font-semibold text-emerald-800">
+                                    {(
                                           Math.round(
                                             (item.widthM *
                                               item.heightM *
-                                              item.quantity *
+                                      item.quantity *
                                               item.unitPrice) /
                                               1000,
                                           ) * 1000
-                                        ).toLocaleString()}
-                                        ₫
-                                      </span>
-                                    </div>
-                                  </div>
-                                )}
-                            </CardContent>
-                          </Card>
-                        ))}
+                                    ).toLocaleString()}
+                                    ₫
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
 
-                        <Button
-                          onClick={addGlassItem}
-                          variant="outline"
-                          className="w-full border-2 border-dashed border-emerald-300 py-6 text-emerald-700 hover:bg-emerald-50"
-                        >
-                          <Plus className="mr-2 h-5 w-5" />
-                          Thêm loại kính khác
-                        </Button>
-                      </div>
+                      <Button
+                        onClick={addGlassItem}
+                        variant="outline"
+                          className="w-full border-2 border-dashed border-emerald-300 py-2 text-emerald-700 hover:bg-emerald-50 md:py-6"
+                      >
+                          <Plus className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+                        Thêm loại kính khác
+                      </Button>
                     </div>
-                  )}
+                  </div>
+                )}
                 </>
                 {/* Step 1 End*/}
 
                 {/* Step 2: Customer Information */}
                 <>
-                  {currentStep === 2 && (
-                    <div>
-                      <div className="mb-8 flex items-center">
-                        <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
-                          <Store className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <h2 className="text-3xl font-bold text-gray-800">
-                            Thông tin khách hàng
-                          </h2>
-                          <p className="text-gray-600">
-                            Nhập thông tin để chúng tôi liên hệ và giao hàng
-                          </p>
-                        </div>
+                {currentStep === 2 && (
+                  <div>
+                      <div className="mb-4 flex items-center md:mb-8">
+                      <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+                        <Store className="h-6 w-6" />
                       </div>
+                      <div>
+                        <h2 className="text-3xl font-bold text-gray-800">
+                          Thông tin khách hàng
+                        </h2>
+                        <p className="text-gray-600">
+                          Nhập thông tin để chúng tôi liên hệ và giao hàng
+                        </p>
+                      </div>
+                    </div>
 
-                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-6">
                         {deliveryMethod === 0 && (
                           <>
-                            <div>
-                              <Label className="mb-2 block text-sm font-medium text-gray-700">
-                                Họ và tên *
-                              </Label>
-                              <Input
-                                placeholder="Nhập họ và tên"
-                                className="border-emerald-200 focus:border-emerald-500"
+                      <div>
+                              <Label className="block text-sm font-medium text-gray-700 md:mb-2">
+                          Họ và tên *
+                        </Label>
+                        <Input
+                          placeholder="Nhập họ và tên"
+                          className="border-emerald-200 focus:border-emerald-500"
                                 value={userProfile?.fullName}
                                 disabled
-                              />
+                        />
                             </div>{" "}
-                            <div>
-                              <Label className="mb-2 block text-sm font-medium text-gray-700">
-                                Số điện thoại *
-                              </Label>
-                              <Input
-                                placeholder="Nhập số điện thoại"
-                                className="border-emerald-200 focus:border-emerald-500"
+                      <div>
+                              <Label className="block text-sm font-medium text-gray-700 md:mb-2">
+                          Số điện thoại *
+                        </Label>
+                        <Input
+                          placeholder="Nhập số điện thoại"
+                          className="border-emerald-200 focus:border-emerald-500"
                                 value={userProfile?.phone}
                                 disabled
-                              />
-                            </div>
-                            <div>
-                              <Label className="mb-2 block text-sm font-medium text-gray-700">
-                                Email
-                              </Label>
-                              <Input
-                                type="email"
-                                placeholder="Nhập email"
-                                className="border-emerald-200 focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                              <Label className="block text-sm font-medium text-gray-700 md:mb-2">
+                          Email
+                        </Label>
+                        <Input
+                          type="email"
+                          placeholder="Nhập email"
+                          className="border-emerald-200 focus:border-emerald-500"
                                 value={userProfile?.email}
                                 disabled
-                              />
-                            </div>
+                        />
+                      </div>
                           </>
                         )}
 
-                        <div>
-                          <Label className="mb-2 block text-sm font-medium text-gray-700">
-                            Phương thức nhận hàng *
-                          </Label>
-                          <Select
+                      <div>
+                          <Label className="block text-sm font-medium text-gray-700 md:mb-2">
+                          Phương thức nhận hàng *
+                        </Label>
+                        <Select
                             value={deliveryMethod.toString()}
                             onValueChange={(value) =>
                               setDeliveryMethod(Number(value))
                             }
-                          >
-                            <SelectTrigger className="border-emerald-200 focus:border-emerald-500">
-                              <SelectValue placeholder="Chọn phương thức nhận hàng" />
-                            </SelectTrigger>
-                            <SelectContent>
+                        >
+                          <SelectTrigger className="border-emerald-200 focus:border-emerald-500">
+                            <SelectValue placeholder="Chọn phương thức nhận hàng" />
+                          </SelectTrigger>
+                          <SelectContent>
                               <SelectItem value="0">
-                                <div className="flex items-center">
-                                  <Package className="mr-2 h-4 w-4" />
-                                  Nhận tại cửa hàng
-                                </div>
-                              </SelectItem>
+                              <div className="flex items-center">
+                                <Package className="mr-2 h-4 w-4" />
+                                Nhận tại cửa hàng
+                              </div>
+                            </SelectItem>
                               <SelectItem value="1">
-                                <div className="flex items-center">
-                                  <Truck className="mr-2 h-4 w-4" />
-                                  Giao hàng tận nơi
-                                </div>
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                              <div className="flex items-center">
+                                <Truck className="mr-2 h-4 w-4" />
+                                Giao hàng tận nơi
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
+                    </div>
                       {deliveryMethod === 1 && (
                         <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
                           <div className="flex items-start space-x-2">
@@ -856,11 +873,10 @@ function OrderPage() {
                         </div>
                       )}
                       {deliveryMethod === 1 && (
-                        <div className="mt-2">
-                          <Label className="mb-2 block text-sm font-medium text-gray-700">
+                        <div className="mt-2 md:mt-4">
+                          <Label className="block text-sm font-medium text-gray-700 md:mb-2">
                             Chọn địa chỉ giao hàng *
-                          </Label>
-
+                        </Label>
                           <RadioGroup
                             value={selectedAddressId.toString()}
                             onValueChange={(value) =>
@@ -872,13 +888,13 @@ function OrderPage() {
                               <Card
                                 key={item.id}
                                 onClick={() => setSelectedAddressId(item.id)}
-                                className={`flex cursor-pointer items-center border-emerald-200 bg-white/50 p-2 shadow-md transition-all ${
+                                className={`flex cursor-pointer items-center border-emerald-200 bg-white/50 p-1 shadow-md transition-all md:p-2 ${
                                   selectedAddressId === item.id
                                     ? "border-2 border-emerald-500 ring-2 ring-emerald-100"
                                     : "border"
                                 }`}
                               >
-                                <div className="items-center gap-6 md:flex">
+                                <div className="flex w-full items-center gap-2 md:gap-6 ">
                                   <div className="mt-0 w-3xs flex-1 p-1 md:w-lg lg:w-xl">
                                     <div className="mb-1 flex gap-2">
                                       <RadioGroupItem
@@ -908,7 +924,13 @@ function OrderPage() {
                                       {item.addressLine}
                                     </p>
                                     {item.note && (
-                                      <p className="text-xs italic md:text-sm">
+                                      <p
+                                        className="text-xs italic md:text-sm"
+                                        style={{
+                                          wordBreak: "break-word",
+                                          maxWidth: 600,
+                                        }}
+                                      >
                                         <span className="font-bold">
                                           Ghi chú:{" "}
                                         </span>
@@ -916,7 +938,7 @@ function OrderPage() {
                                       </p>
                                     )}
                                   </div>
-                                  <div className="mt-2 flex w-25 flex-row gap-2 md:mt-0 md:ml-3 md:flex-col">
+                                  <div className="mt-2 flex w-20 flex-col gap-2 mr-2 md:mt-0 md:ml-3 md:w-25 md:flex-col">
                                     <Button
                                       variant="outline"
                                       size="sm"
@@ -1002,171 +1024,182 @@ function OrderPage() {
                               </Button>
                             </div>
                           )}
-                        </div>
-                      )}
+                      </div>
+                    )}
 
-                      <div className="mt-6">
-                        <Label className="mb-2 block text-sm font-medium text-gray-700">
+                    <div className="mt-6">
+                      <Label className="mb-2 block text-sm font-medium text-gray-700">
                           Ghi chú đơn hàng
-                        </Label>
-                        <Textarea
-                          placeholder="Ghi chú thêm về đơn hàng (tùy chọn)"
-                          className="border-emerald-200 focus:border-emerald-500"
-                          rows={3}
+                      </Label>
+                      <Textarea
+                        placeholder="Ghi chú thêm về đơn hàng (tùy chọn)"
+                        className="border-emerald-200 focus:border-emerald-500"
+                          maxLength={300}
+                        rows={3}
                           value={note}
                           onChange={(e) => setNote(e.target.value)}
                         />
-                      </div>
+                        <div className="mt-1 flex justify-between text-xs">
+                          <span className="text-gray-500">
+                            Ghi chú tối đa 300 ký tự
+                          </span>
+                          <span
+                            className={`${note.length > 300 ? "text-red-500" : "text-gray-500"}`}
+                          >
+                            {note.length}/300
+                          </span>
+                        </div>
                     </div>
-                  )}
+                  </div>
+                )}
                 </>
                 {/* Step 2 End*/}
 
                 {/* Step 3: Payment Method */}
                 <>
-                  {currentStep === 3 && (
-                    <div>
-                      <div className="mb-8 flex items-center">
-                        <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
-                          <CreditCard className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <h2 className="text-3xl font-bold text-gray-800">
-                            Phương thức thanh toán
-                          </h2>
-                          <p className="text-gray-600">
-                            Chọn cách thức thanh toán phù hợp
-                          </p>
-                        </div>
+                {currentStep === 3 && (
+                  <div>
+                    <div className="mb-8 flex items-center">
+                      <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+                        <CreditCard className="h-6 w-6" />
                       </div>
+                      <div>
+                        <h2 className="text-3xl font-bold text-gray-800">
+                          Phương thức thanh toán
+                        </h2>
+                        <p className="text-gray-600">
+                          Chọn cách thức thanh toán phù hợp
+                        </p>
+                      </div>
+                    </div>
 
-                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <Card
-                          className={`cursor-pointer border-2 transition-all duration-300 hover:shadow-lg ${
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <Card
+                        className={`cursor-pointer border-2 transition-all duration-300 hover:shadow-lg ${
                             paymentMethod.toString() === "0"
-                              ? "border-emerald-500 bg-emerald-50"
-                              : "border-gray-200"
-                          }`}
+                            ? "border-emerald-500 bg-emerald-50"
+                            : "border-gray-200"
+                        }`}
                           onClick={() => setPaymentMethod(0)}
-                        >
-                          <CardContent className="p-6 text-center">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 text-white">
-                              <Package className="h-8 w-8" />
-                            </div>
-                            <h3 className="mb-2 text-xl font-bold text-gray-800">
-                              Tiền mặt khi nhận
-                            </h3>
-                            <p className="text-sm text-gray-600">
+                      >
+                        <CardContent className="p-6 text-center">
+                          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 text-white">
+                            <Package className="h-8 w-8" />
+                          </div>
+                          <h3 className="mb-2 text-xl font-bold text-gray-800">
+                            Tiền mặt khi nhận
+                          </h3>
+                          <p className="text-sm text-gray-600">
                               Thanh toán khi nhận hàng tại cửa hàng hoặc khi
                               giao hàng
-                            </p>
-                            <Badge className="mt-3 bg-green-100 text-green-700">
-                              Phổ biến
-                            </Badge>
-                          </CardContent>
-                        </Card>
+                          </p>
+                          <Badge className="mt-3 bg-green-100 text-green-700">
+                            Phổ biến
+                          </Badge>
+                        </CardContent>
+                      </Card>
 
-                        <Card
-                          className={`cursor-pointer border-2 transition-all duration-300 hover:shadow-lg ${
+                      <Card
+                        className={`cursor-pointer border-2 transition-all duration-300 hover:shadow-lg ${
                             paymentMethod.toString() === "1"
-                              ? "border-emerald-500 bg-emerald-50"
-                              : "border-gray-200"
-                          }`}
+                            ? "border-emerald-500 bg-emerald-50"
+                            : "border-gray-200"
+                        }`}
                           onClick={() => setPaymentMethod(1)}
-                        >
-                          <CardContent className="p-6 text-center">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
-                              <CreditCard className="h-8 w-8" />
-                            </div>
-                            <h3 className="mb-2 text-xl font-bold text-gray-800">
-                              Thanh toán trực tuyến
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              Chuyển khoản ngân hàng hoặc ví điện tử
-                            </p>
-                            <Badge className="mt-3 bg-blue-100 text-blue-700">
-                              Nhanh chóng
-                            </Badge>
-                          </CardContent>
-                        </Card>
-                      </div>
+                      >
+                        <CardContent className="p-6 text-center">
+                          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                            <CreditCard className="h-8 w-8" />
+                          </div>
+                          <h3 className="mb-2 text-xl font-bold text-gray-800">
+                            Thanh toán trực tuyến
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            Chuyển khoản ngân hàng hoặc ví điện tử
+                          </p>
+                          <Badge className="mt-3 bg-blue-100 text-blue-700">
+                            Nhanh chóng
+                          </Badge>
+                        </CardContent>
+                      </Card>
+                    </div>
 
                       {paymentMethod.toString() === "1" && (
-                        <Card className="mt-6 border border-blue-200 bg-blue-50">
-                          <CardContent className="p-6">
-                            <h4 className="mb-4 font-bold text-blue-800">
-                              Thông tin chuyển khoản
-                            </h4>
-                            <div className="space-y-2 text-sm">
-                              <p>
-                                <strong>Ngân hàng:</strong> Vietcombank
-                              </p>
-                              <p>
-                                <strong>Số tài khoản:</strong> 1234567890
-                              </p>
-                              <p>
+                      <Card className="mt-6 border border-blue-200 bg-blue-50">
+                        <CardContent className="p-6">
+                          <h4 className="mb-4 font-bold text-blue-800">
+                            Thông tin chuyển khoản
+                          </h4>
+                          <div className="space-y-2 text-sm">
+                            <p>
+                              <strong>Ngân hàng:</strong> Vietcombank
+                            </p>
+                            <p>
+                              <strong>Số tài khoản:</strong> 1234567890
+                            </p>
+                            <p>
                                 <strong>Chủ tài khoản:</strong> Nguyễn Quốc
                                 Hoàng
-                              </p>
-                              <p>
+                            </p>
+                            <p>
                                 <strong>Nội dung:</strong> Thanh toan don hang
                                 [Số điện thoại]
-                              </p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </div>
-                  )}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                )}
                 </>
                 {/* Step 3 End*/}
 
                 {/* Step 4: Order Confirmation */}
                 <>
-                  {currentStep === 4 && (
-                    <div>
-                      <div className="mb-8 flex items-center">
-                        <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
-                          <CheckCircle className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <h2 className="text-3xl font-bold text-gray-800">
-                            Xác nhận đơn hàng
-                          </h2>
-                          <p className="text-gray-600">
-                            Kiểm tra lại thông tin trước khi đặt hàng
-                          </p>
-                        </div>
+                {currentStep === 4 && (
+                  <div>
+                    <div className="mb-8 flex items-center">
+                      <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+                        <CheckCircle className="h-6 w-6" />
                       </div>
+                      <div>
+                        <h2 className="text-3xl font-bold text-gray-800">
+                          Xác nhận đơn hàng
+                        </h2>
+                        <p className="text-gray-600">
+                          Kiểm tra lại thông tin trước khi đặt hàng
+                        </p>
+                      </div>
+                    </div>
 
-                      <div className="space-y-6">
-                        {/* Order Summary */}
-                        <Card className="border border-emerald-200">
-                          <CardContent className="p-6">
-                            <h3 className="mb-4 text-xl font-bold text-gray-800">
-                              Chi tiết đơn hàng
-                            </h3>
-                            <div className="space-y-3">
+                    <div className="space-y-6">
+                      {/* Order Summary */}
+                      <Card className="border border-emerald-200">
+                        <CardContent className="p-6">
+                          <h3 className="mb-4 text-xl font-bold text-gray-800">
+                            Chi tiết đơn hàng
+                          </h3>
+                          <div className="space-y-3">
                               {orderItems.map((item) => {
                                 const glassType = product.find(
                                   (type) => type.id === Number(item.productId),
                                 );
 
-                                return (
-                                  <div
-                                    key={item.id}
-                                    className="flex items-center justify-between border-b border-gray-100 py-2"
-                                  >
-                                    <div>
-                                      <span className="font-medium">
+                              return (
+                                <div
+                                  key={item.id}
+                                  className="flex items-center justify-between border-b border-gray-100 py-2"
+                                >
+                                  <div>
+                                    <span className="font-medium">
                                         {glassType?.productName}
-                                      </span>
-                                      <span className="ml-2 text-sm text-gray-500">
-                                        ({item.widthM}m × {item.heightM}m ×{" "}
-                                        {item.quantity})
-                                      </span>
-                                    </div>
-                                    <span className="font-semibold">
+                                    </span>
+                                    <span className="ml-2 text-sm text-gray-500">
+                                        ({item.widthM}m × {item.heightM}m) ={" "}
+                                        {item.quantity} Tấm
+                                    </span>
+                                  </div>
+                                  <span className="font-semibold">
                                       {(
                                         Math.round(
                                           (item.widthM *
@@ -1177,118 +1210,147 @@ function OrderPage() {
                                         ) * 1000
                                       ).toLocaleString()}
                                       ₫
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                              {note && (
-                                <div className="flex justify-between">
-                                  <p className="font-semibold">
-                                    Ghi chú:  <span className="italic font-normal text-sm">{note}</span>
-                                  </p>
+                                  </span>
                                 </div>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
+                              );
+                            })}
 
-                        {/* Customer Info */}
-                        <Card className="border border-emerald-200">
-                          <CardContent className="p-6">
-                            <h3 className="mb-4 text-xl font-bold text-gray-800">
-                              Thông tin khách hàng
-                            </h3>
-                            <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+                              <div className="flex justify-between">
+                                <p className="text-sm font-semibold">
+                                  Ghi chú đơn hàng:{" "}
+                                  {note && note !== "" ? (
+                                    <span
+                                      className="block text-xs font-normal italic"
+                                      style={{ wordBreak: "break-word" }}
+                                    >
+                                      {note}
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs font-normal italic">
+                                      Không có
+                                    </span>
+                                  )}
+                                </p>
+                              </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Customer Info */}
+                      <Card className="border border-emerald-200">
+                        <CardContent className="p-6">
+                          <h3 className="mb-4 text-xl font-bold text-gray-800">
+                            Thông tin khách hàng
+                          </h3>
+                          <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
                               {deliveryMethod === 1 ? (
                                 <>
-                                  <div>
-                                    <strong>Họ tên: </strong> {address?.contactName}
+                            <div>
+                                    <strong>Họ tên: </strong>{" "}
+                                    {address?.contactName}
                                   </div>{" "}
                                   <div>
-                                    <strong>Điện thoại:</strong> {address?.contactPhone}
-                                  </div>
-                                  <div>
-                                    <strong>Email:</strong>{" "}
-                                    {userProfile?.email}
-                                  </div>
+                                    <strong>Điện thoại:</strong>{" "}
+                                    {address?.contactPhone}
+                            </div>
+                            <div>
+                                    <strong>Email:</strong> {userProfile?.email}
+                            </div>
                                 </>
                               ) : (
                                 <>
-                                  <div>
-                                    <strong>Họ tên: </strong> {userProfile?.fullName}
+                            <div>
+                                    <strong>Họ tên: </strong>{" "}
+                                    {userProfile?.fullName}
                                   </div>{" "}
                                   <div>
-                                    <strong>Điện thoại:</strong>{userProfile?.phone}
-                                  </div>
-                                  <div>
-                                    <strong>Email:</strong>{" "}
-                                    {userProfile?.email}
-                                  </div></>
-                              )}
-
-                              <div>
-                                <strong>Nhận hàng:</strong>{" "}
-                                {deliveryMethod === 0
-                                  ? "Tại cửa hàng"
-                                  : "Giao tận hàng nơi"}
-                              </div>
-                              {deliveryMethod === 1 && (
-                                <div className="md:col-span-2">
-                                  <strong>Địa chỉ:</strong> {address?.addressLine}
-                                </div>
-                              )}
-                              {deliveryMethod === 1 && (
-                                <div className="md:col-span-2">
-                                  <strong>Ghi chú:</strong> {address?.note}
-                                </div>
-                              )}
+                                    <strong>Điện thoại:</strong>{" "}
+                                    {userProfile?.phone}
                             </div>
-                          </CardContent>
-                        </Card>
-                      </div>
+                                  <div>
+                                    <strong>Email:</strong> {userProfile?.email}
+                                  </div>
+                                </>
+                              )}
+                            <div>
+                              <strong>Nhận hàng:</strong>{" "}
+                                {deliveryMethod === 0
+                                ? "Tại cửa hàng"
+                                  : "Giao tận hàng nơi"}
+                              </div>{" "}
+                              {deliveryMethod === 1 && (
+                                <div>
+                                  <strong>Địa chỉ giao hàng:</strong>{" "}
+                                  {address?.addressLine}
+                            </div>
+                              )}{" "}
+                              <div>
+                                <strong>Thanh toán:</strong>{" "}
+                                {paymentMethod === 0
+                                  ? "Tiền mặt"
+                                  : "Thanh toán trực tuyến"}
+                              </div>
+                              {deliveryMethod === 1 && address?.note && (
+                                <div>
+                                  <strong>Ghi chú địa chỉ:</strong>{" "}
+                                  <span
+                                    className="block text-xs font-normal italic"
+                                    style={{
+                                      wordBreak: "break-word",
+                                      maxWidth: 600,
+                                    }}
+                                  >
+                                    {address?.note}
+                                  </span>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
-                  )}
+                  </div>
+                )}
                 </>
                 {/* Step 4 End*/}
 
                 {/* Navigation Buttons */}
                 <>
-                  <div className="mt-8 flex justify-between">
-                    <Button
-                      variant="outline"
-                      onClick={prevStep}
-                      disabled={currentStep === 1}
-                      className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                    >
-                      Quay lại
-                    </Button>
-                    <Button
-                      onClick={
-                        currentStep === 4
+                <div className="mt-8 flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={prevStep}
+                    disabled={currentStep === 1}
+                    className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                  >
+                    Quay lại
+                  </Button>
+                  <Button
+                    onClick={
+                      currentStep === 4
                           ? () => console.log("Đặt hàng thành công!")
-                          : nextStep
-                      }
-                      className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg transition-all duration-300 hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl"
-                    >
-                      {currentStep === 4 ? (
-                        <>
+                        : nextStep
+                    }
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg transition-all duration-300 hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl"
+                  >
+                    {currentStep === 4 ? (
+                      <>
                           <Button
                             type="button"
                             className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg transition-all duration-300 hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl"
                             onClick={handleOrder}
                           >
-                            <CheckCircle className="mr-2 h-5 w-5" />
-                            Xác nhận đặt hàng
+                        <CheckCircle className="mr-2 h-5 w-5" />
+                        Xác nhận đặt hàng
                           </Button>
-                        </>
-                      ) : (
-                        <>
-                          Tiếp tục
-                          <ArrowRight className="ml-2 h-5 w-5" />
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                      </>
+                    ) : (
+                      <>
+                        Tiếp tục
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </>
+                    )}
+                  </Button>
+                </div>
                 </>
                 {/* Navigation Buttons End*/}
               </CardContent>
@@ -1297,15 +1359,15 @@ function OrderPage() {
 
           {/* Order Summary Sidebar */}
           <>
-            <div className="lg:col-span-1">
-              <Card className="sticky top-24 border-0 bg-gradient-to-br from-white to-emerald-50/30 shadow-2xl">
-                <CardContent className="p-6">
-                  <div className="mb-6 flex items-center">
-                    <Calculator className="mr-2 h-6 w-6 text-emerald-600" />
-                    <h3 className="text-xl font-bold text-gray-800">
-                      Tóm tắt đơn hàng
-                    </h3>
-                  </div>
+          <div className="lg:col-span-1">
+            <Card className="sticky top-24 border-0 bg-gradient-to-br from-white to-emerald-50/30 shadow-2xl">
+              <CardContent className="p-6">
+                <div className="mb-6 flex items-center">
+                  <Calculator className="mr-2 h-6 w-6 text-emerald-600" />
+                  <h3 className="text-xl font-bold text-gray-800">
+                    Tóm tắt đơn hàng
+                  </h3>
+                </div>
 
                   <div className="space-y-2">
                     {orderItems.map((item) => {
@@ -1313,32 +1375,32 @@ function OrderPage() {
                         return null;
                       const glassType = product.find(
                         (type) => type.id === Number(item.productId),
-                      );
-                      const itemTotal =
+                    );
+                    const itemTotal =
                         item.widthM *
                         item.heightM *
-                        item.quantity *
+                      item.quantity *
                         item.unitPrice;
                       const roundedTotal = Math.round(itemTotal / 1000) * 1000;
 
-                      return (
-                        <div
-                          key={item.id}
-                          className="rounded-lg border border-emerald-100 bg-white p-3"
-                        >
-                          <div className="text-sm font-medium text-gray-800">
+                    return (
+                      <div
+                        key={item.id}
+                        className="rounded-lg border border-emerald-100 bg-white p-3"
+                      >
+                        <div className="text-sm font-medium text-gray-800">
                             {glassType?.productName}
-                          </div>
+                        </div>
                           <div className="flex items-center text-xs text-gray-500">
                             {item.quantity} × ({item.widthM}m × {item.heightM}m)
                             <span className="ml-auto text-right text-base font-semibold text-emerald-700">
                               {roundedTotal.toLocaleString()}₫
                             </span>
-                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    );
+                  })}
+                </div>
 
                   <div className="mt-0 border-emerald-200 pt-6">
                     <div className="space-y-2">
@@ -1346,11 +1408,11 @@ function OrderPage() {
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-gray-600">
                             Tạm tính:
-                          </span>
+                    </span>
                           <span className="text-sm font-medium">
-                            {totalAmount.toLocaleString()}₫
-                          </span>
-                        </div>
+                      {totalAmount.toLocaleString()}₫
+                    </span>
+                  </div>
                       )}
 
                       {deliveryMethod === 1 && (
@@ -1365,7 +1427,7 @@ function OrderPage() {
                               `${shippingFee.toLocaleString()}₫`
                             )}
                           </span>
-                        </div>
+                    </div>
                       )}
 
                       <div className="flex items-center justify-between border-t border-emerald-200 pt-2">
@@ -1375,20 +1437,20 @@ function OrderPage() {
                         <span className="text-2xl font-bold text-emerald-700">
                           {finalTotal.toLocaleString()}₫
                         </span>
-                      </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="mt-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 p-4 text-center text-white">
-                    <div className="text-sm opacity-90">Tiết kiệm được</div>
-                    <div className="text-xl font-bold">15%</div>
-                    <div className="text-xs opacity-90">
-                      so với giá thị trường
-                    </div>
+                <div className="mt-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 p-4 text-center text-white">
+                  <div className="text-sm opacity-90">Tiết kiệm được</div>
+                  <div className="text-xl font-bold">15%</div>
+                  <div className="text-xs opacity-90">
+                    so với giá thị trường
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
           </>
           {/* Order Summary Sidebar End*/}
         </div>

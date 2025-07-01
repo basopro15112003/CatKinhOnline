@@ -30,8 +30,8 @@ export function validateForm(contactName: string, contactPhone: string, finalAdd
       toast.warning("Vui lòng nhập địa chỉ cụ thể");
       return false;
     }
-    if (finalAddress.trim().length > 300) {
-      toast.warning("Địa chỉ cụ thể quá dài (tối đa 300 ký tự)");
+    if (finalAddress.trim().length > 200) {
+      toast.warning("Địa chỉ cụ thể quá dài (tối đa 200 ký tự)");
       return false;
     }
     if (finalAddress.trim().length < 10 ) {

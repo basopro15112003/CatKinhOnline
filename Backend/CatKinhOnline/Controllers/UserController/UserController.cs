@@ -1,4 +1,5 @@
-﻿using CatKinhOnline.ModelDTOs;
+﻿using Azure;
+using CatKinhOnline.ModelDTOs;
 using CatKinhOnline.Models;
 using CatKinhOnline.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -33,17 +34,32 @@ namespace CatKinhOnline.Controllers.UserController
             }
 
         // GET api/<UserController>/5
-        [HttpGet("{email}")]
-        public async Task<IActionResult> Get(string email)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id  )
             {
             try
                 {
-                var user = await _userService.GetUserByEmail(email);
-                if (user==null)
-                    {
-                    return NotFound($"User with Email {email} not found.");
-                    }
-                return Ok(user);
+                var response = await _userService.GetUserById(id);
+                if (response!.IsSuccess)
+                    return Ok(response);
+                else return BadRequest(response);
+                }
+            catch (Exception ex)
+                {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+                }
+            }
+        // GET api/<UserController>/5
+        [HttpGet]
+        [Route("user/{email}")]
+        public async Task<IActionResult> GetUserByEmail(string email)
+            {
+            try
+                {
+                var response = await _userService.GetUserByEmail(email);
+                if (response!.IsSuccess)
+                    return Ok(response);
+                else return BadRequest(response);
                 }
             catch (Exception ex)
                 {

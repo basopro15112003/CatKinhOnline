@@ -11,6 +11,7 @@ import type { ViewOrder } from "@/services/orderService";
 import { getProducts, type Product } from "@/services/productService";
 import { useEffect, useState } from "react";
 import { getAddressById, type Address } from "@/services/addressService";
+import Logo from "../../assets/images/Logo.png";
 
 export function DetailOrder({
   selectedOrder,
@@ -36,18 +37,17 @@ export function DetailOrder({
     const fetchProducts = async () => {
       try {
         const allProducts = await getProducts();
-        const productsMap: { [key: number]: Product } = {};
-
-        allProducts.forEach((product) => {
-          productsMap[product.id] = product;
-        });
-
-        setProducts(productsMap);
+        if (allProducts.isSuccess && Array.isArray(allProducts.result)) {
+          const productsMap: { [key: number]: Product } = {};
+          allProducts.result.forEach((product: Product) => {
+            productsMap[product.id] = product;
+          });
+          setProducts(productsMap);
+        }
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -81,61 +81,95 @@ export function DetailOrder({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div className="relative w-full max-w-3xl rounded-xl bg-white p-6 shadow-lg">
-          <h2 className="mb-4 text-2xl font-bold text-green-800">
+        <div className="relative w-full max-w-3xl rounded-xl bg-white p-6 shadow-lg print:border-1">
+          <div className="border-b-2 border-gray-300">
+            <div className="mb-2 flex items-center justify-center text-center">
+              <img src={Logo} alt="Logo" className="mr-2 h-10 w-10" />
+              <h1 className="text-center text-2xl font-bold text-green-800">
+                Nhôm Kính Quốc Thuần
+              </h1>
+            </div>
+            <div className="flex items-center justify-center text-sm">
+              <p className="mb-4 text-gray-600">
+                227 Phong Điền, TP Cần Thơ, Việt Nam | 0939 105 522 |
+                quochoangnguyen2003ct@gmail.com
+              </p>
+            </div>
+          </div>
+
+          <h2 className="mt-4 mb-2 text-xl font-bold text-green-800">
             Chi tiết đơn hàng #DH{selectedOrder.id.toString().padStart(4, "0")}
           </h2>
-          <p className="mb-2">
-            <span className="font-semibold">Ngày tạo:</span>{" "}
-            {new Date(selectedOrder.createdAt).toLocaleDateString()}
-          </p>
-          <p className="mb-2">
-            <span className="font-semibold">Họ và tên:</span>{" "}
-            {address?.contactName}
-          </p>
-          <p className="mb-2">
-            <span className="font-semibold">Số điện thoại:</span>{" "}
-            {address?.contactPhone}
-          </p>
-          <p className="mb-2">
-            <span className="font-semibold">Vận chuyển:</span>{" "}
-            {selectedOrder.deliveryType === 1
-              ? "Giao tận nhà"
-              : "Nhận tại cửa hàng"}
-          </p>
-          {selectedOrder.deliveryType === 1 && (
-            <p className="mb-2">
-              <span className="font-semibold">Địa chỉ giao hàng:</span>{" "}
-              {address?.addressLine}
-              {address?.note && address?.note !== "" && (
-                <span>
-                  {" "}
-                  <span className="text-sm font-semibold">(Ghi chú:</span>{" "}
-                  {address?.note})
-                </span>
+          <div className="grid grid-cols-1 items-start justify-between border-b border-gray-200 md:grid-cols-2 md:gap-2">
+            <div className="">
+              <p className="mb-2">
+                <span className="font-semibold">Ngày tạo:</span>{" "}
+                {new Date(selectedOrder.createdAt).toLocaleDateString("vi-VN")}
+              </p>
+              <p className="mb-2">
+                <span className="font-semibold">Họ và tên:</span>{" "}
+                {address?.contactName}
+              </p>
+              <p className="mb-2">
+                <span className="font-semibold">Số điện thoại:</span>{" "}
+                {address?.contactPhone}
+              </p>
+              {selectedOrder.note && selectedOrder.note !== "" && (
+                <p className="mb-2">
+                  <span className="font-semibold">Ghi chú đơn hàng:</span>{" "}
+                  <span className="text-sm text-gray-900 italic break-words max-h-24 overflow-y-auto">
+                    {selectedOrder.note}
+                  </span>
+                </p>
               )}
-            </p>
-          )}{" "}
-          <p className="mb-2">
-            <span className="font-semibold">Trạng thái:</span>{" "}
-            {selectedOrder.status === 0
-              ? "Chờ xác nhận"
-              : selectedOrder.status === 1
-                ? "Đã xác nhận"
-                : selectedOrder.status === 2
-                  ? "Đang thực hiện"
-                  : selectedOrder.status === 3
-                    ? "Đang giao hàng"
-                    : selectedOrder.status === 4
-                      ? "Đã hoàn thành"
-                      : "Đã hủy"}
-          </p>
-          <p className="mb-2">
-            <span className="font-semibold">Thanh toán:</span>{" "}
-            {selectedOrder.paymentMethod === 1 ? "Tiền mặt" : "Chuyển khoản"}
-          </p>
+            </div>
+            <div className="">
+              <p className="mb-2">
+                <span className="font-semibold">Vận chuyển:</span>{" "}
+                {selectedOrder.deliveryType === 1
+                  ? "Giao tận nhà"
+                  : "Nhận tại cửa hàng"}
+              </p>
+              {selectedOrder.deliveryType === 1 && (
+                <p className="mb-2">
+                  <span className="font-semibold">Địa chỉ giao hàng:</span>{" "}
+                  {address?.addressLine}
+                  {/* {address?.note && address?.note !== "" && (
+                    <span>
+                      {" "}
+                      <span className="text-sm font-semibold">
+                        (Ghi chú:
+                      </span>{" "}
+                      {address?.note})
+                    </span>
+                  )} */}
+                </p>
+              )}{" "}
+              <p className="mb-2">
+                <span className="font-semibold">Thanh toán:</span>{" "}
+                {selectedOrder.paymentMethod === 1
+                  ? "Tiền mặt"
+                  : "Chuyển khoản"}
+              </p>
+              <p className="mb-2">
+                <span className="font-semibold">Trạng thái:</span>{" "}
+                {selectedOrder.status === 0
+                  ? "Chờ xác nhận"
+                  : selectedOrder.status === 1
+                    ? "Đã xác nhận"
+                    : selectedOrder.status === 2
+                      ? "Đang thực hiện"
+                      : selectedOrder.status === 3
+                        ? "Đang giao hàng"
+                        : selectedOrder.status === 4
+                          ? "Đã hoàn thành"
+                          : "Đã hủy"}
+              </p>
+            </div>
+          </div>
+
           {/* Bảng chi tiết từng item */}
-          <Table className="mt-4 ">
+          <Table className="mt-4">
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
@@ -187,7 +221,6 @@ export function DetailOrder({
                   </TableRow>
                 </>
               )}
-
               {/* Tổng cộng */}
               <TableRow>
                 <TableCell colSpan={6} className="text-right text-lg font-bold">
@@ -199,7 +232,8 @@ export function DetailOrder({
               </TableRow>
             </TableBody>
           </Table>
-          <div className="mt-6 flex justify-end">
+
+          <div className="mt-6 flex justify-end gap-2 print:hidden">
             <Button
               variant="ghost"
               type="button"

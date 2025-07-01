@@ -9,14 +9,31 @@ import { Price } from "@/components/common/price";
 import PriceQuoteCard from "@/components/common/calPrice";
 import { ArrowRight, Calculator, Shield, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CustomerReview from "@/components/common/customerReview";
 
 function HomePage() {
   const [isVisible, setIsVisible] = useState(false);
+  const [isMove, setIsMove] = useState(false);
+  const h2Ref = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     setIsVisible(true);
+  }, []);
+
+  useEffect(() => {
+    const observer = new window.IntersectionObserver(
+      ([entry]) => {
+        setIsMove(entry.isIntersecting);
+      },
+      { threshold: 0.5 }, // 20% xuất hiện là bắt đầu hiệu ứng
+    );
+    if (h2Ref.current) {
+      observer.observe(h2Ref.current);
+    }
+    return () => {
+      if (h2Ref.current) observer.unobserve(h2Ref.current);
+    };
   }, []);
 
   const features = [
@@ -43,7 +60,7 @@ function HomePage() {
   return (
     <>
       <main>
-        <section className="relative mx-auto mb-16 max-w-7xl px-4">
+        <section className="relative mx-auto mb-16 max-w-7xl px-1 md:px-4">
           <div className="relative overflow-hidden rounded-3xl shadow-2xl">
             <Carousel className="w-full" plugins={[Autoplay({ delay: 4000 })]}>
               <CarouselContent>
@@ -53,7 +70,7 @@ function HomePage() {
                   "https://d2rdhxfof4qmbb.cloudfront.net/wp-content/uploads/20200825140923/iStock-918934132-scaled.jpg",
                 ].map((src, idx) => (
                   <CarouselItem key={idx}>
-                    <div className="relative h-90 md:h-[500px] overflow-hidden">
+                    <div className="relative h-90 overflow-hidden md:h-[500px]">
                       <img
                         src={src || "/placeholder.svg"}
                         alt={`Banner ${idx + 1}`}
@@ -71,7 +88,7 @@ function HomePage() {
               <div
                 className={`max-w-2xl transform transition-all duration-1000 ${isVisible ? "translate-x-0 opacity-100" : "-translate-x-10 opacity-0"}`}
               >
-                <h2 className="md:mb-6 text-3xl md:text-5xl leading-tight font-bold text-white">
+                <h2 className="text-3xl leading-tight font-bold text-white md:mb-6 md:text-5xl">
                   Nơi đặt kính
                   <span className="block bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
                     nhanh chóng & tiện lợi
@@ -95,9 +112,11 @@ function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto mb-16 max-w-7xl px-4">
+        <section className={`mx-auto mb-16 max-w-7xl px-1 md:px-4`}>
           <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold text-gray-800">
+            <h2
+              className={`mb-4 text-4xl font-bold text-gray-800 transition-all duration-300`}
+            >
               Tại sao chọn chúng tôi?
             </h2>
             <p className="mx-auto max-w-2xl text-xl text-gray-600">
@@ -105,25 +124,28 @@ function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-8">
             {features.map((feature, idx) => (
               <Card
                 key={idx}
-                className={`group relative transform overflow-hidden border-0 shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${isVisible ? "animate-fade-in-up" : ""}`}
+                className={`group relative transform overflow-hidden border-0 shadow-xl transition-all duration-500 hover:-translate-y-5 hover:shadow-2xl ${isVisible ? "animate-fade-in-up" : ""} `}
                 style={{ animationDelay: `${idx * 200}ms` }}
               >
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 transition-opacity duration-300 group-hover:opacity-10`}
                 ></div>
-                <CardContent className="relative z-10 p-8">
-                  <div
-                    className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${feature.color} mb-6 flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110`}
-                  >
-                    {feature.icon}
+                <CardContent className="relative z-10 p-4 md:p-8">
+                  <div className="flex flex-row items-center gap-4 md:flex-col md:items-start">
+                    <div
+                      className={`h-12 w-12 rounded-2xl bg-gradient-to-br md:h-16 md:w-16 ${feature.color} flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110`}
+                    >
+                      {feature.icon}
+                    </div>
+                    <h3 className="mb-4 text-2xl font-bold text-gray-800 transition-colors duration-300 group-hover:text-emerald-700">
+                      {feature.title}
+                    </h3>
                   </div>
-                  <h3 className="mb-4 text-2xl font-bold text-gray-800 transition-colors duration-300 group-hover:text-emerald-700">
-                    {feature.title}
-                  </h3>
+
                   <p className="leading-relaxed text-gray-600">
                     {feature.desc}
                   </p>
@@ -136,12 +158,11 @@ function HomePage() {
         <Price></Price>
         <PriceQuoteCard></PriceQuoteCard>
         <CustomerReview></CustomerReview>
-   
 
-        <section className="mx-auto mb-12 max-w-7xl  px-4">
+        <section className="mx-auto mb-12 max-w-7xl p-1 md:px-4">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d335.7529973570932!2d105.6776721423215!3d9.994594320910576!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31a08ec8035be43b%3A0x432cb00910505ce1!2zQ8ahIFPhu58gQ-G7rWEgU-G6r3QgUXXhu5FjIFRodeG6p24!5e1!3m2!1sen!2s!4v1748685293274!5m2!1sen!2s"
-            className="w-full rounded-2xl border-emerald-200 border-2 shadow-xl"
+            className="w-full rounded-2xl border-2 border-emerald-200 shadow-xl"
             width="600"
             height="300"
             loading="lazy"

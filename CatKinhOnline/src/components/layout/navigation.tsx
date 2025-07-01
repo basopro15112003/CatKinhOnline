@@ -20,7 +20,7 @@ function NavigationComponent() {
       <nav className="md:sticky top-0 z-50 mx-auto max-w-7xl px-4 py-4 print:hidden">
         <div className="flex justify-center">
           <div className="rounded-full border border-emerald-200 bg-white/70 px-8 py-3 shadow-sm backdrop-blur-md ">
-            <div className="flex space-x-3 md:space-x-8">
+            <div className="flex space-x-2 text-sm md:text-base md:space-x-8">
               <Link
                 to={"/"}
                 className={getLinkClasses("/")}

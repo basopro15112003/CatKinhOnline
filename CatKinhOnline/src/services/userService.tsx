@@ -36,24 +36,30 @@ export type RegisterInput = {
   status: number;
 };
 
-export type ChangePasswordInput ={
+export type ChangePasswordInput = {
   newPassword: string;
   oldPassword: string;
-}
+};
 
-export const changePassword = async (email: string, data:ChangePasswordInput):Promise<APIResponse> => {
+export const changePassword = async (
+  email: string,
+  data: ChangePasswordInput,
+): Promise<APIResponse> => {
   try {
-    const response: AxiosResponse<APIResponse> = await request.put(`User/ChangePassword/${email}`, data) 
-      return response.data
+    const response: AxiosResponse<APIResponse> = await request.put(
+      `User/ChangePassword/${email}`,
+      data,
+    );
+    return response.data;
   } catch (error) {
-    console.log(error)
-        return {
+    console.log(error);
+    return {
       isSuccess: false,
       message: "Đã có lỗi xảy ra khi kết nối tới máy chủ.",
       result: [],
     };
   }
-}
+};
 
 export const registerNewUser = async (
   data: RegisterInput,
@@ -98,17 +104,36 @@ export const LoginJWT = async (data: LoginInput): Promise<string | null> => {
   }
 };
 
-export const getUserProfile = async (
-  email: string,
-): Promise<UserProfile | null> => {
+export const getUserProfileByID = async (id: string): Promise<APIResponse> => {
   try {
-    const response: AxiosResponse<UserProfile> = await request.get(
-      `User/${email}`,
+    const response: AxiosResponse<APIResponse> = await request.get(
+      `User/${id}`,
     );
     return response.data;
   } catch (error) {
     console.log(error);
-    return null;
+    return {
+      isSuccess: false,
+      message: "Đã có lỗi xảy ra khi kết nối tới máy chủ.",
+      result: [],
+    };
+  }
+};
+export const getUserProfileByEmail = async (
+  email: string,
+): Promise<APIResponse | null> => {
+  try {
+    const response: AxiosResponse<APIResponse> = await request.get(
+      `User/user/${email}`,
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return {
+      isSuccess: false,
+      message: "Đã có lỗi xảy ra khi kết nối tới máy chủ.",
+      result: [],
+    };
   }
 };
 

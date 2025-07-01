@@ -198,3 +198,12 @@
 }
 
 /* custom-datepicker.css End */
+/* Chatbase AI Chatbot */
+#chatbase-bubble-window {
+  width: 350px !important;
+  max-width: 90vw !important;
+  height: 450px !important;
+  max-height: 80vh !important;
+  border-radius: 16px !important;
+  font-size: 15px !important;
+}

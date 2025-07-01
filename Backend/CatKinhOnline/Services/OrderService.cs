@@ -10,10 +10,12 @@ namespace CatKinhOnline.Services
         {
         private readonly IOrderRepository _orderRepository;
         private readonly OrderItemService _orderItemService;
-        public OrderService(IOrderRepository orderRepository, OrderItemService orderItemService)
+        private readonly AddressService _addressService;
+        public OrderService(IOrderRepository orderRepository, OrderItemService orderItemService, AddressService addressService)
             {
             _orderRepository=orderRepository;
             _orderItemService=orderItemService;
+            _addressService=addressService;
             }
 
         #region Get All Orders
@@ -144,8 +146,19 @@ namespace CatKinhOnline.Services
                     {
                     return new APIResponse { IsSuccess=false, Message="Không tìm thấy đơn hàng." };
                     }
-                var orderDTO = new OrderDTO();
-                orderDTO.CopyProperties(order);
+                    var orderDTO = new ViewOrderDTO();
+                    orderDTO.CopyProperties(order);
+                    if (order.OrderItems!=null)
+                        {
+                        List<OrderItemDTO> orderItemDTOs = new List<OrderItemDTO>();
+                        foreach (var item in order.OrderItems)
+                            {
+                            var orderItemDTO = new OrderItemDTO();
+                            orderItemDTO.CopyProperties(item);
+                            orderItemDTOs.Add(orderItemDTO);
+                            }
+                        orderDTO.OrderItems=orderItemDTOs;
+                        }
                 return new APIResponse { IsSuccess=true, Result=orderDTO };
                 }
             catch (Exception ex)
@@ -186,7 +199,19 @@ namespace CatKinhOnline.Services
                     {
                     order.ShippingAddressId=null;
                     }
-                var orderEntity = new Order();
+                else
+                    {
+                    if (order.ShippingAddressId==null)
+                        {
+                        return new APIResponse { IsSuccess=true, Message="Địa chỉ giao hàng không được để trống." };
+                        }
+                    var address = await _addressService.GetAddressById(order.ShippingAddressId.Value);
+                    if (address.IsSuccess && address.Result == null)
+                        {
+                        return new APIResponse { IsSuccess=true, Message="Địa chỉ giao hàng không tồn tại." };
+                        }
+                    }
+                    var orderEntity = new Order();
                 orderEntity.CopyProperties(order);
                 orderEntity.CreatedAt=DateTime.UtcNow;
                 var orderAdded = await _orderRepository.AddOrderAsync(orderEntity);
@@ -215,7 +240,6 @@ namespace CatKinhOnline.Services
                 }
             }
         #endregion
-
 
         //#region Update Order
         //public async Task<APIResponse> UpdateOrderAsync(OrderDTO order)

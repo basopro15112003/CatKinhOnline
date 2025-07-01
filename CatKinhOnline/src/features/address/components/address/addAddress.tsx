@@ -212,22 +212,45 @@ export function FromAddress({
                 <div>
                   <Label htmlFor="specificAddress">Địa chỉ cụ thể</Label>
                   <Textarea
+                  className="w-full max-w-[530px]"
                     id="specificAddress"
                     placeholder="Số nhà, tên đường, tòa nhà, ..."
-                    rows={2}
+                    rows={3}
+                    maxLength={200}
                     value={finalAddress}
                     onChange={(e) => setFinalAddress(e.target.value)}
-                  />
+                  /> <div className="mt-1 flex justify-between text-xs">
+                  <span className="text-gray-500">
+                    Ghi chú tối đa 200 ký tự
+                  </span>
+                  <span
+                    className={`${finalAddress.length > 200 ? "text-red-500" : "text-gray-500"}`}
+                  >
+                    {finalAddress.length}/200
+                  </span>
+                </div>
                 </div>{" "}
                 <div>
                   <Label htmlFor="note">Ghi chú</Label>
                   <Textarea
+                    className="w-full max-w-[530px]"
+                    maxLength={300}
                     id="note"
                     placeholder="Ghi chú (tùy chọn) đi qua mấy cửa hàng, đi qua mấy ngã tư, qua mấy cây cầu, ..."
-                    rows={2}
+                    rows={3}
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                  />
+                  />{" "}
+                  <div className="mt-1 flex justify-between text-xs">
+                    <span className="text-gray-500">
+                      Ghi chú tối đa 300 ký tự
+                    </span>
+                    <span
+                      className={`${note.length > 300 ? "text-red-500" : "text-gray-500"}`}
+                    >
+                      {note.length}/300
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Label htmlFor="isDefault">Đặt làm địa chỉ mặc định</Label>

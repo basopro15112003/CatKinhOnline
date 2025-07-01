@@ -31,8 +31,8 @@ export default function CustomerReview() {
   ];
   return (
     <>
-      <section className="mx-auto mb-16 max-w-7xl px-4">
-        <div className="mb-12 text-center">
+      <section className="mx-auto mb-8 md:mb-16 max-w-7xl px-1 md:px-4">
+        <div className="mb-8 md:mb-12 text-center">
           <h2 className="mb-4 text-4xl font-bold text-gray-800">
             Khách hàng nói gì về chúng tôi?
           </h2>
@@ -41,26 +41,26 @@ export default function CustomerReview() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:gap-8 md:grid-cols-3">
           {reviews.map((review, idx) => (
             <Card
               key={idx}
               className="group transform border-0 bg-gradient-to-br from-white to-emerald-50/30 shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl"
             >
-              <CardContent className="p-8">
-                <div className="mb-6 flex items-center">
+              <CardContent className="p-4 md:p-8">
+                <div className="mb-2 md:mb-6 flex items-center">
                   <img
                     src={review.img || "/placeholder.svg"}
                     alt={review.name}
                     className="h-16 w-16 rounded-full border-4 border-emerald-200 object-cover transition-colors duration-300 group-hover:border-emerald-400"
                   />
-                  <div className="ml-4">
+                  <div className="ml-2 md:ml-4">
                     <h4 className="font-bold text-gray-800">{review.name}</h4>
                     <p className="text-sm text-gray-600">{review.role}</p>
                   </div>
                 </div>
 
-                <div className="mb-4 flex">
+                <div className="mb-2 md:mb-4 flex">
                   {[...Array(review.rating)].map((_, i) => (
                     <Star
                       key={i}

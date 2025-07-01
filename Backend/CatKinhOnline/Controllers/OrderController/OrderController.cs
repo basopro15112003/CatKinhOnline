@@ -40,6 +40,17 @@ namespace CatKinhOnline.Controllers.OrderController
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrderById(int id)
             {
+            APIResponse response = await _orderService.getOrderByIdAsync(id);
+            if (response.IsSuccess)
+                {
+                return Ok(response);
+                }
+            return NotFound(response.Message);
+            }
+        [HttpGet]
+        [Route("user/{id}")]
+        public async Task<IActionResult> GetOrderByUserId(int id)
+            {
             APIResponse response = await _orderService.getOrdersHaveOrderItemByUserIdAsync(id);
             if (response.IsSuccess)
                 {

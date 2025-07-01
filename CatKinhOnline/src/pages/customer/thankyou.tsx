@@ -15,39 +15,76 @@ import {
   FileText,
   Share2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CustomerReview from "@/components/common/customerReview";
 import { useParams } from "react-router-dom";
+import { getOrderById, type ViewOrder } from "@/services/orderService";
+import { getProducts, type Product } from "@/services/productService";
+import { getAddressById, type Address } from "@/services/addressService";
+import { getUserProfileByID, type UserProfile } from "@/services/userService";
 
 function ThankYouPage() {
   const [currentTime] = useState(new Date());
   const { id } = useParams();
   const [orderNumber] = useState(() => `DH${Date.now().toString().slice(-6)}`);
+  const [order, setOrder] = useState<ViewOrder | null>(null);
+  const [products, setProducts] = useState<{ [key: number]: Product }>({});
+  const [address, setAddress] = useState<Address>();
+  const [user, setUser] = useState<UserProfile>();
 
-  // Mock order data - trong thực tế sẽ lấy từ props hoặc API
-  const orderData = {
-    customerName: "Nguyễn Văn A",
-    phone: "0123456789",
-    email: "customer@email.com",
-    items: [
-      {
-        name: "Kính cường lực",
-        size: "1.2m × 0.8m",
-        quantity: 2,
-        price: 720000,
-      },
-      {
-        name: "Kính trắng 5 ly",
-        size: "1.0m × 1.5m",
-        quantity: 1,
-        price: 330000,
-      },
-    ],
-    total: 1050000,
-    deliveryMethod: "Giao hàng tận nơi",
-    paymentMethod: "Tiền mặt khi nhận",
-    estimatedDelivery: "2-3 ngày làm việc",
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await getUserProfileByID(order?.userId.toString() || "");
+      if (response.isSuccess) {
+        setUser(response.result as UserProfile);
+      }
+    };
+    fetchUser();
+  }, []);
+  console.log(user);
+  useEffect(() => {
+    const fetchAddress = async () => {
+      const response = await getAddressById(order?.shippingAddressId || 0);
+      if (response.isSuccess) {
+        setAddress(response.result as Address);
+      }
+    };
+    fetchAddress();
+  }, []);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const allProducts = await getProducts();
+        if (allProducts.isSuccess && Array.isArray(allProducts.result)) {
+          const productsMap: { [key: number]: Product } = {};
+          allProducts.result.forEach((product: Product) => {
+            productsMap[product.id] = product;
+          });
+          setProducts(productsMap);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      const response = await getOrderById(Number(id));
+      if (response.isSuccess) {
+        setOrder(response.result as ViewOrder);
+        console.log(order);
+      }
+    };
+    fetchOrder();
+  }, [id]);
+
+  const calculateSubtotal = () => {
+    return order?.orderItems.reduce((total, item) => total + item.subtotal, 0);
   };
+  const subtotal = calculateSubtotal();
 
   const nextSteps = [
     {
@@ -75,7 +112,7 @@ function ThankYouPage() {
       {/* Print-only header */}
       <div className="hidden print:mb-8 print:block print:text-center">
         <h1 className="text-2xl font-bold text-gray-800">
-          NHÔM KÍNH QUỐC HOÀNG
+          NHÔM KÍNH QUỐC THUẦN
         </h1>
         <p className="mb-4 text-gray-600">
           227 Phong Điền, TP Cần Thơ, Việt Nam | 0333 744 591 |
@@ -85,16 +122,16 @@ function ThankYouPage() {
         <p className="text-gray-600">{currentTime.toLocaleString("vi-VN")}</p>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-12 print:max-w-none print:p-0">
+      <div className="mx-auto max-w-7xl px-1 py-12 md:px-4 print:max-w-none print:p-0">
         {/* Success Message */}
         <div className="mb-12 text-center print:hidden">
-          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-emerald-500 shadow-2xl">
+          <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-emerald-500 shadow-2xl md:mb-6">
             <CheckCircle className="h-12 w-12 text-white" />
           </div>
-          <h1 className="mb-4 text-4xl font-bold text-gray-800">
+          <h1 className="mb-2 text-2xl font-bold text-gray-800 md:mb-4 md:text-4xl">
             Cảm ơn bạn đã đặt hàng!
           </h1>
-          <p className="mb-2 text-xl text-gray-600">
+          <p className="text-base text-gray-600 md:mb-2 md:text-xl">
             Đơn hàng của bạn đã được tiếp nhận thành công
           </p>
           <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
@@ -121,50 +158,122 @@ function ThankYouPage() {
                 </div>
 
                 <div className="space-y-4">
-                  {orderData.items.map((item, index) => (
+                  {order?.orderItems.map((item, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between border-b border-emerald-100 py-3 print:border-gray-300"
+                      className="flex items-center justify-between border-emerald-100 print:border-gray-300"
                     >
-                      <div>
-                        <div className="font-semibold text-gray-800">
-                          {item.name}
+                      <div className="flex">
+                        <div className="flex items-center justify-center border-r-2 border-gray-300 pr-3 text-base md:text-xl font-bold text-emerald-700">
+                          {index + 1}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {item.size} × {item.quantity}
+                        <div className="ml-2 flex flex-col">
+                          <div className="font-semibold text-gray-800">
+                            {products[item.productId]?.productName}
+                          </div>
+                          <div className="text-xs md:text-base text-gray-500">
+                            {item.widthM} m × {item.heightM} m x{" "}
+                            {item.unitPrice.toLocaleString()}₫/m2 ={" "}
+                            {item.widthM * item.heightM * item.unitPrice}₫ x{" "}
+                            {item.quantity} Tấm
+                          </div>
                         </div>
                       </div>
-                      <div className="font-semibold text-emerald-700 print:text-black">
-                        {item.price.toLocaleString()}₫
+                      <div className="text-base md:text-lg font-semibold text-black print:text-black">
+                        {item.subtotal.toLocaleString()}₫
                       </div>
                     </div>
                   ))}
 
-                  <div className="flex items-center justify-between border-t-2 border-emerald-200 pt-4 print:border-gray-400">
-                    <span className="text-xl font-bold text-gray-800">
-                      Tổng cộng:
-                    </span>
-                    <span className="text-2xl font-bold text-emerald-700 print:text-black">
-                      {orderData.total.toLocaleString()}₫
-                    </span>
+                  <div className="border-t-2 print:border-gray-300 border-emerald-100 pt-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-base font-bold text-gray-800">
+                        Tạm tính:
+                      </span>
+                      <span className="text-lg font-bold text-black print:text-black">
+                        {subtotal?.toLocaleString()}₫
+                      </span>
+                    </div>{" "}
+                    <div className="flex items-center justify-between">
+                      <span className="text-base font-bold text-gray-800">
+                        Phí vận chuyển:
+                      </span>
+                      <span className="text-base italic font-bold text-black print:text-black">
+                        {subtotal && subtotal >= 2000000
+                          ? "Miễn phí"
+                          : "200,000₫"}
+                      </span>
+                    </div>{" "}
+                    <div className="flex items-center justify-between border-b-2 border-emerald-100 pb-4 print:border-gray-300">
+                      <span className="text-xl font-bold text-gray-800">
+                        Tổng cộng:
+                      </span>
+                      <span className="text-2xl font-bold text-black print:text-black">
+                        {order?.totalAmount.toLocaleString()}₫
+                      </span>
+                    </div>
                   </div>
                 </div>
-
+                <div className="mt-2 flex justify-between">
+                  <p className="text-sm font-semibold">
+                    Ghi chú đơn hàng:{" "}
+                    {order?.note && order?.note !== "" ? (
+                      <span
+                        className="block text-xs font-normal italic"
+                        style={{ wordBreak: "break-word" }}
+                      >
+                        {order?.note}
+                      </span>
+                    ) : (
+                      <span className="text-xs font-normal italic">
+                        Không có
+                      </span>
+                    )}
+                  </p>
+                </div>
                 <div className="mt-6 grid grid-cols-1 gap-4 text-sm md:grid-cols-2 print:grid-cols-2">
-                  <div className="rounded-lg bg-emerald-50 p-3 print:border print:border-gray-300 print:bg-gray-100">
-                    <div className="font-semibold text-emerald-800 print:text-black">
+                  <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
+                    <div className="text-lg font-semibold text-emerald-900 print:text-black">
+                      Người nhận
+                    </div>
+                    <div className="text-emerald-600 print:text-black">
+                      {address?.contactName}
+                    </div>
+                  </div>
+                  <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
+                    <div className="text-lg font-semibold text-emerald-900 print:text-black">
+                      Số điện thoại
+                    </div>
+                    <div className="text-emerald-600 print:text-black">
+                      {address?.contactPhone}
+                    </div>
+                  </div>
+                  <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
+                    <div className="text-lg font-semibold text-emerald-900 print:text-black">
                       Phương thức nhận hàng
                     </div>
                     <div className="text-emerald-600 print:text-black">
-                      {orderData.deliveryMethod}
+                      {order?.deliveryType === 0
+                        ? "Tại cửa hàng"
+                        : "Giao tận hàng nơi"}
                     </div>
-                  </div>
-                  <div className="rounded-lg bg-emerald-50 p-3 print:border print:border-gray-300 print:bg-gray-100">
-                    <div className="font-semibold text-emerald-800 print:text-black">
+                  </div>{" "}
+                  <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
+                    <div className="text-lg font-semibold text-emerald-900 print:text-black">
                       Phương thức thanh toán
                     </div>
                     <div className="text-emerald-600 print:text-black">
-                      {orderData.paymentMethod}
+                      {order?.paymentMethod === 0
+                        ? "Tiền mặt"
+                        : "Thanh toán trực tuyến"}
+                    </div>
+                  </div>{" "}
+                  <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
+                    <div className="text-lg font-semibold text-emerald-900 print:text-black">
+                      Địa chỉ nhận hàng
+                    </div>
+                    <div className="text-emerald-600 print:text-black">
+                      {address?.addressLine}
                     </div>
                   </div>
                 </div>
@@ -257,7 +366,9 @@ function ThankYouPage() {
                 <Truck className="mx-auto mb-4 h-12 w-12" />
                 <h3 className="mb-2 text-xl font-bold">Dự kiến giao hàng</h3>
                 <p className="mb-4 text-emerald-100">
-                  {orderData.estimatedDelivery}
+                  {order?.deliveryType === 0
+                    ? "Tại cửa hàng"
+                    : "Giao tận hàng nơi"}
                 </p>
                 <div className="text-sm opacity-90">
                   Chúng tôi sẽ liên hệ trước khi giao hàng

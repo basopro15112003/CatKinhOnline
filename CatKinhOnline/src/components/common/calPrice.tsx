@@ -1,4 +1,4 @@
-import  { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
@@ -12,19 +12,28 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Calculator, CheckCircle } from "lucide-react";
+import { getProducts, type Product } from "@/services/productService";
 
 export default function PriceQuoteCard() {
-  type Product = { product: string; price: number };
-  const products: Product[] = useMemo(
-    () => [
-      { product: "tempered", price: 300000 },
-      { product: "frosted", price: 250000 },
-      { product: "clear4", price: 200000 },
-      { product: "clear5", price: 220000 },
-      { product: "clear8", price: 260000 },
-    ],
-    [],
-  );
+  const [product, setProduct] = useState<Product[]>([]);
+  // Get Product Data
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await getProducts();
+        if (response.isSuccess && Array.isArray(response.result)) {
+          // kiểm tra xem response có phải là một mảng không
+          const filtered = response.result.filter(
+            (item: Product) => item.status === 1,
+          ); // lọc ra những sản phẩm có status là đang còn hàng
+          setProduct(filtered);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    }
+    fetchData();
+  }, []);
 
   // State cho form
   const [glassType, setGlassType] = useState<string>("");
@@ -32,7 +41,7 @@ export default function PriceQuoteCard() {
   const [height, setHeight] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
 
-  const found = products.find((p) => p.product === glassType) || null; // set product prop = glasstype trong select
+  const found = product.find((p) => p.id === parseInt(glassType)) || null; // set product prop = glasstype trong select
   const subtotal = useMemo(() => {
     if (!glassType) return 0;
     if (!found) return 0;
@@ -45,13 +54,13 @@ export default function PriceQuoteCard() {
     // Tính diện tích tổng
     const areaTotal = w * h * quantity;
     // Tạm tính = diện tích * đơn giá
-    return Math.round(areaTotal * found.price);
-  }, [glassType, width, height, quantity, found, products]);
+    return Math.round(areaTotal * found.pricePerM2);
+  }, [glassType, width, height, quantity, found, product]);
   return (
     <>
-      <section className="mx-auto mb-16 max-w-7xl px-4">
+      <section className="mx-auto mb-16 max-w-7xl px-1 md:px-4">
         <Card className="overflow-hidden border-0 bg-gradient-to-br from-white to-emerald-50/30 shadow-2xl">
-          <CardContent className="lg:p-12 mt-2">
+          <CardContent className="mt-2 p-1 md:p-12">
             <div className="mb-10 text-center">
               <h2 className="mb-4 text-4xl font-bold text-gray-800">
                 Tính giá kính thông minh
@@ -61,7 +70,7 @@ export default function PriceQuoteCard() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-emerald-100 bg-white p-4 lg:p-8 shadow-lg">
+            <div className="rounded-2xl border border-emerald-100 bg-white p-2 md:p-4 shadow-lg lg:p-8">
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                 {/* Form inputs would go here */}
                 <div className="col-span-1 space-y-6">
@@ -96,7 +105,7 @@ export default function PriceQuoteCard() {
                   </div>
                 </div>
               </div>{" "}
-              <div className="mt-6 rounded-xl border border-emerald-200 p-8 text-center">
+              <div className="mt-6 rounded-xl border border-emerald-200 p-4 md:p-8 text-center">
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                   {/* Form nhập liệu */}
                   <div>
@@ -107,15 +116,21 @@ export default function PriceQuoteCard() {
                       value={glassType}
                       onValueChange={(value) => setGlassType(value)}
                     >
-                      <SelectTrigger id="glassType" className="w-full">
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Chọn loại kính" />
                       </SelectTrigger>
                       <SelectContent className="border-2 border-emerald-200">
-                        <SelectItem value="tempered">Kính cường lực</SelectItem>
-                        <SelectItem value="frosted">Kính bông</SelectItem>
-                        <SelectItem value="clear4">Kính trắng 4 ly</SelectItem>
-                        <SelectItem value="clear5">Kính trắng 5 ly</SelectItem>
-                        <SelectItem value="clear8">Kính trắng 8 ly</SelectItem>
+                        {product.map((type) => (
+                          <SelectItem key={type.id} value={type.id.toString()}>
+                            <div className="flex w-full items-center justify-between">
+                              <span>{type.productName}</span>
+                              <span className="ml-4 font-semibold text-emerald-600">
+                                {type.pricePerM2.toLocaleString()}
+                                ₫/m²
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
 
@@ -127,7 +142,16 @@ export default function PriceQuoteCard() {
                           id="width"
                           placeholder="Rộng"
                           value={width}
-                          onChange={(e) => setWidth(e.target.value)}
+                          type="number"
+                          min={0.1}
+                          max={2.7}
+                          onChange={(e) => {
+                            let value = Number(e.target.value);
+                            if (value > 2.7) value = 2.7;
+                            if (value < 0.1) value = 0.1;
+                            value = Math.round(value * 1000) / 1000;
+                            setWidth(value.toString());
+                          }}
                         />
                       </div>
                       <div className="w-full">
@@ -137,9 +161,16 @@ export default function PriceQuoteCard() {
                         <Input
                           id="height"
                           placeholder="Dài"
+                          min={0.1}
+                          max={4.8}
+                          type="number"
                           value={height}
                           onChange={(e) => {
-                            setHeight(e.target.value);
+                            let value = Number(e.target.value);
+                            if (value > 4.8) value = 4.8;
+                            if (value < 0.1) value = 0.1;
+                            value = Math.round(value * 1000) / 1000;
+                            setHeight(value.toString());
                           }}
                         />
                       </div>
@@ -150,12 +181,13 @@ export default function PriceQuoteCard() {
                         <Input
                           id="quantity"
                           type="number"
-                          min={1}
-                          className="w-14 md:w-full "
+                          className="w-14 md:w-full"
                           value={quantity}
                           onChange={(e) => {
-                            const v = parseInt(e.target.value, 10);
-                            setQuantity(isNaN(v) || v < 1 ? 1 : v);
+                            let value = Number(e.target.value);
+                            if (value > 101) value = 101;
+                            if (value < 1) value = 1;
+                            setQuantity(value);
                           }}
                         />
                       </div>
@@ -170,10 +202,10 @@ export default function PriceQuoteCard() {
                       </p>
                       <p className="text-start text-sm md:text-base">
                         {quantity} × {glassType} ({width}m × {height}m) x{" "}
-                        {found?.price.toLocaleString()} ₫/m² ={" "}
+                        {found?.pricePerM2.toLocaleString()} ₫/m² ={" "}
                         {subtotal.toLocaleString()}₫
                       </p>
-                      <p className="mt-2 text-sx text-end md:text-xl font-bold text-green-900">
+                      <p className="text-sx mt-2 text-end font-bold text-green-900 md:text-xl">
                         Tổng: {subtotal.toLocaleString()}₫
                       </p>
                     </div>
@@ -188,7 +220,7 @@ export default function PriceQuoteCard() {
                     Đặt kính ngay
                   </Button>
                 </Link>
-                <p className="mt-6 text-center text-sm text-gray-500 italic">
+                <p className="mt-4 md:mt-6 text-center text-xs md:text-sm text-gray-500 italic">
                   * Bảng này dùng để báo giá theo từng loại kính, nếu quý khách
                   hàng muốn đặt kính vui lòng bấm vào nút "Đặt kính ngay"
                 </p>

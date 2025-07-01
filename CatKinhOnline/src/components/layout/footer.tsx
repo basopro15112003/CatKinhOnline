@@ -15,7 +15,7 @@ export function Footer() {
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 rounded-2xl md:grid-cols-4">
           <div>
             <h3 className="mb-4 text-2xl font-semibold">
-              Tiệm kính Quốc Hoàng
+              Nhôm Kính Quốc Thuần
             </h3>
             <p className="mb-2 flex items-center gap-2 text-sm">
               <MapPin size={20} />
@@ -25,7 +25,7 @@ export function Footer() {
               <Mail size={20} /> quochoangnguyen2003ct@gmail.com
             </p>
             <p className="mb-2 flex items-center gap-2 text-sm">
-              <Phone size={20} /> 0901 234 567
+              <Phone size={20} /> 0939 105 522
             </p>
           </div>
 

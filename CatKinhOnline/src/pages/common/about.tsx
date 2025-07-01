@@ -128,7 +128,7 @@ export default function About() {
             }`}
           >
             <p className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              Tiệm kính Quốc Hoàng
+              Nhôm Kính Quốc Thuần
             </p>
           </h1>
           <p className="mx-auto max-w-3xl text-xl leading-relaxed text-gray-600">
@@ -170,7 +170,7 @@ export default function About() {
               Câu chuyện của chúng tôi
             </h2>
             <p className="mb-6 text-lg leading-relaxed text-gray-600">
-              Bắt đầu từ một cửa hàng nhỏ năm 2003, Tiệm Kính Quốc Hoàng đã
+              Bắt đầu từ một cửa hàng nhỏ năm 2003, Nhôm Kính Quốc Thuần đã
               không ngừng phát triển và trở thành một trong những địa chỉ uy tín
               nhất trong lĩnh vực cắt kính tại Cần Thơ.
             </p>

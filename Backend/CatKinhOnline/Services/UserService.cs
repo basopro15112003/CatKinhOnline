@@ -1,6 +1,7 @@
 ﻿using CatKinhOnline.ModelDTOs;
 using CatKinhOnline.Models;
 using CatKinhOnline.Repositories.UserRepository;
+using ISUZU_NEXT.Server.Core.Extentions;
 
 namespace CatKinhOnline.Services
     {
@@ -40,11 +41,27 @@ namespace CatKinhOnline.Services
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<User?> GetUserById(int id)
+        public async Task<APIResponse?> GetUserById(int id)
             {
             try
                 {
-                return await _userRepository.GetUserById(id);
+                var user = await _userRepository.GetUserById(id);
+                if (user==null)
+                    {
+                    return new APIResponse
+                        {
+                        IsSuccess=true,
+                        Message="Người dùng không tồn tại."
+                        };
+                    }
+                var userDTO = new ViewUserDTO();
+                userDTO.CopyProperties(user);
+                return new APIResponse
+                    {
+                    IsSuccess=true,
+                    Message="Lấy thông tin người dùng thành công.",
+                    Result=userDTO
+                    };
                 }
             catch (Exception ex)
                 {
@@ -60,11 +77,27 @@ namespace CatKinhOnline.Services
         /// <param name="email"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<User?> GetUserByEmail(string email)
+        public async Task<APIResponse?> GetUserByEmail(string email)
             {
             try
                 {
-                return await _userRepository.GetUserByEmail(email);
+                var user = await _userRepository.GetUserByEmail(email);
+                if (user==null)
+                    {
+                    return new APIResponse
+                        {
+                        IsSuccess=true,
+                        Message="Người dùng không tồn tại."
+                        };
+                    }
+                var userDTO = new ViewUserDTO();
+                userDTO.CopyProperties(user);
+                return new APIResponse
+                    {
+                    IsSuccess=true,
+                    Message="Lấy thông tin người dùng thành công.",
+                    Result=userDTO
+                    };
                 }
             catch (Exception ex)
                 {

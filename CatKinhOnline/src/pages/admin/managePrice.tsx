@@ -39,6 +39,7 @@ export default function ManagePrice() {
   const [showForm, setShowForm] = useState(false);
   const [open, setOpen] = React.useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<number>(0);
   const [statusFilter, setStatusFilter] = useState<number>(0);
   const [product, setProduct] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -50,7 +51,9 @@ export default function ManagePrice() {
     async function fetchData() {
       try {
         const response = await getProducts();
-        setProduct(response);
+        if (response.isSuccess && Array.isArray(response.result)) {
+          setProduct(response.result);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -80,7 +83,9 @@ export default function ManagePrice() {
 
   const handleReload = async () => {
     const response = await getProducts();
-    setProduct(response);
+    if (response.isSuccess && Array.isArray(response.result)) {
+      setProduct(response.result);
+    }
   };
 
   function toggleSidebar() {
@@ -94,11 +99,14 @@ export default function ManagePrice() {
         o.productName.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
-    if (statusFilter !== 0) {
-      data = data.filter((o) => o.category.id === statusFilter);
+    if (statusFilter !== 2) {
+      data = data.filter((o) => o.status === statusFilter);
+    }
+    if (categoryFilter !== 0) {
+      data = data.filter((o) => o.category.id === categoryFilter);
     }
     return data;
-  }, [product, searchTerm, statusFilter]);
+  }, [product, searchTerm, statusFilter, categoryFilter]);
   //#endregion
 
   return (
@@ -135,8 +143,8 @@ export default function ManagePrice() {
             </CardHeader>
             <CardContent>
               <div>
-                <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <div>
+                <div className="mb-6 flex flex-col space-x-2 md:flex-col md:space-x-2 lg:flex-row">
+                  <div className="w-full md:w-3xs">
                     <Label>Tên sản phẩm</Label>
                     <Input
                       value={searchTerm}
@@ -144,11 +152,13 @@ export default function ManagePrice() {
                       placeholder="Tìm sản phẩm theo tên"
                     />
                   </div>
-                  <div>
+                  <div className="w-full md:w-3xs">
                     <Label>Loại</Label>
                     <Select
-                      value={statusFilter.toString()}
-                      onValueChange={(value) => setStatusFilter(Number(value))}
+                      value={categoryFilter.toString()}
+                      onValueChange={(value) =>
+                        setCategoryFilter(Number(value))
+                      }
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Chọn loại" />
@@ -163,15 +173,36 @@ export default function ManagePrice() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="flex items-end space-x-2">
+                  <div className="w-full md:w-3xs">
+                    <Label>Trạng thái</Label>
+                    <Select
+                      value={statusFilter.toString()}
+                      onValueChange={(value) => setStatusFilter(Number(value))}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Chọn loại" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2">Tất cả</SelectItem>
+                        <SelectItem value="1">Còn hàng</SelectItem>
+                        <SelectItem value="0">Hết hàng</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="mt-3 flex w-full space-x-2 md:w-3xs">
                     <Button
+                      className="md:w-34"
                       type="button"
                       variant="outline"
                       onClick={newProduct}
                     >
                       Sản phẩn mới nhất
                     </Button>
-                    <Button type="button" onClick={() => setShowForm(true)}>
+                    <Button
+                      type="button"
+                      className="md:w-34"
+                      onClick={() => setShowForm(true)}
+                    >
                       Thêm sản phẩm
                     </Button>
                   </div>
@@ -188,9 +219,9 @@ export default function ManagePrice() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredData.map((prod) => (
+                    {filteredData.map((prod, index) => (
                       <TableRow key={prod.id}>
-                        <TableCell>{prod.id}</TableCell>
+                        <TableCell>{index + 1}</TableCell>
                         <TableCell>{prod.productName}</TableCell>
                         <TableCell>{prod.category.categoryName}</TableCell>
                         <TableCell>

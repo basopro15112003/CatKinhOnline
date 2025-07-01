@@ -21,6 +21,10 @@ namespace CatKinhOnline.Controllers.ProductController
         public async Task<IActionResult> Get()
             {
             var products = await _productService.GetAllProduct();
+            if (!products.IsSuccess)
+                {
+                return NotFound(products);
+                }
             return Ok(products);
             }
 
@@ -31,7 +35,7 @@ namespace CatKinhOnline.Controllers.ProductController
             var product = await _productService.GetProductById(id);
             if (product==null)
                 {
-                return NotFound($"Product with ID {id} not found.");
+                return NotFound(product);
                 }
             return Ok(product);
             }

@@ -2,18 +2,19 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Register } from "@/pages/common/register";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, Store } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Link, useNavigate } from "react-router-dom";
-import { getUserProfile, type UserProfile } from "@/services/userService";
+import { getUserProfileByEmail, type UserProfile } from "@/services/userService";
 import { Login } from "@/pages/common/login";
 import { toast } from "@/hooks/use-toast";
 import NavigationComponent from "./navigation";
+import Logo from "../../assets/images/LogoWhiteNoBG.png";
 
 export function Header() {
   const [showForm, setShowForm] = useState(false);
   const token = localStorage.getItem("token");
-  const [userProfile, setUserProfile] = useState<UserProfile>();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const navigate = useNavigate();
   const email = localStorage.getItem("email");
 
@@ -23,9 +24,10 @@ export function Header() {
         return;
       }
       try {
-        const response = await getUserProfile(email);
-        if (response) {
-          setUserProfile(response);
+        const response = await getUserProfileByEmail(email);
+        if (response && response.isSuccess) {
+          setUserProfile(response.result as UserProfile | null);
+          console.log("userProfile", userProfile);
         }
         if (userProfile?.phone === "") {
           toast.warning(
@@ -61,10 +63,10 @@ export function Header() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
           <Link to={"/"} className="flex items-center space-x-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600">
-              <Store className="h-6 w-6 text-white" />
+              <img src={Logo} alt="Logo" className="w-7 h-7 text-white" />
             </div>
             <h1 className="bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-base font-bold text-transparent md:text-2xl">
-              Tiệm kính Quốc Hoàng
+              Nhôm Kính Quốc Thuần
             </h1>
           </Link>
           {!token ? (
