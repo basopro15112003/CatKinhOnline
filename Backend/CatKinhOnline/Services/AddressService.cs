@@ -2,6 +2,8 @@
 using CatKinhOnline.Models;
 using CatKinhOnline.Repositories.AddressRepository;
 using ISUZU_NEXT.Server.Core.Extentions;
+using Microsoft.IdentityModel.Tokens;
+using System.Text.RegularExpressions;
 
 namespace CatKinhOnline.Services
     {
@@ -96,6 +98,42 @@ namespace CatKinhOnline.Services
             }
         #endregion
 
+        #region validate Address      
+        /// <summary>
+        /// validate an address before adding or updating it.
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        public APIResponse ValidateAddress(AddressDTO address)
+            {
+             if (address == null)
+                {
+                return new APIResponse { IsSuccess=false, Message="Địa chỉ không được để trống" };
+                }
+             if(address.ContactName.IsNullOrEmpty()||address.ContactName.Length<6||address.ContactName.Length>50)
+                {
+                return new APIResponse { IsSuccess=false, Message="Tên liên hệ không hợp lệ. Độ dài từ 3 đến 50 ký tự." };
+                }
+             if(address.ContactPhone.IsNullOrEmpty())
+                {
+                return new APIResponse { IsSuccess=false, Message="Số điện thoại liên hệ không được để trống" };
+                }
+            if (!Regex.IsMatch(address.ContactPhone.Trim(), @"^0[0-9]{9}$"))
+                {
+                return new APIResponse { IsSuccess=false, Message="Số điện thoại không hợp lệ" };
+                }
+            if (address.AddressLine.IsNullOrEmpty()||address.AddressLine.Length<10||address.AddressLine.Length>200)
+                {
+                return new APIResponse { IsSuccess=false, Message="Địa chỉ không hợp lệ. Độ dài từ 10 đến 200 ký tự." };
+                }
+            if(address.Note!=null&&address.Note.Length>200)
+                {
+                return new APIResponse { IsSuccess=false, Message="Ghi chú không hợp lệ. Độ dài tối đa là 200 ký tự." };
+                }
+            return new APIResponse { IsSuccess=true, Message="Địa chỉ hợp lệ" };
+            }
+        #endregion
+
         #region add address
         /// <summary>
         /// add a new address to the database.
@@ -106,9 +144,10 @@ namespace CatKinhOnline.Services
             {
             try
                 {
-                if (address==null)
+                var validationResult = ValidateAddress(address);
+                if (!validationResult.IsSuccess)
                     {
-                    return new APIResponse { IsSuccess=false, Message="Địa chỉ không được để trống" };
+                    return validationResult; 
                     }
                 var addressEntity = new Address();
                 addressEntity.CopyProperties(address);
@@ -136,9 +175,10 @@ namespace CatKinhOnline.Services
             {
             try
                 {
-                if (address==null)
+                var validationResult = ValidateAddress(address);
+                if (!validationResult.IsSuccess)
                     {
-                    return new APIResponse { IsSuccess=false, Message="Địa chỉ không được để trống" };
+                    return validationResult;
                     }
                 var addressEntity = new Address();
                 addressEntity.CopyProperties(address);

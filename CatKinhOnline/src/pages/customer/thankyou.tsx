@@ -21,7 +21,6 @@ import { useParams } from "react-router-dom";
 import { getOrderById, type ViewOrder } from "@/services/orderService";
 import { getProducts, type Product } from "@/services/productService";
 import { getAddressById, type Address } from "@/services/addressService";
-import { getUserProfileByID, type UserProfile } from "@/services/userService";
 
 function ThankYouPage() {
   const [currentTime] = useState(new Date());
@@ -30,18 +29,7 @@ function ThankYouPage() {
   const [order, setOrder] = useState<ViewOrder | null>(null);
   const [products, setProducts] = useState<{ [key: number]: Product }>({});
   const [address, setAddress] = useState<Address>();
-  const [user, setUser] = useState<UserProfile>();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const response = await getUserProfileByID(order?.userId.toString() || "");
-      if (response.isSuccess) {
-        setUser(response.result as UserProfile);
-      }
-    };
-    fetchUser();
-  }, []);
-  console.log(user);
   useEffect(() => {
     const fetchAddress = async () => {
       const response = await getAddressById(order?.shippingAddressId || 0);
@@ -50,7 +38,7 @@ function ThankYouPage() {
       }
     };
     fetchAddress();
-  }, []);
+  }, [order]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -75,7 +63,6 @@ function ThankYouPage() {
       const response = await getOrderById(Number(id));
       if (response.isSuccess) {
         setOrder(response.result as ViewOrder);
-        console.log(order);
       }
     };
     fetchOrder();
@@ -156,7 +143,6 @@ function ThankYouPage() {
                     Chi tiết đơn hàng
                   </h2>
                 </div>
-
                 <div className="space-y-4">
                   {order?.orderItems.map((item, index) => (
                     <div
@@ -164,14 +150,14 @@ function ThankYouPage() {
                       className="flex items-center justify-between border-emerald-100 print:border-gray-300"
                     >
                       <div className="flex">
-                        <div className="flex items-center justify-center border-r-2 border-gray-300 pr-3 text-base md:text-xl font-bold text-emerald-700">
+                        <div className="flex items-center justify-center border-r-2 border-gray-300 pr-3 text-base font-bold text-emerald-700 md:text-xl">
                           {index + 1}
                         </div>
                         <div className="ml-2 flex flex-col">
                           <div className="font-semibold text-gray-800">
                             {products[item.productId]?.productName}
                           </div>
-                          <div className="text-xs md:text-base text-gray-500">
+                          <div className="text-xs text-gray-500 md:text-base">
                             {item.widthM} m × {item.heightM} m x{" "}
                             {item.unitPrice.toLocaleString()}₫/m2 ={" "}
                             {item.widthM * item.heightM * item.unitPrice}₫ x{" "}
@@ -179,18 +165,17 @@ function ThankYouPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="text-base md:text-lg font-semibold text-black print:text-black">
+                      <div className="text-base font-semibold text-black md:text-lg print:text-black">
                         {item.subtotal.toLocaleString()}₫
                       </div>
                     </div>
                   ))}
-
-                  <div className="border-t-2 print:border-gray-300 border-emerald-100 pt-2">
+                  <div className="border-t-2 border-emerald-100 pt-2 print:border-gray-300">
                     <div className="flex items-center justify-between">
                       <span className="text-base font-bold text-gray-800">
                         Tạm tính:
                       </span>
-                      <span className="text-lg font-bold text-black print:text-black">
+                      <span className="text-base font-bold text-black print:text-black">
                         {subtotal?.toLocaleString()}₫
                       </span>
                     </div>{" "}
@@ -198,7 +183,7 @@ function ThankYouPage() {
                       <span className="text-base font-bold text-gray-800">
                         Phí vận chuyển:
                       </span>
-                      <span className="text-base italic font-bold text-black print:text-black">
+                      <span className="text-base font-bold text-black print:text-black">
                         {subtotal && subtotal >= 2000000
                           ? "Miễn phí"
                           : "200,000₫"}
@@ -232,22 +217,45 @@ function ThankYouPage() {
                   </p>
                 </div>
                 <div className="mt-6 grid grid-cols-1 gap-4 text-sm md:grid-cols-2 print:grid-cols-2">
-                  <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
-                    <div className="text-lg font-semibold text-emerald-900 print:text-black">
-                      Người nhận
-                    </div>
-                    <div className="text-emerald-600 print:text-black">
-                      {address?.contactName}
-                    </div>
-                  </div>
-                  <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
-                    <div className="text-lg font-semibold text-emerald-900 print:text-black">
-                      Số điện thoại
-                    </div>
-                    <div className="text-emerald-600 print:text-black">
-                      {address?.contactPhone}
-                    </div>
-                  </div>
+                  {order?.deliveryType === 1 && (
+                    <>
+                      <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
+                        <div className="text-lg font-semibold text-emerald-900 print:text-black">
+                          Người nhận
+                        </div>
+                        <div className="text-emerald-600 print:text-black">
+                          {address?.contactName}
+                        </div>
+                      </div>
+                      <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
+                        <div className="text-lg font-semibold text-emerald-900 print:text-black">
+                          Số điện thoại
+                        </div>
+                        <div className="text-emerald-600 print:text-black">
+                          {address?.contactPhone}
+                        </div>
+                      </div>{" "}
+                    </>
+                  )}       {order?.deliveryType === 0 && (
+                    <>
+                      <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
+                        <div className="text-lg font-semibold text-emerald-900 print:text-black">
+                          Người nhận
+                        </div>
+                        <div className="text-emerald-600 print:text-black">
+                          {order?.fullName}
+                        </div>
+                      </div>
+                      <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
+                        <div className="text-lg font-semibold text-emerald-900 print:text-black">
+                          Số điện thoại
+                        </div>
+                        <div className="text-emerald-600 print:text-black">
+                          {order?.phone}
+                        </div>
+                      </div>{" "}
+                    </>
+                  )}
                   <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
                     <div className="text-lg font-semibold text-emerald-900 print:text-black">
                       Phương thức nhận hàng
@@ -268,14 +276,18 @@ function ThankYouPage() {
                         : "Thanh toán trực tuyến"}
                     </div>
                   </div>{" "}
-                  <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
-                    <div className="text-lg font-semibold text-emerald-900 print:text-black">
-                      Địa chỉ nhận hàng
-                    </div>
-                    <div className="text-emerald-600 print:text-black">
-                      {address?.addressLine}
-                    </div>
-                  </div>
+                  {order?.deliveryType === 1 && (
+                    <>
+                      <div className="rounded-lg bg-emerald-100/50 p-3 print:border print:border-gray-300 print:bg-gray-100">
+                        <div className="text-lg font-semibold text-emerald-900 print:text-black">
+                          Địa chỉ nhận hàng
+                        </div>
+                        <div className="text-emerald-600 print:text-black">
+                          {address?.addressLine}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>

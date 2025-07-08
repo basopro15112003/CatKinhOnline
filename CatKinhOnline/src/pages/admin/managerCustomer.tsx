@@ -31,7 +31,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getUsers, type UserProfile } from "@/services/userService";
+import {
+  getUsers,
+  updateUserStatus,
+  type UserProfile,
+} from "@/services/userService";
+import { toast } from "sonner";
 
 export default function ManageCustomer() {
   //#region Variable declaration
@@ -50,7 +55,6 @@ export default function ManageCustomer() {
         const response = await getUsers();
         if (response) {
           setUser(response.reverse());
-          console.log(response);
           return response;
         } else {
           console.log("ftech data thất bại");
@@ -70,7 +74,7 @@ export default function ManageCustomer() {
   //#endregion
 
   //#region const handle logic, filter
-   const filteredData = useMemo(() => {
+  const filteredData = useMemo(() => {
     let data = users;
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
@@ -94,6 +98,15 @@ export default function ManageCustomer() {
     return filteredData.slice(start, start + pageSize);
   }, [filteredData, currentPage]);
 
+  const handleUpdateUserStatus = async (id: number, newStatus: number) => {
+    const response = await updateUserStatus(id, newStatus);
+    if (response.isSuccess) {  toast.success(response.message);
+      setUser((prev) =>
+        prev.map((u) => (u.id === id ? { ...u, status: newStatus } : u)),
+      );
+    
+    }
+  };
   //#endregion
 
   return (
@@ -160,7 +173,7 @@ export default function ManageCustomer() {
                     <TableHead>Email</TableHead>
                     <TableHead>Số điện thoại</TableHead>
                     <TableHead>Trạng thái</TableHead>
-                    <TableHead>Hành động</TableHead>
+                    {/* <TableHead>Hành động</TableHead> */}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -171,9 +184,22 @@ export default function ManageCustomer() {
                       <TableCell>{ord.email}</TableCell>
                       <TableCell>{ord.phone}</TableCell>
                       <TableCell>
-                        {ord.status === 1 ? "Đang hoạt động" : "Đã bị khóa"}
+                        <Select
+                          value={ord.status === 1 ? "1" : "0"}
+                          onValueChange={(value) =>
+                            handleUpdateUserStatus(ord.id, Number(value))
+                          }
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">Đang hoạt động</SelectItem>
+                            <SelectItem value="0">Đã bị khóa</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
-                      <TableCell className="space-x-2">
+                      {/* <TableCell className="space-x-2">
                         <Button
                           variant="outline"
                           className="bg-blue-200"
@@ -181,7 +207,7 @@ export default function ManageCustomer() {
                         >
                           Sửa
                         </Button>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))}
                 </TableBody>

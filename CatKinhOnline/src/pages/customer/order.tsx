@@ -100,6 +100,9 @@ function OrderPage() {
   const [order, setOrder] = useState<Order>({
     id: 0,
     userId: 0,
+    email: "",
+    fullName: "",
+    phone: "",
     shippingAddressId: 0,
     createdAt: new Date().toISOString(),
     status: 0,
@@ -230,6 +233,7 @@ function OrderPage() {
     setAddress(findAddress || null);
   }, [selectedAddressId, addresses]);
   // Get User Profile
+
   useEffect(() => {
     async function fetchData() {
       const email = localStorage.getItem("email");
@@ -266,7 +270,13 @@ function OrderPage() {
       }
     }
     fetchData();
-  }, [userProfile?.id]);
+  }, [
+    userProfile?.id,
+    userProfile?.fullName,
+    userProfile?.phone,
+    userProfile?.email,
+    order,
+  ]);
 
   // Set Default Address
   useEffect(() => {
@@ -334,6 +344,9 @@ function OrderPage() {
       setOrder((prev) => ({
         ...prev,
         deliveryType: deliveryMethod,
+        fullName: userProfile?.fullName || "",
+        phone: userProfile?.phone || "",
+        email: userProfile?.email || "",
         shippingAddressId: selectedAddressId,
         userId: userProfile?.id || 0,
         paymentMethod: paymentMethod,
@@ -345,6 +358,9 @@ function OrderPage() {
       setOrder((prev) => ({
         ...prev,
         deliveryType: deliveryMethod,
+        fullName: userProfile?.fullName || "",
+        phone: userProfile?.phone || "",
+        email: userProfile?.email || "",
         shippingAddressId: null as unknown as number,
         userId: userProfile?.id || 0,
         paymentMethod: paymentMethod,
@@ -894,7 +910,7 @@ function OrderPage() {
                                     : "border"
                                 }`}
                               >
-                                <div className="flex w-full items-center gap-2 md:gap-6 ">
+                                <div className="flex w-full items-center gap-2 md:gap-6">
                                   <div className="mt-0 w-3xs flex-1 p-1 md:w-lg lg:w-xl">
                                     <div className="mb-1 flex gap-2">
                                       <RadioGroupItem
@@ -938,7 +954,7 @@ function OrderPage() {
                                       </p>
                                     )}
                                   </div>
-                                  <div className="mt-2 flex w-20 flex-col gap-2 mr-2 md:mt-0 md:ml-3 md:w-25 md:flex-col">
+                                  <div className="mt-2 mr-2 flex w-20 flex-col gap-2 md:mt-0 md:ml-3 md:w-25 md:flex-col">
                                     <Button
                                       variant="outline"
                                       size="sm"
@@ -973,7 +989,7 @@ function OrderPage() {
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                           <AlertDialogCancel>
-                                            Hủy
+                                            Hủy 
                                           </AlertDialogCancel>
                                           <AlertDialogAction
                                             onClick={() => {

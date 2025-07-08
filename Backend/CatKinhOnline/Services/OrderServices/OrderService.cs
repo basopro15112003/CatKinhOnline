@@ -2,20 +2,26 @@
 using CatKinhOnline.Models;
 using CatKinhOnline.Repositories.OrderRepository;
 using ISUZU_NEXT.Server.Core.Extentions;
+using Microsoft.AspNetCore.SignalR;
 using static NuGet.Packaging.PackagingConstants;
 
-namespace CatKinhOnline.Services
+namespace CatKinhOnline.Services.OrderServices
     {
     public class OrderService
         {
         private readonly IOrderRepository _orderRepository;
         private readonly OrderItemService _orderItemService;
         private readonly AddressService _addressService;
-        public OrderService(IOrderRepository orderRepository, OrderItemService orderItemService, AddressService addressService)
+        private readonly UserService _userService;
+        private readonly IHubContext<OrderHub> _hubContext;
+
+        public OrderService(IOrderRepository orderRepository, OrderItemService orderItemService, AddressService addressService, UserService userService, IHubContext<OrderHub> hubContext)
             {
             _orderRepository=orderRepository;
             _orderItemService=orderItemService;
             _addressService=addressService;
+            _userService=userService;
+            _hubContext=hubContext;
             }
 
         #region Get All Orders
@@ -32,11 +38,22 @@ namespace CatKinhOnline.Services
                     {
                     return new APIResponse { IsSuccess=true, Message="Không tìm thấy các đơn hàng." };
                     }
-                var orderDTOs = new List<OrderDTO>();
+                var orderDTOs = new List<ViewOrderDTO>();
                 foreach (var order in orders)
                     {
-                    var orderDTO = new OrderDTO();
+                    var orderDTO = new ViewOrderDTO();
                     orderDTO.CopyProperties(order);
+                    if (order.OrderItems!=null)
+                        {
+                        List<OrderItemDTO> orderItemDTOs = new List<OrderItemDTO>();
+                        foreach (var item in order.OrderItems)
+                            {
+                            var orderItemDTO = new OrderItemDTO();
+                            orderItemDTO.CopyProperties(item);
+                            orderItemDTOs.Add(orderItemDTO);
+                            }
+                        orderDTO.OrderItems=orderItemDTOs;
+                        }
                     orderDTOs.Add(orderDTO);
                     }
                 return new APIResponse { IsSuccess=true, Result=orderDTOs };
@@ -76,7 +93,7 @@ namespace CatKinhOnline.Services
                             orderItemDTO.CopyProperties(item);
                             orderItemDTOs.Add(orderItemDTO);
                             }
-                        orderDTO.OrderItems=orderItemDTOs; 
+                        orderDTO.OrderItems=orderItemDTOs;
                         }
                     orderDTOs.Add(orderDTO);
                     }
@@ -146,19 +163,19 @@ namespace CatKinhOnline.Services
                     {
                     return new APIResponse { IsSuccess=false, Message="Không tìm thấy đơn hàng." };
                     }
-                    var orderDTO = new ViewOrderDTO();
-                    orderDTO.CopyProperties(order);
-                    if (order.OrderItems!=null)
+                var orderDTO = new ViewOrderDTO();
+                orderDTO.CopyProperties(order);
+                if (order.OrderItems!=null)
+                    {
+                    List<OrderItemDTO> orderItemDTOs = new List<OrderItemDTO>();
+                    foreach (var item in order.OrderItems)
                         {
-                        List<OrderItemDTO> orderItemDTOs = new List<OrderItemDTO>();
-                        foreach (var item in order.OrderItems)
-                            {
-                            var orderItemDTO = new OrderItemDTO();
-                            orderItemDTO.CopyProperties(item);
-                            orderItemDTOs.Add(orderItemDTO);
-                            }
-                        orderDTO.OrderItems=orderItemDTOs;
+                        var orderItemDTO = new OrderItemDTO();
+                        orderItemDTO.CopyProperties(item);
+                        orderItemDTOs.Add(orderItemDTO);
                         }
+                    orderDTO.OrderItems=orderItemDTOs;
+                    }
                 return new APIResponse { IsSuccess=true, Result=orderDTO };
                 }
             catch (Exception ex)
@@ -206,12 +223,12 @@ namespace CatKinhOnline.Services
                         return new APIResponse { IsSuccess=true, Message="Địa chỉ giao hàng không được để trống." };
                         }
                     var address = await _addressService.GetAddressById(order.ShippingAddressId.Value);
-                    if (address.IsSuccess && address.Result == null)
+                    if (address.IsSuccess&&address.Result==null)
                         {
                         return new APIResponse { IsSuccess=true, Message="Địa chỉ giao hàng không tồn tại." };
                         }
                     }
-                    var orderEntity = new Order();
+                var orderEntity = new Order();
                 orderEntity.CopyProperties(order);
                 orderEntity.CreatedAt=DateTime.UtcNow;
                 var orderAdded = await _orderRepository.AddOrderAsync(orderEntity);
@@ -230,8 +247,9 @@ namespace CatKinhOnline.Services
                         }
                     totalAmount+=orderItem.Subtotal;
                     }
-                if (totalAmount<=2000000){totalAmount+=200000; } // If totalAmount lower 2 million add 200k shipping
+                if (totalAmount<=2000000) { totalAmount+=200000; } // If totalAmount lower 2 million add 200k shipping
                 await UpdateOrderTotalAsync(orderAdded.Id, totalAmount);
+                await _hubContext.Clients.All.SendAsync("OrderUpdated", orderAdded);
                 return new APIResponse { IsSuccess=true, Message="Thêm đơn hàng thành công", Result=orderAdded };
                 }
             catch (Exception ex)
@@ -241,30 +259,62 @@ namespace CatKinhOnline.Services
             }
         #endregion
 
-        //#region Update Order
-        //public async Task<APIResponse> UpdateOrderAsync(OrderDTO order)
-        //    {
-        //    try
-        //        {
-        //        if (order==null)
-        //            {
-        //            return new APIResponse { IsSuccess=false, Message="Đơn hàng không được để trống." };
-        //            }
-        //        var orderEntity = new Order();
-        //        orderEntity.CopyProperties(order);
-        //        var isSuccess = await _orderRepository.UpdateOrderAsync(orderEntity);
-        //        if (isSuccess==true)
-        //            {
-        //            return new APIResponse { IsSuccess=true, Message="Cập nhật đơn hàng thành công" };
-        //            }
-        //        return new APIResponse { IsSuccess=false, Message="Cập nhật đơn hàng thất bại" };
-        //        }
-        //    catch (Exception ex)
-        //        {
-        //        return new APIResponse { Result=null, IsSuccess=false, Message="Lỗi khi cập nhật đơn hàng: "+ex.Message };
-        //        }
-        //    }
-        //#endregion
+        #region Update Order
+        public async Task<APIResponse> UpdateOrderAsync(OrderDTO order)
+            {
+            try
+                {
+                if (order==null)
+                    {
+                    return new APIResponse { IsSuccess=false, Message="Đơn hàng không được để trống." };
+                    }
+                var orderEntity = new Order();
+                orderEntity.CopyProperties(order);
+                var response = await _orderRepository.UpdateOrderAsync(orderEntity);
+                if (response == true)
+                    {
+                    return new APIResponse { IsSuccess=true, Message="Cập nhật đơn hàng thành công" };
+                    }
+                return new APIResponse { IsSuccess=false, Message="Cập nhật đơn hàng thất bại" };
+                }
+            catch (Exception ex)
+                {
+                return new APIResponse { Result=null, IsSuccess=false, Message="Lỗi khi cập nhật đơn hàng: "+ex.Message };
+                }
+            }
+        #endregion
+
+        #region Update Order Status
+        /// <summary>
+        /// update the status of an order by its ID.
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        public async Task<APIResponse> UpdateOrderStatusAsync(int orderId, int status)
+            {
+            try
+                {
+                var order = await _orderRepository.GetOrderByIdAsync(orderId);
+                if (order==null)
+                    {
+                    return new APIResponse { IsSuccess=false, Message="Không tìm thấy đơn hàng." };
+                    }
+                order.Status=status;
+                var response = await _orderRepository.UpdateOrderAsync(order);
+                if (response==true)
+                    {
+                    return new APIResponse { IsSuccess=true, Message="Cập nhật trạng thái đơn hàng thành công" };
+                    }
+                return new APIResponse { IsSuccess=false, Message="Cập nhật trạng thái đơn hàng thất bại" };
+                }
+            catch (Exception ex)
+                {
+                return new APIResponse { Result=null, IsSuccess=false, Message="Lỗi khi cập nhật trạng thái đơn hàng: "+ex.Message };
+                }
+            }
+        #endregion
 
         }
+
     }

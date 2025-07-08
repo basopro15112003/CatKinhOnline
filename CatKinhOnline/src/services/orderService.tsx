@@ -5,6 +5,9 @@ import type { AxiosResponse } from "axios";
 export interface ViewOrder {
   id: number,
   userId: number,
+  fullName: string,
+  phone: string,
+  email: string,
   shippingAddressId: number,
   createdAt: string,
   status: number,
@@ -18,6 +21,9 @@ export interface ViewOrder {
 export interface Order {
     id: number,
     userId: number,
+    fullName: string,
+    phone: string,
+    email: string,
     shippingAddressId: number,
     createdAt: string,
     status: number,
@@ -41,6 +47,28 @@ export interface OrderItems {
   export interface OrderCreateRequest{
     order: Order;
     orderItems: OrderItems[];
+  }
+
+  export const getOrders = async ():Promise<APIResponse> => {
+    try {
+        const response:AxiosResponse<APIResponse> = await request.get("Order");
+        if (response.data.isSuccess) {
+            return response.data;
+        } else {
+            return {
+                isSuccess: false,
+                message: response.data.message,
+                result: [],
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            isSuccess: false,
+            message: "Đã có lỗi xảy ra khi kết nối tới máy chủ.",
+            result: [],
+        };
+    }
   }
 
   export const addOrder = async (orderCreateRequest: OrderCreateRequest) => {
@@ -96,3 +124,24 @@ export interface OrderItems {
         };
     }
   }
+export const updateOrderStatus = async (id: number, status: number): Promise<APIResponse> => {
+  try {
+    const response: AxiosResponse<APIResponse> = await request.put(`Order/${id}/status/${status}`);
+    if (response.data.isSuccess) {
+      return response.data;
+    } else {
+              return {
+          isSuccess: false,
+          message: response.data.message,
+          result: {},
+        };
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      isSuccess: false,
+      message: "Đã có lỗi xảy ra khi kết nối tới máy chủ.",
+      result: {},
+    };
+  }
+}

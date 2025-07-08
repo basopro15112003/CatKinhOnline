@@ -144,3 +144,25 @@ export const updateUserProfile = async (
   const response = await request.put<UpdateUserDto>(`User/${id}`, dto);
   return response.data;
 };
+
+export const updateUserStatus = async (id: number, status: number): Promise<APIResponse> => {
+  try {
+    const response: AxiosResponse<APIResponse> = await request.put(`User/${id}/status/${status}`);
+    if (response.data.isSuccess) {
+      return response.data;
+    } else {
+              return {
+          isSuccess: false,
+          message: response.data.message,
+          result: {},
+        };
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      isSuccess: false,
+      message: "Đã có lỗi xảy ra khi kết nối tới máy chủ.",
+      result: {},
+    };
+  }
+}

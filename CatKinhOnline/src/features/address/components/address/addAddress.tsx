@@ -72,6 +72,7 @@ export function FromAddress({
     selectedDistrict,
     selectedWard,
   );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   //#endregion
 
   //#region Handle Event
@@ -80,6 +81,7 @@ export function FromAddress({
     if (!validateForm(contactName, contactPhone, finalAddress, note)) {
       return;
     }
+    setIsLoading(true);
     const address = {
       userId: userId,
       addressLine: finalAddress,
@@ -119,6 +121,7 @@ export function FromAddress({
     } else {
       toast.error("Thêm địa chỉ thất bại");
     }
+    setIsLoading(false);
   };
   //#endregion
 
@@ -268,7 +271,9 @@ export function FromAddress({
               <Button variant="outline" onClick={onClose}>
                 Hủy
               </Button>
-              <Button type="submit">Thêm địa chỉ</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Đang thêm địa chỉ..." : "Thêm địa chỉ"}
+              </Button>
             </CardFooter>
           </form>
         </Card>

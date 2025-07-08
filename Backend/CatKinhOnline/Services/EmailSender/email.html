@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt lại mật khẩu - Nhôm Kính Quốc Thuần</title>
+</head>
+
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0fdfa; line-height: 1.6;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f0fdfa;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation"
+                       style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden;">
+
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #059669 0%, #0d9488 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole-icon lucide-lock-keyhole"><circle cx="12" cy="16" r="1" /><rect x="3" y="10" width="18" height="12" rx="2" /><path d="M7 10V7a5 5 0 0 1 10 0v3" /></svg> Đặt lại mật khẩu
+                            </h1>
+                            <p style="margin: 10px 0 0 0; color: #d1fae5; font-size: 16px; opacity: 0.9; font-size: 20px;">
+                                Nhôm Kính Quốc Thuần
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <div style="margin-bottom: 30px;">
+                                <h2 style="margin: 0 0 15px 0; color: #065f46; font-size: 24px; font-weight: 600;">
+                                    Xin chào!
+                                </h2>
+                                <p style="margin: 0; color: #374151; font-size: 16px;">
+                                    Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản
+                                    <strong>${userEmail}</strong> tại Nhôm Kính Quốc Thuần.
+                                </p>
+                            </div>
+
+                            <!-- Security Notice -->
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                                <div style="display: flex; align-items: flex-start;">
+                                    <span style="color: #f59e0b; font-size: 20px;margin-top:-8px ; margin-right: 12px;">⚠️</span>
+                                    <div>
+                                        <p style="margin: 0 0 8px 0; color: #92400e; font-weight: 600; font-size: 14px;">
+                                            Lưu ý bảo mật
+                                        </p>
+                                        <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.5;">
+                                            Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này. Liên kết
+                                            sẽ hết hạn sau 5 phút.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Reset Button -->
+                            <div style="text-align: center; margin: 35px 0;">
+                                <a href="${resetLink}"
+                                   style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #0d9488 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);">
+                                    🔑 Đặt lại mật khẩu ngay
+                                </a>
+                            </div>
+
+                            <!-- Alternative Link -->
+                            <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                                <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px; font-weight: 600;">
+                                    Không thể nhấp vào nút trên? Sao chép và dán liên kết sau vào trình duyệt:
+                                </p>
+                                <p style="margin: 0; word-break: break-all; color: #059669; font-size: 14px; font-family: monospace; background-color: #ffffff; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px;">
+                                    ${resetLink}
+                                </p>
+                            </div>
+
+                            <!-- Contact Info -->
+                            <div style="background: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 100%); padding: 25px; border-radius: 12px; border: 1px solid #a7f3d0; margin: 25px 0;">
+                                <h3 style="margin: 0 0 15px 0; color: #065f46; font-size: 16px; font-weight: 600;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone-icon lucide-phone"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384" /></svg> Cần hỗ trợ?
+                                </h3>
+                                <p style="margin: 0; color: #374151; font-size: 14px; line-height: 1.4;">
+                                    Hotline: 0939 105 522 | Email: quochoangnguyen2003ct@gmail.com
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                            <h3 style="margin: 0 0 10px 0; color: #059669; font-size: 20px; font-weight: bold;">
+                                Nhôm Kính Quốc Thuần
+                            </h3>
+                            <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 14px;">
+                                Chuyên cung cấp nhôm kính chất lượng cao
+                            </p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                                © 2024 QuocHoang. Email này được gửi tự động.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

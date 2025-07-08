@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
+import { OrderNotification } from "@/components/admin/order/orderNotification";
 
 const items = [
   {
@@ -37,6 +38,7 @@ export function AppSidebar() {
     <>
       {" "}
       <Toaster></Toaster>
+      <OrderNotification></OrderNotification>
       <Sidebar className="overflow-hidden rounded-2xl">
         <SidebarContent className="bg-gray-200">
           <SidebarGroup>

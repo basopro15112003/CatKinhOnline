@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { registerNewUser, type RegisterInput } from "@/services/userService";
+import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 
 export function Register({
@@ -23,7 +24,8 @@ export function Register({
   const [phone, setPhone] = useState<string>("");
   const [passwordHash, setPassword] = useState<string>("");
   const [confirmPassWord, setConfirmPassword] = useState<string>("");
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const validate = (): boolean => {
     if (!fullname.trim()) {
       toast.warning("Họ và tên không thể được để trống !");
@@ -128,29 +130,59 @@ export function Register({
                   onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
-              <div className="grid gap-2">
+              <div className="relative grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Mật khẩu</Label>
                 </div>
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={passwordHash}
                   placeholder="Nhập vào mật khẩu"
                   onChange={(e) => setPassword(e.target.value)}
-                />
+                /><button
+                type="button"
+                className="absolute top-7 right-2 scale-95"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+              >
+                {!showPassword ? (
+                  <>
+                    <EyeClosed></EyeClosed>
+                  </>
+                ) : (
+                  <>
+                    <Eye></Eye>
+                  </>
+                )}
+              </button>{" "}
               </div>
-              <div className="mb-2 grid gap-2">
+              <div className="relative mb-2 grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Xác nhận mật khẩu</Label>
                 </div>
                 <Input
                   id="confirmPassword"
-                  type="password"
+                  type={showConfirm ? "text" : "password"}
                   value={confirmPassWord}
                   placeholder="Xác nhận mật khẩu"
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                />
+                />  <button
+                type="button"
+                className="absolute top-7 right-2 scale-95"
+                onClick={() => setShowConfirm((v) => !v)}
+                tabIndex={-1}
+              >
+                {!showConfirm ? (
+                  <>
+                    <EyeClosed></EyeClosed>
+                  </>
+                ) : (
+                  <>
+                    <Eye></Eye>
+                  </>
+                )}
+              </button>{" "}
               </div>
             </div>
           </CardContent>

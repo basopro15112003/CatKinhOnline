@@ -116,7 +116,7 @@ namespace CatKinhOnline.Repositories.OrderRepository
         /// <param name="order"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<Order?> UpdateOrderAsync(Order order)
+        public async Task<bool?> UpdateOrderAsync(Order order)
             {
             if (order==null)
                 {
@@ -128,7 +128,7 @@ namespace CatKinhOnline.Repositories.OrderRepository
                     {
                     context.Orders.Update(order);
                     await context.SaveChangesAsync();
-                    return order;
+                    return true;
                     }
                 }
             catch (Exception ex)

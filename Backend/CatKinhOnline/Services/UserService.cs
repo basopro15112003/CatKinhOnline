@@ -87,7 +87,8 @@ namespace CatKinhOnline.Services
                     return new APIResponse
                         {
                         IsSuccess=true,
-                        Message="Người dùng không tồn tại."
+                        Message="Người dùng không tồn tại." ,
+                        Result=null
                         };
                     }
                 var userDTO = new ViewUserDTO();
@@ -98,6 +99,20 @@ namespace CatKinhOnline.Services
                     Message="Lấy thông tin người dùng thành công.",
                     Result=userDTO
                     };
+                }
+            catch (Exception ex)
+                {
+                throw new Exception($"Error retrieving user with email {email}: {ex.Message}");
+                }
+            }
+        #endregion
+
+        #region Get user by Email
+        public async Task<User?> GetUserByEmailAsync(string email)
+            {
+            try
+                {
+                return await _userRepository.GetUserByEmail(email);
                 }
             catch (Exception ex)
                 {
@@ -128,7 +143,7 @@ namespace CatKinhOnline.Services
                 List<(bool condition, string errorMessage)>? validations = new List<(bool condition, string errorMessage)>
             {
                   (user == null, "Người dùng không thể trống"),
-                  (checkEmailEsixst != null, "Email này đã tồn tại trong hệ thống."),
+                  (checkEmailEsixst?.Result != null, "Email này đã tồn tại trong hệ thống."),
                   (checkPhoneEsixst != null, "Số điện thoại này đã tồn tại trong hệ thống."),
             };
                 foreach (var validation in validations)
@@ -187,6 +202,46 @@ namespace CatKinhOnline.Services
             }
         #endregion
 
+        #region
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<APIResponse> UpdateUserStatus(int id, int status)
+            {
+            try
+                {
+                var user = await _userRepository.GetUserById(id);
+                if (user==null)
+                    {
+                    return new APIResponse
+                        {
+                        IsSuccess=false,
+                        Message="Người dùng không tồn tại."
+                        };
+                    }
+                user.Status=status;
+                await _userRepository.UpdateUser(user);
+                return new APIResponse
+                    {
+                    IsSuccess=true,
+                    Message="Cập nhật trạng thái người dùng thành công."
+                    };
+                }
+            catch (Exception ex)
+                {
+                return new APIResponse
+                    {
+                    IsSuccess=false,
+                    Message=ex.Message
+                    };
+                }
+            }
+        #endregion
+
         #region Change password
         /// <summary>
         /// change password for a user.
@@ -215,6 +270,42 @@ namespace CatKinhOnline.Services
             catch (Exception ex)
                 {
                 return new APIResponse {
+                    IsSuccess=false,
+                    Message=ex.Message
+                    };
+                }
+            }
+        #endregion
+
+        #region Change password
+        /// <summary>
+        /// change password for a user.
+        /// </summary>
+        /// <param name="userDTO"></param>
+        /// <param name="changePasswordDto"></param>
+        /// <returns></returns>
+        public async Task<APIResponse> ChangePasswordForget(string email, string newPassword)
+            {
+            try
+                {
+                var user = await _userRepository.GetUserByEmail(email);
+                if (user==null)
+                    {
+                    return new APIResponse { IsSuccess=false, Message="Người dùng không tồn tại." };
+                    }
+         
+                user.PasswordHash=_authService.HashPassword(newPassword);
+                await _userRepository.UpdateUser(user);
+                return new APIResponse
+                    {
+                    IsSuccess=true,
+                    Message="Đổi mật khẩu thành công."
+                    };
+                }
+            catch (Exception ex)
+                {
+                return new APIResponse
+                    {
                     IsSuccess=false,
                     Message=ex.Message
                     };

@@ -1,11 +1,14 @@
 ﻿using CatKinhOnline.ModelDTOs;
 using CatKinhOnline.Models;
-using CatKinhOnline.Services;
+using CatKinhOnline.Services.OrderServices;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatKinhOnline.Controllers.OrderController
-{
+    {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class OrderController : ControllerBase
@@ -70,5 +73,28 @@ namespace CatKinhOnline.Controllers.OrderController
             return BadRequest(response.Message);
             }
 
-        }
+        [HttpPut]
+        public async Task<IActionResult> Put([FromBody] OrderDTO order)
+            {
+            if (order==null)
+                return BadRequest("Dữ liệu đơn hàng không hợp lệ.");
+            APIResponse response = await _orderService.UpdateOrderAsync(order);
+            if (response.IsSuccess)
+                {
+                return Ok(response);
+                }
+            return BadRequest(response.Message);
+
+            }
+        [HttpPut("{id}/status/{status}")]
+        public async Task<IActionResult> UpdateOrderStatus(int id, int status)
+            {
+            APIResponse response = await _orderService.UpdateOrderStatusAsync(id, status);
+            if (response.IsSuccess)
+                {
+                return Ok(response);
+                }
+            return BadRequest(response.Message);
+            }
+            }
     }

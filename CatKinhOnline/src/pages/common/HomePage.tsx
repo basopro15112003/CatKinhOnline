@@ -11,6 +11,9 @@ import { ArrowRight, Calculator, Shield, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import CustomerReview from "@/components/common/customerReview";
+import banner1 from "@/assets/images/banner/banner1.avif";
+import banner2 from "@/assets/images/banner/banner2.avif";
+import banner3 from "@/assets/images/banner/banner3.avif";
 
 function HomePage() {
   const [isVisible, setIsVisible] = useState(false);
@@ -65,9 +68,9 @@ function HomePage() {
             <Carousel className="w-full" plugins={[Autoplay({ delay: 4000 })]}>
               <CarouselContent>
                 {[
-                  "https://acotecxuanmai.com.vn/storage/du-an/anh-3.jpg",
-                  "https://www.gothaibefree.com/wp-content/uploads/2016/01/Pattaya1940x1300.jpg",
-                  "https://d2rdhxfof4qmbb.cloudfront.net/wp-content/uploads/20200825140923/iStock-918934132-scaled.jpg",
+                  banner3,
+                  banner2,
+                  banner1,
                 ].map((src, idx) => (
                   <CarouselItem key={idx}>
                     <div className="relative h-90 overflow-hidden md:h-[500px]">
@@ -75,6 +78,9 @@ function HomePage() {
                         src={src || "/placeholder.svg"}
                         alt={`Banner ${idx + 1}`}
                         className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                        loading={idx === 0 ? "eager" : "lazy"} // anh 1 load nhanh, de lay du lieu nhanh hon roi moi load anh 2 va 3 co the lazy load
+                        width={1200}
+                        height={500}
                       />
                       <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"></div>
                     </div>
@@ -154,13 +160,14 @@ function HomePage() {
             ))}
           </div>
         </section>
-
         <Price></Price>
         <PriceQuoteCard></PriceQuoteCard>
         <CustomerReview></CustomerReview>
 
-        <section className="mx-auto mb-12 max-w-7xl p-1 md:px-4">
+        <section id="map" className="mx-auto mb-12 max-w-7xl p-1 md:px-4">
           <iframe
+            name="map"
+            title="Bản đồ cửa hàng"
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d335.7529973570932!2d105.6776721423215!3d9.994594320910576!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31a08ec8035be43b%3A0x432cb00910505ce1!2zQ8ahIFPhu58gQ-G7rWEgU-G6r3QgUXXhu5FjIFRodeG6p24!5e1!3m2!1sen!2s!4v1748685293274!5m2!1sen!2s"
             className="w-full rounded-2xl border-2 border-emerald-200 shadow-xl"
             width="600"

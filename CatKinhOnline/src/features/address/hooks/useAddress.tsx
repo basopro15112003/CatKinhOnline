@@ -1,4 +1,3 @@
-  
 import { toast } from "@/hooks/use-toast";
 import {
   deleteAddress,
@@ -9,7 +8,7 @@ import {
   addressService,
   type District,
   type Ward,
-} from "@/services/addressService"; 
+} from "@/services/addressService";
 import { useEffect, useState } from "react";
 
 //#region Get Address By User Id
@@ -134,19 +133,17 @@ export const useGetWards = (
 };
 //#endregion
 
-
-
-  //#region Update finalAddress based on selected province/district/ward
-  export const useUpdateFinalAddress = (
-    provinces: Province[],
-    districts: District[],
-    wards: Ward[],
-    selectedProvince: string,
-    selectedDistrict: string,
-    selectedWard: string,
-  ) => {
-    const [finalAddress, setFinalAddress] = useState<string>("");
-    useEffect(() => {
+//#region Update finalAddress based on selected province/district/ward
+export const useUpdateFinalAddress = (
+  provinces: Province[],
+  districts: District[],
+  wards: Ward[],
+  selectedProvince: string,
+  selectedDistrict: string,
+  selectedWard: string,
+) => {
+  const [finalAddress, setFinalAddress] = useState<string>("");
+  useEffect(() => {
     const selectedProvinceName =
       provinces.find((p) => p.code.toString() === selectedProvince)?.name || "";
     const selectedDistrictName =
@@ -170,5 +167,5 @@ export const useGetWards = (
     selectedWard,
   ]);
   return { finalAddress, setFinalAddress };
-};  
+};
 //#endregion

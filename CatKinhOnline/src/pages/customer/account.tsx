@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CustomerOrders } from "@/components/pages/customer/account/customerOrder";
+import { CustomerOrders } from "@/components/customer/account/order/customerOrder";
 import Address from "@/features/address/pages/address";
 import type { ChangePasswordInput, UpdateUserDto, UserProfile } from "@/services/userService";
 import { useState, useEffect } from "react";
@@ -23,7 +23,7 @@ export default function Account() {
   // Fetch user profile
   useEffect(() => {
     async function fetchData() {
-      const email = localStorage.getItem("email");
+      const email =   sessionStorage.getItem("email");
       if (!email) {
         console.error("Không tìm thấy email trong localStorage");
         return;
@@ -59,8 +59,8 @@ export default function Account() {
       toast.warning("Họ tên quá ngắn (tối thiểu 6 ký tự)");
       return false;
     }
-    if (form.fullName.trim().length > 50) {
-      toast.warning("Họ tên quá dài (tối đa 50 ký tự)");
+    if (form.fullName.trim().length > 36) {
+      toast.warning("Họ tên quá dài (tối đa 36 ký tự)");
       return false;
     }
     if (!form.phone.trim()) {

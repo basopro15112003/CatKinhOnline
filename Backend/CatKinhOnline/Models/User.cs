@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json.Serialization;
 
 namespace CatKinhOnline.Models
     {
-    public class User
+    public class User  
         {             
         [Key]
         public int Id { get; set; }

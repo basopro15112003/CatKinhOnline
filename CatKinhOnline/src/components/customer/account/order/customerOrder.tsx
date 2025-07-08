@@ -17,13 +17,24 @@ import { TabsContent } from "@radix-ui/react-tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
-import { DetailOrder } from "@/components/form/detailOrder";
-import { getOrderByUserId } from "@/services/orderService";
+import { DetailOrder } from "@/components/customer/account/order/detailOrder";
+import { getOrderByUserId, updateOrderStatus } from "@/services/orderService";
 import { toast } from "@/hooks/use-toast";
 import type { ViewOrder } from "@/services/orderService";
 import { Label } from "@/components/ui/label";
 import DateRangePicker from "@/components/ui/date-picker";
 import { Link } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 export function CustomerOrders({ userId }: { userId: number }) {
   //#region  Variable
@@ -36,6 +47,7 @@ export function CustomerOrders({ userId }: { userId: number }) {
     null,
     null,
   ]);
+  const [cancelId, setCancelId] = useState<number | null>(null);
   //#endregion
 
   const openDetail = (order: ViewOrder) => {
@@ -62,6 +74,13 @@ export function CustomerOrders({ userId }: { userId: number }) {
     fetchOrders();
   }, [userId]);
 
+  const handleReloadOrders = async () => {
+    const response = await getOrderByUserId(userId);
+    if (response.isSuccess) {
+      setOrders(response.result as ViewOrder[]);
+    }
+  };
+
   const filteredOrders = useMemo(() => {
     let data = orders;
     if (search.trim()) {
@@ -81,9 +100,19 @@ export function CustomerOrders({ userId }: { userId: number }) {
         return created >= start && created <= end;
       });
     }
-
     return data;
   }, [orders, search, status, dateRange]);
+
+  const handleCancelOrder = async (id: number) => {
+    const response = await updateOrderStatus(id, 5);
+    if (response.isSuccess) {
+      toast.success("Đã hủy đơn hàng thành công");
+      setCancelId(null);
+      handleReloadOrders();
+    } else {
+      toast.error("Đã có lỗi xảy ra khi hủy đơn hàng");
+    }
+  };
 
   return (
     <>
@@ -92,7 +121,7 @@ export function CustomerOrders({ userId }: { userId: number }) {
         {orders.length > 0 ? (
           <>
             <div className="mb-4 flex flex-col items-center gap-4 md:flex-row">
-              <div className="flex flex-col gap-1 w-full md:w-auto">
+              <div className="flex w-full flex-col gap-1 md:w-auto">
                 <Label htmlFor="picture">Tìm kiếm mã đơn</Label>
                 <Input
                   placeholder="Tìm kiếm mã đơn"
@@ -101,7 +130,7 @@ export function CustomerOrders({ userId }: { userId: number }) {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <div className="flex flex-col gap-1 w-full md:w-auto">
+              <div className="flex w-full flex-col gap-1 md:w-auto">
                 <Label htmlFor="picture">Lọc trạng thái</Label>
                 <Select
                   value={status}
@@ -110,7 +139,7 @@ export function CustomerOrders({ userId }: { userId: number }) {
                   <SelectTrigger className="w-full md:w-48">
                     <SelectValue placeholder="Lọc trạng thái" />
                   </SelectTrigger>
-                  <SelectContent >
+                  <SelectContent>
                     <SelectItem value="all">Tất cả</SelectItem>
                     <SelectItem value="0">Chờ xác nhận</SelectItem>
                     <SelectItem value="1">Đã xác nhận</SelectItem>
@@ -121,9 +150,9 @@ export function CustomerOrders({ userId }: { userId: number }) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex flex-col gap-1 w-full md:w-auto">
+              <div className="flex w-full flex-col gap-1 md:w-auto">
                 <Label htmlFor="dateRange">Tìm đơn theo khoảng thời gian</Label>
-                <div className="flex gap-2 w-full md:w-auto">
+                <div className="flex w-full gap-2 md:w-auto">
                   <DateRangePicker
                     onChange={([start, end]) => setDateRange([start, end])}
                   />
@@ -177,14 +206,46 @@ export function CustomerOrders({ userId }: { userId: number }) {
                             {item.totalAmount.toLocaleString()} VNĐ
                           </TableCell>
                           <TableCell className="w-1 space-x-1 text-right">
-                            {item.status === 0 ? (
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="sm"
-                              >
-                                Hủy
-                              </Button>
+                            {item.status === 0 || item.status === 1 ? (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => setCancelId(item.id)}
+                                  >
+                                    Hủy
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Bạn có chắc muốn hủy đơn hàng này?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Hành động này không thể hoàn tác. Đơn hàng
+                                      sẽ bị hủy vĩnh viễn.
+                                      <br />
+                                      Bạn có chắc muốn hủy đơn hàng này?
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Quay lại
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      className="bg-red-500 hover:bg-red-600"
+                                      onClick={() => {
+                                        if (cancelId)
+                                          handleCancelOrder(cancelId);
+                                      }}
+                                    >
+                                      Hủy đơn hàng
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             ) : (
                               <></>
                             )}

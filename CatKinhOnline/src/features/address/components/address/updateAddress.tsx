@@ -51,7 +51,6 @@ export function UpdateAddress({
   const [selectedWard, setSelectedWard] = useState("");
   const [note, setNote] = useState("");
   const [isDefault, setIsDefault] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const { provinces } = useGetProvinces();
   const { districts } = useGetDistricts(
     selectedProvince,
@@ -67,6 +66,7 @@ export function UpdateAddress({
     selectedDistrict,
     selectedWard,
   );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   //#endregion
 
   //#region Initialize data from address prop
@@ -94,7 +94,7 @@ export function UpdateAddress({
     if (!validateForm(contactName, contactPhone, finalAddress, note)) {
       return;
     }
-    setSubmitting(true);
+    setIsLoading(true);
     try {
       // Nếu đang set địa chỉ này làm mặc định, thì bỏ mặc định tất cả địa chỉ khác
       if (isDefault) {
@@ -114,6 +114,7 @@ export function UpdateAddress({
           }
         }
       }
+
       const updated = await updateAddress(address!.id, {
         id: address!.id,
         userId: address!.userId,
@@ -124,6 +125,7 @@ export function UpdateAddress({
         isDefault,
         isDeleted: false,
       });
+
       if (updated) {
         onClose();
         reloadAddressHandler();
@@ -133,7 +135,7 @@ export function UpdateAddress({
       console.error(error);
       toast.error("Cập nhật địa chỉ thất bại");
     } finally {
-      setSubmitting(false);
+      setIsLoading(false);
     }
   };
   //#endregion
@@ -228,23 +230,24 @@ export function UpdateAddress({
                 <div>
                   <Label htmlFor="specificAddress">Địa chỉ cụ thể</Label>
                   <Textarea
-                  className="w-full max-w-[530px]"
+                    className="w-full max-w-[530px]"
                     id="specificAddress"
                     placeholder="Số nhà, tên đường, tòa nhà, ..."
                     rows={3}
                     maxLength={200}
                     value={finalAddress}
                     onChange={(e) => setFinalAddress(e.target.value)}
-                  /> <div className="mt-1 flex justify-between text-xs">
-                  <span className="text-gray-500">
-                    Ghi chú tối đa 200 ký tự
-                  </span>
-                  <span
-                    className={`${finalAddress.length > 200 ? "text-red-500" : "text-gray-500"}`}
-                  >
-                    {finalAddress.length}/200
-                  </span>
-                </div>
+                  />{" "}
+                  <div className="mt-1 flex justify-between text-xs">
+                    <span className="text-gray-500">
+                      Ghi chú tối đa 200 ký tự
+                    </span>
+                    <span
+                      className={`${finalAddress.length > 200 ? "text-red-500" : "text-gray-500"}`}
+                    >
+                      {finalAddress.length}/200
+                    </span>
+                  </div>
                 </div>{" "}
                 <div>
                   <Label htmlFor="note">Ghi chú</Label>
@@ -284,8 +287,8 @@ export function UpdateAddress({
               <Button variant="outline" onClick={onClose}>
                 Hủy
               </Button>
-              <Button type="submit" disabled={submitting}>
-                Cập nhật địa chỉ
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Đang cập nhật địa chỉ..." : "Cập nhật địa chỉ"}
               </Button>
             </CardFooter>
           </form>

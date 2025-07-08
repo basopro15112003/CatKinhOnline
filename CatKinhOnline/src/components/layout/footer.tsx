@@ -46,7 +46,7 @@ export function Footer() {
           </div>
           <div>
             <h4 className="mb-4 text-2xl font-semibold">Tài khoản</h4>
-            <ul className="space-y-1 text-base">
+            <ul className="space-y-1 text-sm">
               <li className="mb-2">
                 <a href="#" className="hover:underline">
                   Đăng nhập

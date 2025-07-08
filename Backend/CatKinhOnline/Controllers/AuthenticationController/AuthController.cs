@@ -12,6 +12,11 @@ using CatKinhOnline.Models;
 using Microsoft.EntityFrameworkCore;
 using CatKinhOnline.Services;
 using CatKinhOnline.ModelDTOs;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Humanizer;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace CatKinhOnline.Controllers.AuthenticationController
     {
@@ -21,29 +26,35 @@ namespace CatKinhOnline.Controllers.AuthenticationController
         {
         private readonly IConfiguration _config;
         private readonly AuthService _authService;
+        private readonly UserService _userService;
+        private readonly IEmailSender _emailSender;
 
-        public AuthController(IConfiguration config, AuthService authService)
+        public AuthController(IConfiguration config, AuthService authService, UserService userService, IEmailSender emailSender)
             {
             _config=config;
             _authService=authService;
+            _userService=userService;
+            _emailSender=emailSender;
             }
 
- 
+
         [HttpPost("loginJWT")]
-        public async Task<IActionResult> Login([FromBody]LoginDTO loginDTO)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
             {
-            if(loginDTO ==null)
+            if (loginDTO==null)
                 {
                 return BadRequest("Tài khoản mật khẩu không thể để trống");
                 }
             try
                 {
                 var user = await _authService.Login(loginDTO.Email, loginDTO.Password);
-                if(user ==null)
+                if (user==null)
                     {
                     return BadRequest("Lỗi không tìm thấy người dùng khi đăng nhập");
                     }
-                var token = GenerateJwtToken(user.Email,user.FullName);
+                var token = GenerateJwtToken(user.Email, user.FullName, user.Role.ToString());
+
                 return Ok(token);
                 }
             catch (ArgumentNullException ex)
@@ -79,7 +90,7 @@ namespace CatKinhOnline.Controllers.AuthenticationController
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        private string GenerateJwtToken(string email, string fullname)
+        private string GenerateJwtToken(string email, string fullname, string role)
             {
             // Sinh JWT
             var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
@@ -90,13 +101,36 @@ namespace CatKinhOnline.Controllers.AuthenticationController
                 {
                 new Claim(ClaimTypes.Email, email!),
                 new Claim(ClaimTypes.Name, fullname!),
+                new Claim(ClaimTypes.Role, role)
             }),
                 Expires=DateTime.UtcNow.AddHours(1),
+                Issuer="NhomKinhQuocThuan",
+                Audience="NhomKinhQuocThuanUser",
                 SigningCredentials=creds
                 };
             JwtSecurityTokenHandler? handler = new JwtSecurityTokenHandler();
             var jwt = handler.WriteToken(handler.CreateToken(tokenDesc));
 
+            return jwt;
+            }
+
+        private string GenerateResetPasswordToken(int userId, string email)
+            {
+            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
+            SigningCredentials? creds = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
+            var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                Subject=new ClaimsIdentity(new[]
+                {
+            new Claim("userId", userId.ToString()),
+            new Claim("email", email)
+        }),
+                Expires=DateTime.UtcNow.AddMinutes(5),
+                SigningCredentials=creds
+                };
+
+            JwtSecurityTokenHandler? handler = new JwtSecurityTokenHandler();
+            var jwt = handler.WriteToken(handler.CreateToken(tokenDescriptor));
             return jwt;
             }
 
@@ -127,13 +161,70 @@ namespace CatKinhOnline.Controllers.AuthenticationController
                     }
                 }
             // Sinh JWT
-            var jwt = GenerateJwtToken(email!,name!);
+            var jwt = GenerateJwtToken(email!, name!, "1");
 
-      
+
             // Redirect về FE (kèm basename nếu có)
             var front = _config["Frontend:BaseUrl"]!.TrimEnd('/');
-            var redirect = $"{front}/CatKinhOnline/auth/callback?token={jwt}";
+            var redirect = $"{front}/NhomKinhQuocThuan/auth/callback?token={jwt}";
             return Redirect(redirect);
+            }
+
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest model)
+            {
+            var user = await _userService.GetUserByEmailAsync(model.Email);
+            if (user==null)
+                return Ok();
+
+            var token = GenerateResetPasswordToken(user.Id, user.Email);
+            var resetLink = $"http://localhost:5173/NhomKinhQuocThuan/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(model.Email)}";
+
+            // Bước 2: Đọc file template
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Services", "EmailSender", "email.html");
+            var htmlBody = System.IO.File.ReadAllText(templatePath);
+
+            // Bước 3: Thay thế biến động
+            htmlBody=htmlBody.Replace("${userEmail}", user.Email)
+                               .Replace("${resetLink}", resetLink);
+            await _emailSender.SendEmailAsync(user.Email, "Đặt lại mật khẩu - Nhôm Kính Quốc Thuần",htmlBody);
+            return Ok();
+            }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
+            {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
+            try
+                {
+                tokenHandler.ValidateToken(model.Token, new TokenValidationParameters
+                    {
+                    ValidateIssuer=false,
+                    ValidateAudience=false,
+                    ValidateLifetime=true,
+                    IssuerSigningKey=new SymmetricSecurityKey(key),
+                    ValidateIssuerSigningKey=true
+                    }, out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                var email = jwtToken.Claims.First(x => x.Type=="email").Value;
+                // var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "userId").Value);
+                var user = await _userService.ChangePasswordForget(email, model.NewPassword);
+                if (user.IsSuccess)
+                    {
+                    return Ok(user);
+                    }
+                else
+                    {
+                    return BadRequest(user);
+                    }
+                }
+            catch (Exception ex)
+                {
+                return BadRequest("Token không hợp lệ hoặc đã hết hạn: "+ex.Message);
+                }
             }
         }
     }

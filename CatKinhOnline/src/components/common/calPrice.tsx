@@ -109,19 +109,23 @@ export default function PriceQuoteCard() {
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                   {/* Form nhập liệu */}
                   <div>
-                    <Label htmlFor="glassType" className="mb-1">
+                    <Label className="mb-1">
                       Loại kính
                     </Label>
                     <Select
                       value={glassType}
                       onValueChange={(value) => setGlassType(value)}
+                      name="glassType"
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full" name="glassType">
                         <SelectValue placeholder="Chọn loại kính" />
                       </SelectTrigger>
                       <SelectContent className="border-2 border-emerald-200">
                         {product.map((type) => (
-                          <SelectItem key={type.id} value={type.id.toString()}>
+                          <SelectItem
+                            key={type.id}
+                            value={type.id.toString()}
+                          >
                             <div className="flex w-full items-center justify-between">
                               <span>{type.productName}</span>
                               <span className="ml-4 font-semibold text-emerald-600">

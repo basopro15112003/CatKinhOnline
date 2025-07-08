@@ -107,7 +107,7 @@ export default function Address({ userId }: { userId: number }) {
   return (
     <>
       <TabsContent value="address">
-        <div className="space-y-4">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium">Địa chỉ của tôi</h3>
             {(!address || address.length < 3) && (

@@ -14,7 +14,7 @@ export default function GoogleCallback() {
     const token = new URLSearchParams(search).get("token");
     try {
       if (token) {
-        localStorage.setItem("token", token);
+        sessionStorage.setItem("token", token);
         getUserFromToken();
         toast.success(
           "Đăng nhập thành công: Chúc bạn trải nghiệm dịch vụ một cách vui vẻ",

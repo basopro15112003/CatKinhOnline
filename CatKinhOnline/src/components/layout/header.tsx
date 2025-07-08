@@ -5,18 +5,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Link, useNavigate } from "react-router-dom";
-import { getUserProfileByEmail, type UserProfile } from "@/services/userService";
+import {
+  getUserProfileByEmail,
+  type UserProfile,
+} from "@/services/userService";
 import { Login } from "@/pages/common/login";
 import { toast } from "@/hooks/use-toast";
 import NavigationComponent from "./navigation";
-import Logo from "../../assets/images/LogoWhiteNoBG.png";
+import Logo from "@/assets/images/logo/LogoWhiteNoBG.png";
 
 export function Header() {
   const [showForm, setShowForm] = useState(false);
-  const token = localStorage.getItem("token");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const navigate = useNavigate();
-  const email = localStorage.getItem("email");
+  const email = sessionStorage.getItem("email");
 
   useEffect(() => {
     async function fetchData() {
@@ -51,9 +53,7 @@ export function Header() {
   // };
 
   function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("name");
-    localStorage.removeItem("email");
+    sessionStorage.clear()
     navigate("/");
     toast.success("Đang xuất thành công!");
   }
@@ -63,13 +63,13 @@ export function Header() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
           <Link to={"/"} className="flex items-center space-x-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600">
-              <img src={Logo} alt="Logo" className="w-7 h-7 text-white" />
+              <img src={Logo} alt="Logo" className="h-7 w-7 text-white" />
             </div>
             <h1 className="bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-base font-bold text-transparent md:text-2xl">
               Nhôm Kính Quốc Thuần
             </h1>
           </Link>
-          {!token ? (
+          {!email ? (
             <>
               <Button
                 onClick={() => setShowForm(true)}
@@ -82,12 +82,16 @@ export function Header() {
           ) : (
             <>
               <div className="flex items-center">
-                <Avatar className="mr-2 h-10 w-10 md:h-13 md:w-13">
-                  <Link to="/account">
-                    <AvatarImage src="https://yt3.googleusercontent.com/OXbxyxi7XaDta1HS8rAUWzgLcegQxXf4clltpIUE3qCzuO3LxFhRqqatphRP788cVqYiRWWKPXQ=s900-c-k-c0x00ffffff-no-rj" />
+                {" "}
+                <Link to="/account">
+                  <Avatar className="mr-2 h-10 w-10 md:h-13 md:w-13">
+                    <AvatarImage
+                      alt="avatar"
+                      src="https://yt3.googleusercontent.com/OXbxyxi7XaDta1HS8rAUWzgLcegQxXf4clltpIUE3qCzuO3LxFhRqqatphRP788cVqYiRWWKPXQ=s900-c-k-c0x00ffffff-no-rj"
+                    />
                     <AvatarFallback>User</AvatarFallback>
-                  </Link>
-                </Avatar>
+                  </Avatar>{" "}
+                </Link>
                 <div>
                   <Link to="/account">
                     <p className="max-w-30 truncate text-sm font-bold text-green-700 md:max-w-44 md:text-base">

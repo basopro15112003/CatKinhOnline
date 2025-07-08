@@ -89,29 +89,44 @@ export default function About() {
       desc: "Dẫn đầu về chất lượng và dịch vụ",
     },
   ];
-   const services = [
+  const services = [
     {
       title: "Cắt kính cường lực",
       desc: "Kính cường lực cao cấp, độ bền gấp 5-7 lần kính thường, an toàn tuyệt đối",
       img: "https://seacons.vn/wp-content/uploads/2017/07/kinh-cuong-luc.png",
-      features: ["Chống va đập", "Chịu nhiệt tốt", "An toàn khi vỡ", "Bảo hành 2 năm"],
+      features: [
+        "Chống va đập",
+        "Chịu nhiệt tốt",
+        "An toàn khi vỡ",
+        "Bảo hành 2 năm",
+      ],
       price: "Từ 300,000₫/m²",
     },
     {
       title: "Cắt kính bông",
       desc: "Kính mờ trang trí, tạo không gian riêng tư và thẩm mỹ cao",
       img: "https://www.kinhdapcau.vn/media/k2/items/cache/fd8b0f77d767f1f6640afba6916ff67c_XL.jpg",
-      features: ["Tạo riêng tư", "Thẩm mỹ cao", "Dễ vệ sinh", "Đa dạng họa tiết"],
+      features: [
+        "Tạo riêng tư",
+        "Thẩm mỹ cao",
+        "Dễ vệ sinh",
+        "Đa dạng họa tiết",
+      ],
       price: "Từ 250,000₫/m²",
     },
     {
       title: "Cắt kính trắng",
       desc: "Kính trong suốt đa dạng độ dày, phù hợp mọi công trình",
       img: "https://kinhquangtruong.com/wp-content/uploads/2020/09/kinh-trang-5-ly.jpg",
-      features: ["Độ trong cao", "Đa dạng độ dày", "Giá cả hợp lý", "Giao hàng nhanh"],
+      features: [
+        "Độ trong cao",
+        "Đa dạng độ dày",
+        "Giá cả hợp lý",
+        "Giao hàng nhanh",
+      ],
       price: "Từ 200,000₫/m²",
     },
-  ]
+  ];
   return (
     <main>
       <section className="relative mx-auto mb-16 max-w-7xl px-4">
@@ -290,11 +305,12 @@ export default function About() {
                       {feature}
                     </li>
                   ))}
-                </ul>
-                <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700">
-                  <Link to={"/order"}>
-                  Đặt hàng ngay</Link>
-                </Button>
+                </ul>{" "}
+                <Link to={"/order"}>
+                  <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700">
+                    Đặt hàng ngay
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
@@ -314,18 +330,28 @@ export default function About() {
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button
+                asChild
                 size="lg"
                 className="transform bg-white text-emerald-700 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-100 hover:shadow-xl"
               >
-                <Phone className="mr-2 h-5 w-5" />
-                Gọi ngay: 0939 105 522
+                <a href="tel:0939105522">
+                  <Phone className="mr-2 h-5 w-5" />
+                  Gọi ngay: 0939 105 522
+                </a>
               </Button>
-                  <Button
+              <Button
+                asChild
                 size="lg"
                 className="transform bg-white text-emerald-700 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-100 hover:shadow-xl"
               >
-                <MessageSquare className="mr-2 h-5 w-5" />
-                Gửi tin nhắn
+                <a
+                  href="https://zalo.me/0939105522"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageSquare className="mr-2 h-5 w-5" />
+                  Gửi tin nhắn
+                </a>
               </Button>
             </div>
           </CardContent>

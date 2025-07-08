@@ -9,10 +9,10 @@ type LayoutUserProps = {
 
 function LayoutUser({ children }: LayoutUserProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-200 via-emerald-50 to-green-300">
+    <div className="min-h-screen flex flex-col relative bg-gradient-to-br from-green-200 via-emerald-50 to-green-300">
       <Header></Header>
-      <main>{children}</main>
-      <Footer></Footer>
+      <main className="flex-1">{children}</main>
+        <Footer></Footer>
       <Toaster></Toaster>
     </div>
   );

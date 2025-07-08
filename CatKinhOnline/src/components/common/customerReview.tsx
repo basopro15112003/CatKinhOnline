@@ -1,13 +1,15 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Star } from "lucide-react";
-
+import customerReview1 from "@/assets/images/user/customerReview1.avif";
+import customerReview2 from "@/assets/images/user/customerReview2.jpg";
+import customerReview3 from "@/assets/images/user/customerReview3.jpg";
 export default function CustomerReview() {
     
   const reviews = [
     {
       name: "Anh Trường",
-      role: "Chủ cửa hàng nội thất",
-      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7puyx2DAaMt7ejj55Iylp4COOeSf4zPG-mw&s",
+      role: "Chủ cửa hàng nội thất",  
+      img: customerReview1,
       rating: 5,
       comment:
         "Dịch vụ tuyệt vời! Kính chất lượng cao, giao hàng đúng hẹn. Tôi sẽ tiếp tục sử dụng dịch vụ.",
@@ -15,7 +17,7 @@ export default function CustomerReview() {
     {
       name: "Chị Huyền",
       role: "Kiến trúc sư",
-      img: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474053qxl/anh-nguoi-that-cute-nhat_043412774.jpg",
+      img: customerReview2,
       rating: 5,
       comment:
         "Báo giá nhanh chóng, chính xác. Đội ngũ tư vấn nhiệt tình và chuyên nghiệp.",
@@ -23,7 +25,7 @@ export default function CustomerReview() {
     {
       name: "Bạn Hân",
       role: "Nhà thầu xây dựng",
-      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHYtDbL_HuXPvfbfTzOzx7BiMXjQ7PbI9mJw&s",
+      img: customerReview3,
       rating: 5,
       comment:
         "Giá cả hợp lý, chất lượng vượt mong đợi. Đã hợp tác nhiều dự án với tiệm.",
@@ -55,7 +57,7 @@ export default function CustomerReview() {
                     className="h-16 w-16 rounded-full border-4 border-emerald-200 object-cover transition-colors duration-300 group-hover:border-emerald-400"
                   />
                   <div className="ml-2 md:ml-4">
-                    <h4 className="font-bold text-gray-800">{review.name}</h4>
+                    <p className="font-bold text-lg text-gray-800">{review.name}</p>
                     <p className="text-sm text-gray-600">{review.role}</p>
                   </div>
                 </div>

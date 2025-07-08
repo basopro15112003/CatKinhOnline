@@ -6,14 +6,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import type { ViewOrder } from "@/services/orderService";
 import { getProducts, type Product } from "@/services/productService";
 import { useEffect, useState } from "react";
 import { getAddressById, type Address } from "@/services/addressService";
-import Logo from "../../assets/images/Logo.png";
+import Logo from "@/assets/images/logo/Logo.png";
 
-export function DetailOrder({
+export function DetailAdminOrder({    
   selectedOrder,
   closeDetail,
 }: {
@@ -108,16 +108,20 @@ export function DetailOrder({
               </p>
               <p className="mb-2">
                 <span className="font-semibold">Họ và tên:</span>{" "}
-                {address?.contactName}
+                {selectedOrder.deliveryType === 0
+                  ? selectedOrder?.fullName
+                  : address?.contactName}
               </p>
               <p className="mb-2">
                 <span className="font-semibold">Số điện thoại:</span>{" "}
-                {address?.contactPhone}
+                {selectedOrder.deliveryType === 0
+                  ? selectedOrder?.phone
+                  : address?.contactPhone}
               </p>
               {selectedOrder.note && selectedOrder.note !== "" && (
                 <p className="mb-2">
                   <span className="font-semibold">Ghi chú đơn hàng:</span>{" "}
-                  <span className="text-sm text-gray-900 italic break-words max-h-24 overflow-y-auto">
+                  <span className="max-h-24 overflow-y-auto text-sm break-words text-gray-900 italic">
                     {selectedOrder.note}
                   </span>
                 </p>
@@ -134,18 +138,20 @@ export function DetailOrder({
                 <p className="mb-2">
                   <span className="font-semibold">Địa chỉ giao hàng:</span>{" "}
                   {address?.addressLine}
-                  {/* {address?.note && address?.note !== "" && (
-                    <span>
-                      {" "}
-                      <span className="text-sm font-semibold">
-                        (Ghi chú:
-                      </span>{" "}
-                      {address?.note})
-                    </span>
-                  )} */}
                 </p>
               )}{" "}
-              <p className="mb-2">
+              <p>
+                {address?.note && address?.note !== "" && (
+                  <span>
+                    {" "}
+                    <span className="font-semibold">
+                      Ghi chú địa chỉ :
+                    </span>{" "}
+                    {address?.note}
+                  </span>
+                )}
+              </p>
+              <p className="mt-2 mb-2">
                 <span className="font-semibold">Thanh toán:</span>{" "}
                 {selectedOrder.paymentMethod === 1
                   ? "Tiền mặt"
@@ -184,7 +190,7 @@ export function DetailOrder({
             <TableBody>
               {selectedOrder.orderItems.map((item, index) => (
                 <>
-                  <TableRow key={item.id}>
+                  <TableRow  key={index}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>
                       {products[item.productId]?.productName ||

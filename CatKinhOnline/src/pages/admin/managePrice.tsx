@@ -30,8 +30,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import { AlignStartVertical } from "lucide-react";
 import { getProducts, type Product } from "@/services/productService";
-import { FormAddProduct } from "@/components/form/product/addProduct";
-import { FormUpdateProduct } from "@/components/form/product/updateProduct";
+import { FormAddProduct } from "@/components/admin/product/addProduct";
+import { FormUpdateProduct } from "@/components/admin/product/updateProduct";
 import { getCategories, type Category } from "@/services/categoryService";
 
 export default function ManagePrice() {
@@ -40,7 +40,7 @@ export default function ManagePrice() {
   const [open, setOpen] = React.useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<number>(0);
-  const [statusFilter, setStatusFilter] = useState<number>(0);
+  const [statusFilter, setStatusFilter] = useState<number>(2);
   const [product, setProduct] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);

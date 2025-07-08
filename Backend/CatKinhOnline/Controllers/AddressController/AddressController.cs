@@ -1,11 +1,14 @@
 ﻿using CatKinhOnline.ModelDTOs;
 using CatKinhOnline.Models;
 using CatKinhOnline.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatKinhOnline.Controllers.AddressController
     {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class AddressController : ControllerBase

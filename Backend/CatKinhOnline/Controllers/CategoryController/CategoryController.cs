@@ -1,5 +1,7 @@
 ﻿using CatKinhOnline.Models;
 using CatKinhOnline.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -7,6 +9,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CatKinhOnline.Controllers.CategoryController
     {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase

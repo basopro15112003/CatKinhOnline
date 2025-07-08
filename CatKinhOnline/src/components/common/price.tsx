@@ -11,8 +11,11 @@ export function Price() {
     async function fetchData() {
       try {
         const response = await getProducts();
-        if (response.isSuccess && Array.isArray(response.result)) { // kiểm tra xem response có phải là một mảng không
-          const filtered = response.result.filter((item: Product) => item.status === 1); // lọc ra những sản phẩm có status là đang còn hàng
+        if (response.isSuccess && Array.isArray(response.result)) {
+          // kiểm tra xem response có phải là một mảng không
+          const filtered = response.result.filter(
+            (item: Product) => item.status === 1,
+          ); // lọc ra những sản phẩm có status là đang còn hàng
           setProduct(filtered);
         }
       } catch (error) {
@@ -25,36 +28,36 @@ export function Price() {
   return (
     <>
       <section className="mx-auto mb-12 max-w-7xl px-1 md:px-4">
-        <Card className="rounded-2xl bg-gradient-to-br from-white to-emerald-50/30 md:p-6 shadow-lg">
+        <Card className="rounded-2xl bg-gradient-to-br from-white to-emerald-50/30 shadow-lg md:p-6">
           <CardContent>
             <h2 className="mb-8 text-center text-4xl font-bold text-gray-800">
               Bảng giá kính
             </h2>
-            <div className="grid grid-cols-1 gap-2 w-full md:w-auto md:gap-4 sm:grid-cols-2">
+            <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:w-auto md:gap-4">
               {product.map((product, id) => (
                 <div
                   key={id}
-                  className="rounded-xl border border-emerald-400 bg-white/60 p-2 md:p-4  shadow-lg shadow-emerald-100"
+                  className="rounded-xl border border-emerald-400 bg-white/60 p-2 shadow-lg shadow-emerald-100 md:p-4"
                 >
-                  <h4 className="text-lg font-semibold text-black">
+                  <p className="text-lg font-semibold text-black">
                     {product.productName}
-                  </h4>
-                  <p className="md:mt-2 text-green-900">
+                  </p>
+                  <p className="text-green-900 md:mt-2">
                     Giá: {product.pricePerM2.toLocaleString()}₫/m²
                   </p>
                 </div>
               ))}
             </div>
             {location.pathname === "/CatKinhOnline/order" ? null : (
-              <Button
-                className="mx-auto mt-6 flex bg-gradient-to-r from-green-600 to-green-800 text-center text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl"
-                size="lg"
-                type="button"
-              >
-                <Link to="/order" className="w-full text-center text-white">
+              <Link to="/order" className="w-full text-center text-white">
+                <Button
+                  className="mx-auto mt-6 flex bg-gradient-to-r from-green-600 to-green-800 text-center text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl"
+                  size="lg"
+                  type="button"
+                >
                   Đặt kính ngay
-                </Link>
-              </Button>
+                </Button>{" "}
+              </Link>
             )}
 
             <p className="mt-6 text-center text-sm text-gray-500 italic">
