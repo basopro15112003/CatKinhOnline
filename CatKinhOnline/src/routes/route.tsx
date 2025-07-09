@@ -48,7 +48,7 @@ function AdminRoute({ children }: { children: JSX.Element }) {
 function AppRoute() {
   return (
     <>
-      <Router basename="/NhomKinhQuocThuan">
+      <Router >
         <Routes>
           {/* public route */}
           <Route
