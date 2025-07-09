@@ -15,7 +15,7 @@ namespace CatKinhOnline.AppDbContext
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             IConfigurationRoot configuration = builder.Build();
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("HoangConnection"));
+            optionsBuilder.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
             }
         public DbSet<User> Users { get; set; }
         public DbSet<Address> Addresses { get; set; }

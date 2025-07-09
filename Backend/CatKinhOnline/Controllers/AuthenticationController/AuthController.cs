@@ -166,7 +166,7 @@ namespace CatKinhOnline.Controllers.AuthenticationController
 
             // Redirect về FE (kèm basename nếu có)
             var front = _config["Frontend:BaseUrl"]!.TrimEnd('/');
-            var redirect = $"{front}/NhomKinhQuocThuan/auth/callback?token={jwt}";
+            var redirect = $"{front}/auth/callback?token={jwt}";
             return Redirect(redirect);
             }
 

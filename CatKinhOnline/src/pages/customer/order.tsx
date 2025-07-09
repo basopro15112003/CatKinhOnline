@@ -236,7 +236,7 @@ function OrderPage() {
 
   useEffect(() => {
     async function fetchData() {
-      const email = localStorage.getItem("email");
+      const email = sessionStorage.getItem("email");
       if (!email) {
         console.error("Không tìm thấy email trong localStorage");
         return;

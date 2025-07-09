@@ -49,7 +49,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // Đăng ký DbContext
 builder.Services.AddDbContext<MyDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("HoangConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.ConfigureDependencyInjection();
 builder.Configuration.AddUserSecrets<Program>(optional: true);
