@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 
 function NavigationComponent() {
-  const email = localStorage.getItem("email");
+  const email = sessionStorage.getItem("email");
   const location = useLocation();
 
   const isActive = (path: string) => {

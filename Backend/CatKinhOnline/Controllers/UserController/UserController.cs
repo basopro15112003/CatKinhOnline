@@ -72,6 +72,7 @@ namespace CatKinhOnline.Controllers.UserController
 
         // POST api/<UserController>
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Post([FromBody] User user)
             {
             try

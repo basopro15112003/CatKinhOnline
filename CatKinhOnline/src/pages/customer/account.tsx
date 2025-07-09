@@ -5,13 +5,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CustomerOrders } from "@/components/customer/account/order/customerOrder";
 import Address from "@/features/address/pages/address";
-import type { ChangePasswordInput, UpdateUserDto, UserProfile } from "@/services/userService";
+import type {
+  ChangePasswordInput,
+  UpdateUserDto,
+  UserProfile,
+} from "@/services/userService";
 import { useState, useEffect } from "react";
-import { changePassword,  getUserProfileByEmail, updateUserProfile } from "@/services/userService";
+import {
+  changePassword,
+  getUserProfileByEmail,
+  updateUserProfile,
+} from "@/services/userService";
 import { toast } from "@/hooks/use-toast";
-      
-export default function Account() {
+import { Eye, EyeClosed } from "lucide-react";
 
+export default function Account() {
+  const [showPassword, setShowPassword] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile>();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<UpdateUserDto>({
@@ -23,7 +32,7 @@ export default function Account() {
   // Fetch user profile
   useEffect(() => {
     async function fetchData() {
-      const email =   sessionStorage.getItem("email");
+      const email = sessionStorage.getItem("email");
       if (!email) {
         console.error("Không tìm thấy email trong localStorage");
         return;
@@ -32,7 +41,7 @@ export default function Account() {
         const response = await getUserProfileByEmail(email);
         if (response && response.isSuccess) {
           console.log("setUserProfile", response);
-              setUserProfile(response.result as UserProfile);
+          setUserProfile(response.result as UserProfile);
           setForm({
             id: (response.result as UserProfile).id,
             fullName: (response.result as UserProfile).fullName,
@@ -93,7 +102,8 @@ export default function Account() {
       }, 2000);
     }
   };
-  const [changePasswordSubmitting, setChangePasswordSubmitting] = useState(false);
+  const [changePasswordSubmitting, setChangePasswordSubmitting] =
+    useState(false);
   const [changePasswordForm, setChangePasswordForm] =
     useState<ChangePasswordInput>({
       newPassword: "",
@@ -131,7 +141,10 @@ export default function Account() {
     if (!validateFormChangePassword()) return;
     setSubmitting(true);
     try {
-      const response = await changePassword(userProfile!.email, changePasswordForm);
+      const response = await changePassword(
+        userProfile!.email,
+        changePasswordForm,
+      );
       console.log(response);
       if (response.isSuccess) {
         setChangePasswordForm({
@@ -151,7 +164,6 @@ export default function Account() {
       }, 2000);
     }
   };
-
 
   return (
     <div className="px-1 md:px-4">
@@ -235,18 +247,34 @@ export default function Account() {
                         }
                       />
                     </div>{" "}
-                    <div>
+                    <div className="relative">
                       <Label>Mật khẩu mới</Label>
                       <Input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         name="newPassword"
                         value={changePasswordForm.newPassword}
                         onChange={(e) =>
                           handleChangePassword("newPassword", e.target.value)
                         }
-                      />
+                      />{" "}
+                      <button
+                        type="button"
+                        className="absolute top-5 right-2 scale-95"
+                        onClick={() => setShowPassword((v) => !v)}
+                        tabIndex={-1}
+                      >
+                        {!showPassword ? (
+                          <>
+                            <EyeClosed></EyeClosed>
+                          </>
+                        ) : (
+                          <>
+                            <Eye></Eye>
+                          </>
+                        )}
+                      </button>{" "}
                     </div>{" "}
-                    <div>
+                    <div className="relative">
                       <Label>Xác nhận mật khẩu mới</Label>
                       <Input
                         type="password"
@@ -258,9 +286,11 @@ export default function Account() {
                     <Button
                       className="mt-4"
                       type="submit"
-                        disabled={changePasswordSubmitting}
+                      disabled={changePasswordSubmitting}
                     >
-                      {changePasswordSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
+                      {changePasswordSubmitting
+                        ? "Đang lưu..."
+                        : "Lưu thay đổi"}
                     </Button>{" "}
                   </div>
                 </TabsContent>
@@ -273,7 +303,9 @@ export default function Account() {
             {/* Tab Địa chỉ End */}
 
             {/* Manage Order Start */}
-            {userProfile && <CustomerOrders userId={userProfile.id}></CustomerOrders>}
+            {userProfile && (
+              <CustomerOrders userId={userProfile.id}></CustomerOrders>
+            )}
             {/* Manage Order End */}
           </Tabs>
         </CardContent>

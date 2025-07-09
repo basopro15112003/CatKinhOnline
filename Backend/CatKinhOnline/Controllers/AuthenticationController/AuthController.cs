@@ -72,6 +72,7 @@ namespace CatKinhOnline.Controllers.AuthenticationController
             }
 
         [HttpGet("login")]
+        [AllowAnonymous]
         public IActionResult Login([FromQuery] string returnUrl)
             {
             // Build absolute callback URI on backend that Google sẽ gọi về
@@ -134,6 +135,7 @@ namespace CatKinhOnline.Controllers.AuthenticationController
             return jwt;
             }
 
+        [AllowAnonymous]
         [HttpGet("signin-google")]
         public async Task<IActionResult> GoogleCallback([FromQuery] string returnUrl)
             {
@@ -163,14 +165,13 @@ namespace CatKinhOnline.Controllers.AuthenticationController
             // Sinh JWT
             var jwt = GenerateJwtToken(email!, name!, "1");
 
-
             // Redirect về FE (kèm basename nếu có)
             string? front = _config["Frontend:BaseUrl"]!.TrimEnd('/');
             var redirect = $"{front}/auth/callback?token={jwt}";
             return Redirect(redirect);
             }
 
-
+        [AllowAnonymous]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest model)
             {
@@ -193,6 +194,7 @@ namespace CatKinhOnline.Controllers.AuthenticationController
             return Ok();
             }
 
+        [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
             {
