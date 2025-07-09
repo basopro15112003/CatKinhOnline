@@ -165,7 +165,7 @@ namespace CatKinhOnline.Controllers.AuthenticationController
 
 
             // Redirect về FE (kèm basename nếu có)
-            var front = _config["Frontend:BaseUrl"]!.TrimEnd('/');
+            string? front = _config["Frontend:BaseUrl"]!.TrimEnd('/');
             var redirect = $"{front}/auth/callback?token={jwt}";
             return Redirect(redirect);
             }
@@ -179,7 +179,8 @@ namespace CatKinhOnline.Controllers.AuthenticationController
                 return Ok();
 
             var token = GenerateResetPasswordToken(user.Id, user.Email);
-            var resetLink = $"http://localhost:5173/NhomKinhQuocThuan/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(model.Email)}";
+            string? front = _config["Frontend:BaseUrl"]!.TrimEnd('/');
+            var resetLink = $"{front}/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(model.Email)}";
 
             // Bước 2: Đọc file template
             var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Services", "EmailSender", "email.html");

@@ -7,23 +7,23 @@ export default function CustomerReview() {
     
   const reviews = [
     {
-      name: "Anh Trường",
+      name: "Anh Hoàng",
       role: "Chủ cửa hàng nội thất",  
-      img: customerReview1,
+      img: customerReview2,
       rating: 5,
       comment:
         "Dịch vụ tuyệt vời! Kính chất lượng cao, giao hàng đúng hẹn. Tôi sẽ tiếp tục sử dụng dịch vụ.",
     },
     {
-      name: "Chị Huyền",
+      name: "Chị Đào",
       role: "Kiến trúc sư",
-      img: customerReview2,
+      img: customerReview1,
       rating: 5,
       comment:
         "Báo giá nhanh chóng, chính xác. Đội ngũ tư vấn nhiệt tình và chuyên nghiệp.",
     },
     {
-      name: "Bạn Hân",
+      name: "Bạn Khương",
       role: "Nhà thầu xây dựng",
       img: customerReview3,
       rating: 5,
