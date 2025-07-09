@@ -9,7 +9,7 @@ import { Price } from "@/components/common/price";
 import PriceQuoteCard from "@/components/common/calPrice";
 import { ArrowRight, Calculator, Shield, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import CustomerReview from "@/components/common/customerReview";
 import banner1 from "@/assets/images/banner/banner1.avif";
 import banner2 from "@/assets/images/banner/banner2.avif";
@@ -17,26 +17,8 @@ import banner3 from "@/assets/images/banner/banner3.avif";
 
 function HomePage() {
   const [isVisible, setIsVisible] = useState(false);
-  const [isMove, setIsMove] = useState(false);
-  const h2Ref = useRef<HTMLHeadingElement>(null);
-
   useEffect(() => {
     setIsVisible(true);
-  }, []);
-
-  useEffect(() => {
-    const observer = new window.IntersectionObserver(
-      ([entry]) => {
-        setIsMove(entry.isIntersecting);
-      },
-      { threshold: 0.5 }, // 20% xuất hiện là bắt đầu hiệu ứng
-    );
-    if (h2Ref.current) {
-      observer.observe(h2Ref.current);
-    }
-    return () => {
-      if (h2Ref.current) observer.unobserve(h2Ref.current);
-    };
   }, []);
 
   const features = [
@@ -67,11 +49,7 @@ function HomePage() {
           <div className="relative overflow-hidden rounded-3xl shadow-2xl">
             <Carousel className="w-full" plugins={[Autoplay({ delay: 4000 })]}>
               <CarouselContent>
-                {[
-                  banner3,
-                  banner2,
-                  banner1,
-                ].map((src, idx) => (
+                {[banner3, banner2, banner1].map((src, idx) => (
                   <CarouselItem key={idx}>
                     <div className="relative h-90 overflow-hidden md:h-[500px]">
                       <img

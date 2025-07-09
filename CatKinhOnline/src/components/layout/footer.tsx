@@ -6,9 +6,16 @@ import {
   Phone,
   Twitter,
 } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Login } from "@/pages/common/login";
+import { Register } from "@/pages/common/register";
 
 export function Footer() {
+  const [showForm, setShowForm] = useState(false);
+  const email = sessionStorage.getItem("email");
+
   return (
     <>
       <footer className="bg-gradient-to-br from-gray-900 via-emerald-900 to-teal-900 px-4 py-8 text-white print:hidden">
@@ -21,7 +28,7 @@ export function Footer() {
               <MapPin size={20} />
               227 Phong Điền, TP Cần Thơ, Việt Nam
             </p>
-            <p className="mb-2 flex items-center gap-2 text-sm  ">
+            <p className="mb-2 flex items-center gap-2 text-sm">
               <Mail size={20} /> quochoangnguyen2003ct@gmail.com
             </p>
             <p className="mb-2 flex items-center gap-2 text-sm">
@@ -38,7 +45,11 @@ export function Footer() {
                 </Link>
               </li>
               <li className="mb-2">
-                <a href="#" className="hover:underline">
+                <a
+                  href="https://zalo.me/0939105522"
+                  target="_blank"
+                  className="hover:underline"
+                >
                   Liên hệ
                 </a>
               </li>
@@ -47,15 +58,36 @@ export function Footer() {
           <div>
             <h4 className="mb-4 text-2xl font-semibold">Tài khoản</h4>
             <ul className="space-y-1 text-sm">
+              {!email ? (
+                <>
+                  {" "}
+                  <li className="mb-2">
+                    <button
+                      name="btnLoginFooter"
+                      className="cursor-pointer hover:underline"
+                      onClick={() => {
+                        setShowForm(true);
+                      }}
+                    >
+                      Đăng nhập
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  {" "}
+                  <li className="mb-2">
+                    <Link to={"/account"} className="hover:underline">
+                      Tài khoản
+                    </Link>
+                  </li>
+                </>
+              )}
+
               <li className="mb-2">
-                <a href="#" className="hover:underline">
-                  Đăng nhập
-                </a>
-              </li>
-              <li className="mb-2">
-                <a href="#" className="hover:underline">
+                <Link to={"/order"} className="hover:underline">
                   Đặt Đơn
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -80,6 +112,22 @@ export function Footer() {
           © 2025 QuocHoang. All rights reserved.
         </div>
       </footer>
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs">
+          <Tabs defaultValue="account" className="w-full max-w-xl items-center">
+            <TabsList className="mr-auto">
+              <TabsTrigger value="account">Đăng nhập</TabsTrigger>
+              <TabsTrigger value="password">Đăng ký</TabsTrigger>
+            </TabsList>
+            <TabsContent className="w-sm md:w-full" value="account">
+              <Login setShowForm={setShowForm} />
+            </TabsContent>
+            <TabsContent className="w-sm md:w-full" value="password">
+              <Register setShowForm={setShowForm} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
     </>
   );
 }

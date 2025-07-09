@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Login } from "./login";
 import { toast } from "@/hooks/use-toast";
 import { Eye, EyeClosed } from "lucide-react";
 
@@ -22,7 +21,6 @@ export function ResetPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [success, setSuccess] = useState(false);
-  const [showForm, setShowForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -83,9 +81,8 @@ export function ResetPasswordForm() {
             <br />
             Bạn có thể đăng nhập lại với mật khẩu mới.
           </p>
-          <Button className="w-full max-w-xs" onClick={() => setShowForm(true)} asChild>
+          <Button className="w-full max-w-xs" asChild>
             <Link to={"/"} >
-          
            Quay về trang chủ  </Link>
           </Button>
         </div>

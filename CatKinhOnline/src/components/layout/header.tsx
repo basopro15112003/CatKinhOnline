@@ -13,6 +13,7 @@ import { Login } from "@/pages/common/login";
 import { toast } from "@/hooks/use-toast";
 import NavigationComponent from "./navigation";
 import Logo from "@/assets/images/logo/LogoWhiteNoBG.png";
+import AvatarUser from "@/assets/images/user/avatar.avif";
 
 export function Header() {
   const [showForm, setShowForm] = useState(false);
@@ -87,7 +88,7 @@ export function Header() {
                   <Avatar className="mr-2 h-10 w-10 md:h-13 md:w-13">
                     <AvatarImage
                       alt="avatar"
-                      src="https://yt3.googleusercontent.com/OXbxyxi7XaDta1HS8rAUWzgLcegQxXf4clltpIUE3qCzuO3LxFhRqqatphRP788cVqYiRWWKPXQ=s900-c-k-c0x00ffffff-no-rj"
+                      src={AvatarUser}
                     />
                     <AvatarFallback>User</AvatarFallback>
                   </Avatar>{" "}
