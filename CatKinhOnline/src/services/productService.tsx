@@ -1,5 +1,6 @@
 import type { AxiosResponse } from "axios";
 import request from "../../src/utils/baseURL";
+import type { APIResponse } from "./userService";
 
  type Category = {
   id: number;
@@ -20,15 +21,47 @@ export type Product = {
 export type ProductInput = Omit<Product, "id" | "category">;
 
 
-export const getProducts = async ():Promise<Product[]> => {
+export const getProducts = async ():Promise<APIResponse> => {
     try {
-        const response:AxiosResponse<Product[]> = await request.get("Product")
-        return response.data;
+        const response:AxiosResponse<APIResponse> = await request.get("Product")
+        if(response.data.isSuccess){
+            return response.data;
+        }
+        return {
+            isSuccess: response.data.isSuccess,
+            message: response.data.message,
+            result: response.data.result
+        };
     } catch (error) {
         console.log(error);
-        return [];
+        return {
+            isSuccess: false,
+            message: "Lỗi khi lấy sản phẩm",
+            result: []
+        };
     }
 }
+
+export const getProductById = async (id: number): Promise<APIResponse | null> => {
+  try {
+    const response: AxiosResponse<APIResponse> = await request.get(`Product/${id}`);
+    if(response.data.isSuccess){
+      return response.data;
+  }
+  return {
+      isSuccess: response.data.isSuccess,
+      message: response.data.message,
+      result: response.data.result
+  };
+  } catch (error) {
+    console.log(error);
+    return {
+      isSuccess: false,
+      message: "Lỗi khi lấy sản phẩm",
+      result: []
+  };
+  }
+};
 
 export const AddProduct = async(data:ProductInput ) => {
     try {
@@ -43,13 +76,20 @@ export const AddProduct = async(data:ProductInput ) => {
 export const updateProduct = async (
   id: number,
   data: ProductInput
-): Promise<Product | null> => {
+): Promise<APIResponse | null> => {
   try {
-    const response: AxiosResponse<Product> = await request.put(
+    const response: AxiosResponse<APIResponse> = await request.put(
       `Product/${id}`,
       data
     );
-    return response.data;
+    if(response.data.isSuccess){
+      return response.data;
+  }
+  return {
+      isSuccess: response.data.isSuccess,
+      message: response.data.message,
+      result: response.data.result
+  };
   } catch (error) {
     if (error) return null;
     console.error("Error updating product", error);

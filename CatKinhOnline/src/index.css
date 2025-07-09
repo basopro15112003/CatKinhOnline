@@ -140,3 +140,70 @@
     @apply bg-background text-foreground;
   }
 }
+/* custom-datepicker.css Start */
+.react-datepicker {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+  font-family: 'Inter', Arial, sans-serif !important;
+  font-size: 13px !important;
+  min-width: 318px !important;
+}
+
+.react-datepicker__header {
+  background: #7bc498 !important;
+  border-bottom: none !important;  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range {
+    background: #7bc498 !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+}
+.react-datepicker__day,
+.react-datepicker__day-name {
+  width: 38px !important;
+  line-height: 24px !important;
+  font-size: 13px !important;
+}
+.react-datepicker__portal{
+  background: none !important;
+} 
+/* Ô chọn ngày */
+.react-datepicker__day--selected,
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+}
+
+/* Nút điều hướng tháng nhỏ lại */
+.react-datepicker__navigation {
+  top: 10px !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+
+/* Input calendar icon nhỏ lại */
+.react-datepicker__input-container input {
+  font-size: 13px !important;
+}
+.react-datepicker__navigation-icon::before{
+  border-color: #000 !important;
+}
+.react-datepicker__close-icon::after{
+  background: #7bc498 !important;
+  color: #000;
+}
+
+/* custom-datepicker.css End */
+/* Chatbase AI Chatbot */
+#chatbase-bubble-window {
+  width: 350px !important;
+  max-width: 90vw !important;
+  height: 450px !important;
+  max-height: 80vh !important;
+  border-radius: 16px !important;
+  font-size: 15px !important;
+}

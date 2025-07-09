@@ -1,11 +1,16 @@
 ﻿using CatKinhOnline.Repositories.AddressRepository;
 using CatKinhOnline.Repositories.CategoryRepository;
+using CatKinhOnline.Repositories.OrderItemRepository;
+using CatKinhOnline.Repositories.OrderRepository;
 using CatKinhOnline.Repositories.ProductRepository;
 using CatKinhOnline.Repositories.UserRepository;
 using CatKinhOnline.Services;
+using CatKinhOnline.Services.EmailSender;
+using CatKinhOnline.Services.OrderServices;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace CatKinhOnline.Core
-    {
+{
     public static class DependencyInjection
         {
         public static void ConfigureDependencyInjection(this IServiceCollection services)
@@ -15,6 +20,9 @@ namespace CatKinhOnline.Core
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IAddressRepository, AddressRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IOrderItemRepository, OrderItemRepository>();
+
 
             #endregion
 
@@ -24,6 +32,9 @@ namespace CatKinhOnline.Core
             services.AddScoped<UserService>();
             services.AddScoped<AuthService>();
             services.AddScoped<AddressService>();
+            services.AddScoped<OrderService>();
+            services.AddScoped<OrderItemService>();
+            services.AddScoped<IEmailSender, SmtpEmailSender>();
 
             services.AddHttpClient();
             services.AddAuthorization();

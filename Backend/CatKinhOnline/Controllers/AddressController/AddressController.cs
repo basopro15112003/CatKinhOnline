@@ -1,11 +1,14 @@
 ﻿using CatKinhOnline.ModelDTOs;
 using CatKinhOnline.Models;
 using CatKinhOnline.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatKinhOnline.Controllers.AddressController
     {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class AddressController : ControllerBase
@@ -27,15 +30,18 @@ namespace CatKinhOnline.Controllers.AddressController
             return BadRequest(address.Message);
             }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAddressById(int id)
+            {
+            APIResponse? address = await _addressService.GetAddressById(id);
+            return Ok(address);
+            }
+
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetAddressByUserId(int userId)
             {
             APIResponse? address = await _addressService.GetAddressByUserId(userId);
-            if (address.IsSuccess)
-                {
                 return Ok(address);
-                }
-            return BadRequest(address.Message);
             }
 
         [HttpPost]

@@ -1,0 +1,299 @@
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import {
+  useGetDistricts,
+  useGetProvinces,
+  useGetWards,
+  useUpdateFinalAddress,
+} from "@/features/address/hooks/useAddress";
+import {
+  getAddressByUserId,
+  updateAddress,
+  type Address,
+} from "@/services/addressService";
+import { toast } from "@/hooks/use-toast";
+import { validateForm } from "./validateAddress";
+
+interface UpdateAddressProps {
+  address: Address | null;
+  onClose: () => void;
+  reloadAddressHandler: () => void;
+}
+
+export function UpdateAddress({
+  address,
+  onClose,
+  reloadAddressHandler,
+}: UpdateAddressProps) {
+  //#region Variable
+  const [contactName, setContactName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedWard, setSelectedWard] = useState("");
+  const [note, setNote] = useState("");
+  const [isDefault, setIsDefault] = useState(false);
+  const { provinces } = useGetProvinces();
+  const { districts } = useGetDistricts(
+    selectedProvince,
+    setSelectedDistrict,
+    setSelectedWard,
+  );
+  const { wards } = useGetWards(selectedDistrict, setSelectedWard);
+  const { finalAddress, setFinalAddress } = useUpdateFinalAddress(
+    provinces,
+    districts,
+    wards,
+    selectedProvince,
+    selectedDistrict,
+    selectedWard,
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  //#endregion
+
+  //#region Initialize data from address prop
+  useEffect(() => {
+    if (address) {
+      setContactName(address.contactName || "");
+      setContactPhone(address.contactPhone || "");
+      setNote(address.note || "");
+      setIsDefault(address.isDefault || false);
+      setFinalAddress(address.addressLine || "");
+    }
+  }, [
+    address,
+    setContactName,
+    setContactPhone,
+    setNote,
+    setIsDefault,
+    setFinalAddress,
+  ]);
+  //#endregion
+
+  //#region Update Address Handler
+  const updateAddressHandler = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm(contactName, contactPhone, finalAddress, note)) {
+      return;
+    }
+    setIsLoading(true);
+    try {
+      // Nếu đang set địa chỉ này làm mặc định, thì bỏ mặc định tất cả địa chỉ khác
+      if (isDefault) {
+        // Lấy danh sách tất cả địa chỉ của user
+        const allAddressesResponse = await getAddressByUserId(address!.userId);
+        if (allAddressesResponse.isSuccess) {
+          const allAddresses = allAddressesResponse.result as Address[];
+
+          // Bỏ mặc định tất cả địa chỉ khác (trừ địa chỉ hiện tại)
+          for (const addr of allAddresses) {
+            if (addr.id !== address!.id && addr.isDefault) {
+              await updateAddress(addr.id, {
+                ...addr,
+                isDefault: false,
+              });
+            }
+          }
+        }
+      }
+
+      const updated = await updateAddress(address!.id, {
+        id: address!.id,
+        userId: address!.userId,
+        contactName,
+        contactPhone,
+        addressLine: finalAddress,
+        note,
+        isDefault,
+        isDeleted: false,
+      });
+
+      if (updated) {
+        onClose();
+        reloadAddressHandler();
+        toast.success("Cập nhật địa chỉ thành công");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Cập nhật địa chỉ thất bại");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  //#endregion
+  return (
+    <>
+      {" "}
+      <div className="fixed inset-0 z-50 flex w-full items-center justify-center bg-black/50 backdrop-blur-sm md:w-auto">
+        <Card className="fixed max-h-screen w-sm overflow-y-auto border-1 border-emerald-300 shadow-sm shadow-emerald-100 md:w-xl">
+          <form onSubmit={(e) => updateAddressHandler(e)}>
+            <CardHeader>
+              <CardTitle className="mb-2 text-xl">Cập nhật địa chỉ</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name">Tên người nhận</Label>
+                    <Input
+                      id="name"
+                      placeholder="Nhập tên người nhận"
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Số điện thoại</Label>
+                    <Input
+                      id="phone"
+                      placeholder="Nhập số điện thoại"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="city">Tỉnh/Thành phố</Label>
+                  <Select
+                    required
+                    onValueChange={(value) => setSelectedProvince(value)}
+                    value={selectedProvince}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Chọn tỉnh/thành phố"></SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {provinces.map((p) => (
+                        <SelectItem value={p.code.toString()}>
+                          {p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="district">Quận/Huyện</Label>
+                  <Select
+                    value={selectedDistrict}
+                    onValueChange={setSelectedDistrict}
+                    disabled={!districts.length}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Chọn quận/huyện"></SelectValue>{" "}
+                    </SelectTrigger>
+                    <SelectContent>
+                      {districts.map((d) => (
+                        <SelectItem key={d.code} value={d.code.toString()}>
+                          {d.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="ward">Phường/Xã</Label>
+                  <Select
+                    value={selectedWard}
+                    onValueChange={setSelectedWard}
+                    disabled={!wards.length}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Chọn phường/xã" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {wards.map((w) => (
+                        <SelectItem key={w.code} value={w.code.toString()}>
+                          {w.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="specificAddress">Địa chỉ cụ thể</Label>
+                  <Textarea
+                    className="w-full max-w-[530px]"
+                    id="specificAddress"
+                    placeholder="Số nhà, tên đường, tòa nhà, ..."
+                    rows={3}
+                    maxLength={200}
+                    value={finalAddress}
+                    onChange={(e) => setFinalAddress(e.target.value)}
+                  />{" "}
+                  <div className="mt-1 flex justify-between text-xs">
+                    <span className="text-gray-500">
+                      Ghi chú tối đa 200 ký tự
+                    </span>
+                    <span
+                      className={`${finalAddress.length > 200 ? "text-red-500" : "text-gray-500"}`}
+                    >
+                      {finalAddress.length}/200
+                    </span>
+                  </div>
+                </div>{" "}
+                <div>
+                  <Label htmlFor="note">Ghi chú</Label>
+                  <Textarea
+                    className="w-full max-w-[530px]"
+                    maxLength={300}
+                    id="note"
+                    placeholder="Ghi chú (tùy chọn) đi qua mấy cửa hàng, đi qua mấy ngã tư, qua mấy cây cầu, ..."
+                    rows={3}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                  />{" "}
+                  <div className="mt-1 flex justify-between text-xs">
+                    <span className="text-gray-500">
+                      Ghi chú tối đa 300 ký tự
+                    </span>
+                    <span
+                      className={`${note.length > 300 ? "text-red-500" : "text-gray-500"}`}
+                    >
+                      {note.length}/300
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="isDefault">Đặt làm địa chỉ mặc định</Label>
+                  <Checkbox
+                    id="isDefault"
+                    checked={isDefault}
+                    onCheckedChange={(checked) =>
+                      setIsDefault(checked === true)
+                    }
+                  />
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="mt-4 flex justify-end space-x-2">
+              <Button variant="outline" onClick={onClose}>
+                Hủy
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Đang cập nhật địa chỉ..." : "Cập nhật địa chỉ"}
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
+    </>
+  );
+}

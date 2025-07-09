@@ -31,6 +31,34 @@ namespace CatKinhOnline.Repositories.AddressRepository
             }
         #endregion
 
+        #region get address by id
+        /// <summary>
+        /// get an address by its ID from the database.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<Address> GetAddressById(int id)
+            {
+            try
+                {
+                using (var _db = new MyDbContext())
+                    {
+                    var address = await _db.Addresses.FindAsync(id);
+                    if (address==null)
+                        {
+                        throw new Exception("Address not found");
+                        }
+                    return address;
+                    }
+                }
+            catch (Exception ex)
+                {
+                throw new Exception(ex.Message);
+                }
+            }
+        #endregion
+
         #region get address by Userid
         /// <summary>
         /// get an address by its USERID from the database.
@@ -44,7 +72,7 @@ namespace CatKinhOnline.Repositories.AddressRepository
                 {
                 using (var _db = new MyDbContext())
                     {
-                    var address = await _db.Addresses.Where(x=> x.UserId == userId).ToListAsync();
+                    var address = await _db.Addresses.Where(x=> x.UserId == userId&&!x.IsDeleted).ToListAsync();
                     return address;
                     }
                 }
@@ -99,7 +127,6 @@ namespace CatKinhOnline.Repositories.AddressRepository
                 {
                 throw new ArgumentNullException(nameof(address), "Address cannot be null");
                 }
-
             try
                 {
                 using (var _db = new MyDbContext())
@@ -134,7 +161,7 @@ namespace CatKinhOnline.Repositories.AddressRepository
                         {
                         return false; // Address not found
                         }
-                    _db.Addresses.Remove(address);
+                    address.IsDeleted=true; 
                     await _db.SaveChangesAsync();
                     return true; 
                     }

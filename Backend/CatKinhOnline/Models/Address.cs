@@ -26,6 +26,8 @@ namespace CatKinhOnline.Models
 
         public bool IsDefault { get; set; } = false;
 
+        public bool IsDeleted { get; set; } = false;
+
         [JsonIgnore]
         public virtual ICollection<Order> OrdersShipping { get; set; }  = new List<Order>();
         }

@@ -18,7 +18,6 @@ namespace CatKinhOnline.Models
         [MaxLength(250)]
         public string Description { get; set; } = string.Empty;
 
-        // Quan hệ 1 Category có nhiều Product
         [JsonIgnore]
         public virtual ICollection<Product> Products { get; set; } = new List<Product>();
         }

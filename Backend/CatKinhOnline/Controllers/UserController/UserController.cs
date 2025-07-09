@@ -1,6 +1,9 @@
-﻿using CatKinhOnline.ModelDTOs;
+﻿using Azure;
+using CatKinhOnline.ModelDTOs;
 using CatKinhOnline.Models;
 using CatKinhOnline.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -8,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace CatKinhOnline.Controllers.UserController
     {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -33,17 +37,32 @@ namespace CatKinhOnline.Controllers.UserController
             }
 
         // GET api/<UserController>/5
-        [HttpGet("{email}")]
-        public async Task<IActionResult> Get(string email)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id  )
             {
             try
                 {
-                var user = await _userService.GetUserByEmail(email);
-                if (user==null)
-                    {
-                    return NotFound($"User with Email {email} not found.");
-                    }
-                return Ok(user);
+                var response = await _userService.GetUserById(id);
+                if (response!.IsSuccess)
+                    return Ok(response);
+                else return BadRequest(response);
+                }
+            catch (Exception ex)
+                {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+                }
+            }
+        // GET api/<UserController>/5
+        [HttpGet]
+        [Route("user/{email}")]
+        public async Task<IActionResult> GetUserByEmail(string email)
+            {
+            try
+                {
+                var response = await _userService.GetUserByEmail(email);
+                if (response!.IsSuccess)
+                    return Ok(response);
+                else return BadRequest(response);
                 }
             catch (Exception ex)
                 {
@@ -57,9 +76,8 @@ namespace CatKinhOnline.Controllers.UserController
             {
             try
                 {
-                APIResponse aPIResponse = new APIResponse();
-                aPIResponse=await _userService.AddUser(user);
-                return Ok(aPIResponse);
+                var respone =await _userService.AddUser(user);
+                return Ok(respone);
                 }
             catch (Exception ex)
                 {
@@ -89,6 +107,24 @@ namespace CatKinhOnline.Controllers.UserController
                 APIResponse aPIResponse = new APIResponse();
                 aPIResponse = await _userService.ChangePassword(email, dto);
                 return Ok(aPIResponse);
+                }
+            catch (Exception ex)
+                {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+                }
+            }
+
+        // PUT api/User/UpdateStatus/5
+        [HttpPut("{id}/status/{status}")]
+        public async Task<IActionResult> UpdateStatus(int id, int status)
+            {
+            try
+                {
+                var result = await _userService.UpdateUserStatus(id, status);
+                if (result.IsSuccess)
+                    return Ok(result);
+                else
+                    return BadRequest(result);
                 }
             catch (Exception ex)
                 {

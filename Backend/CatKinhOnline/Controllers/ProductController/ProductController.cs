@@ -1,5 +1,7 @@
 ﻿using CatKinhOnline.Models;
 using CatKinhOnline.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -7,6 +9,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CatKinhOnline.Controllers.ProductController
     {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductController : ControllerBase
@@ -18,20 +21,26 @@ namespace CatKinhOnline.Controllers.ProductController
             }
         // GET: api/<ProductController>
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Get()
             {
             var products = await _productService.GetAllProduct();
+            if (!products.IsSuccess)
+                {
+                return NotFound(products);
+                }
             return Ok(products);
             }
 
         // GET api/<ProductController>/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> Get(int id)
             {
             var product = await _productService.GetProductById(id);
             if (product==null)
                 {
-                return NotFound($"Product with ID {id} not found.");
+                return NotFound(product);
                 }
             return Ok(product);
             }
