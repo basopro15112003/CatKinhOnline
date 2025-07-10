@@ -23,6 +23,7 @@ export function ResetPasswordForm() {
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +33,7 @@ export function ResetPasswordForm() {
     if (password.length < 8) {
       return toast.warning("Mật khẩu không thể ngắn hơn 8 ký tự");
     }
+    setSubmitting(true);
     const res = await fetch("https://localhost:7057/api/auth/reset-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -43,6 +45,7 @@ export function ResetPasswordForm() {
     } else {
       toast.error("Có lỗi xảy ra, vui lòng thử lại");
     }
+    setSubmitting(false);
   };
   if (success)
     return (
@@ -162,8 +165,8 @@ export function ResetPasswordForm() {
             </div>
           </CardContent>
           <CardFooter className="w-full flex-col">
-            <Button type="submit" className="w-full" name="changePasswordBtn">
-              Đổi mật khẩu
+            <Button type="submit" className="w-full" name="changePasswordBtn" disabled={submitting}>
+              {submitting ? "Đang đổi mật khẩu..." : "Đổi mật khẩu"}
             </Button>
           </CardFooter>
         </form>    

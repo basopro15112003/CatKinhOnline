@@ -15,16 +15,19 @@ export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     await fetch("https://localhost:7057/api/auth/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
-    setSent(true);  
+    setSent(true);
     setCooldown(60); // 60 giây cooldown
+    setSubmitting(false);
   };
   // Đếm ngược cooldown
   React.useEffect(() => {
@@ -58,8 +61,8 @@ export function ForgotPasswordForm() {
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-2 px-6 pb-6">
-          <Button type="submit" className="w-full" disabled={cooldown > 0}>
-            {cooldown > 0 ? `Vui lòng chờ ${cooldown}s...` : "Lấy lại mật khẩu"}
+          <Button type="submit" className="w-full" disabled={cooldown > 0 || submitting}>
+            {submitting ? "Đang gửi..." : cooldown > 0 ? `Vui lòng chờ ${cooldown}s...` : "Lấy lại mật khẩu"}
           </Button>
               {sent && (
             <div className="text-green-600 mt-2 text-center">
