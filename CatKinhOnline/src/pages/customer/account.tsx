@@ -236,62 +236,69 @@ export default function Account() {
               {" "}
               <form onSubmit={handleSubmitChangePassword}>
                 <TabsContent value="changepass">
-                  <div className="grid max-w-md gap-4">
-                    <div>
-                      <Label>Mật khẩu cũ</Label>
-                      <Input
-                        type="password"
-                        value={changePasswordForm.oldPassword}
-                        onChange={(e) =>
-                          handleChangePassword("oldPassword", e.target.value)
-                        }
-                      />
-                    </div>{" "}
-                    <div className="relative">
-                      <Label>Mật khẩu mới</Label>
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        name="newPassword"
-                        value={changePasswordForm.newPassword}
-                        onChange={(e) =>
-                          handleChangePassword("newPassword", e.target.value)
-                        }
-                      />{" "}
-                      <button
-                        type="button"
-                        className="absolute top-5 right-2 scale-95"
-                        onClick={() => setShowPassword((v) => !v)}
-                        tabIndex={-1}
+                  <div className="grid md:grid-cols-2 space-y-2 md:space-y-0">
+                    <div className="grid max-w-xl space-y-4">
+                      <div>
+                        <Label>Mật khẩu cũ</Label>
+                        <Input
+                          type="password"
+                          value={changePasswordForm.oldPassword}
+                          onChange={(e) =>
+                            handleChangePassword("oldPassword", e.target.value)
+                          }
+                        />
+                      </div>{" "}
+                      <div className="relative">
+                        <Label>Mật khẩu mới</Label>
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          name="newPassword"
+                          value={changePasswordForm.newPassword}
+                          onChange={(e) =>
+                            handleChangePassword("newPassword", e.target.value)
+                          }
+                        />{" "}
+                        <button
+                          type="button"
+                          className="absolute top-5 right-2 scale-95"
+                          onClick={() => setShowPassword((v) => !v)}
+                          tabIndex={-1}
+                        >
+                          {!showPassword ? (
+                            <>
+                              <EyeClosed></EyeClosed>
+                            </>
+                          ) : (
+                            <>
+                              <Eye></Eye>
+                            </>
+                          )}
+                        </button>{" "}
+                      </div>{" "}
+                      <div className="relative">
+                        <Label>Xác nhận mật khẩu mới</Label>
+                        <Input
+                          type="password"
+                          name="confirmPassword"
+                          value={confirmNewPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                      </div>
+                      <Button
+                        className="mt-4"
+                        type="submit"
+                        disabled={changePasswordSubmitting}
                       >
-                        {!showPassword ? (
-                          <>
-                            <EyeClosed></EyeClosed>
-                          </>
-                        ) : (
-                          <>
-                            <Eye></Eye>
-                          </>
-                        )}
-                      </button>{" "}
-                    </div>{" "}
-                    <div className="relative">
-                      <Label>Xác nhận mật khẩu mới</Label>
-                      <Input
-                        type="password"
-                        name="confirmPassword"
-                        value={confirmNewPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                      />
+                        {changePasswordSubmitting
+                          ? "Đang lưu..."
+                          : "Lưu thay đổi"}
+                      </Button>{" "}
                     </div>
-                    <Button
-                      className="mt-4"
-                      type="submit"
-                      disabled={changePasswordSubmitting}
-                    >
-                      {changePasswordSubmitting
-                        ? "Đang lưu..."
-                        : "Lưu thay đổi"}
-                    </Button>{" "}
+                    <div className="w-full italic text-md">
+                      <p>
+                      Nếu tài khoản của bạn sử dụng đăng nhập Google, vui lòng đặt lại mật khẩu qua tính năng "Quên mật khẩu" trên trang Đăng nhập.
+                      </p>
+                    </div>
                   </div>
                 </TabsContent>
               </form>
