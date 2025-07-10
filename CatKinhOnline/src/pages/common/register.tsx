@@ -26,6 +26,8 @@ export function Register({
   const [confirmPassWord, setConfirmPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
   const validate = (): boolean => {
     if (!fullname.trim()) {
       toast.warning("Họ và tên không thể được để trống !");
@@ -58,6 +60,7 @@ export function Register({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+    setSubmitting(true);
     try {
       const payload: RegisterInput = {
         id: 0,
@@ -80,8 +83,10 @@ export function Register({
       } else {
         toast.error(response.message);
       }
+      setSubmitting(false);
     } catch (error) {
       console.log(error);
+      setSubmitting(false);
     }
   };
 
@@ -140,22 +145,23 @@ export function Register({
                   value={passwordHash}
                   placeholder="Nhập vào mật khẩu"
                   onChange={(e) => setPassword(e.target.value)}
-                /><button
-                type="button"
-                className="absolute top-7 right-2 scale-95"
-                onClick={() => setShowPassword((v) => !v)}
-                tabIndex={-1}
-              >
-                {!showPassword ? (
-                  <>
-                    <EyeClosed></EyeClosed>
-                  </>
-                ) : (
-                  <>
-                    <Eye></Eye>
-                  </>
-                )}
-              </button>{" "}
+                />
+                <button
+                  type="button"
+                  className="absolute top-7 right-2 scale-95"
+                  onClick={() => setShowPassword((v) => !v)}
+                  tabIndex={-1}
+                >
+                  {!showPassword ? (
+                    <>
+                      <EyeClosed></EyeClosed>
+                    </>
+                  ) : (
+                    <>
+                      <Eye></Eye>
+                    </>
+                  )}
+                </button>{" "}
               </div>
               <div className="relative mb-2 grid gap-2">
                 <div className="flex items-center">
@@ -167,27 +173,30 @@ export function Register({
                   value={confirmPassWord}
                   placeholder="Xác nhận mật khẩu"
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                />  <button
-                type="button"
-                className="absolute top-7 right-2 scale-95"
-                onClick={() => setShowConfirm((v) => !v)}
-                tabIndex={-1}
-              >
-                {!showConfirm ? (
-                  <>
-                    <EyeClosed></EyeClosed>
-                  </>
-                ) : (
-                  <>
-                    <Eye></Eye>
-                  </>
-                )}
-              </button>{" "}
+                />{" "}
+                <button
+                  type="button"
+                  className="absolute top-7 right-2 scale-95"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  tabIndex={-1}
+                >
+                  {!showConfirm ? (
+                    <>
+                      <EyeClosed></EyeClosed>
+                    </>
+                  ) : (
+                    <>
+                      <Eye></Eye>
+                    </>
+                  )}
+                </button>{" "}
               </div>
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-2 px-6 pb-6">
-            <Button className="w-full">Đăng ký</Button>
+            <Button className="w-full" disabled={submitting}>
+              {submitting ? "Đang đăng ký..." : "Đăng ký"}
+            </Button>
             <Button
               variant="ghost"
               className="w-full text-sm text-gray-500"

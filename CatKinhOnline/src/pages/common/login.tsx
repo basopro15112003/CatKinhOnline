@@ -26,11 +26,13 @@ export function Login({ setShowForm }: props) {
   const [showForgotPasswordForm, setShowForgotPasswordForm] = useState(false);
   const [showLogin, setShowLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
   const BE_LOGIN = `https://catkinhonline.onrender.com/api/auth/login?returnUrl=${encodeURIComponent("/auth/callback")}`;
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const payload: LoginInput = {
         email,
@@ -41,6 +43,7 @@ export function Login({ setShowForm }: props) {
         toast.error(
           "Đăng nhập thất bại: vui lòng kiểm tra lại tài khoản và mật khẩu",
         );
+        setSubmitting(false);
         return;
       } else {
         toast.success(
@@ -54,8 +57,10 @@ export function Login({ setShowForm }: props) {
         setShowForm(false);
         navigate("/");
       }
+      setSubmitting(false);
     } catch (error) {
       alert("Đăng nhập thất bại: " + (error as Error).message);
+      setSubmitting(false);
     }
   };
   return (
@@ -125,8 +130,8 @@ export function Login({ setShowForm }: props) {
                 </div>
               </CardContent>
               <CardFooter className="flex-col gap-2 px-6 pb-6">
-                <Button type="submit" className="w-full">
-                  Đăng nhập
+                <Button type="submit" className="w-full" disabled={submitting}>
+                  {submitting ? "Đang đăng nhập..." : "Đăng nhập"}
                 </Button>
                 <a
                   type="button"
