@@ -14,6 +14,7 @@ import CustomerReview from "@/components/common/customerReview";
 import banner1 from "@/assets/images/banner/banner1.avif";
 import banner2 from "@/assets/images/banner/banner2.avif";
 import banner3 from "@/assets/images/banner/banner3.avif";
+import { Link } from "react-router-dom";
 
 function HomePage() {
   const [isVisible, setIsVisible] = useState(false);
@@ -83,19 +84,21 @@ function HomePage() {
                   Cắt kính chính xác, giao hàng tận nơi hoặc nhận tại cửa hàng.
                 </p>
                 <div className="flex space-x-4">
-                  <Button
-                    size="lg"
-                    className="transform bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xl transition-all duration-300 hover:scale-105 hover:from-emerald-700 hover:to-teal-700 hover:shadow-2xl"
-                  >
-                    Đặt kính ngay
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
+                  {" "}
+                  <Link to={"/order"}>
+                    <Button
+                      size="lg"
+                      className="transform bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xl transition-all duration-300 hover:scale-105 hover:from-emerald-700 hover:to-teal-700 hover:shadow-2xl"
+                    >
+                      Đặt kính ngay
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
         </section>
-
         <section className={`mx-auto mb-16 max-w-7xl px-1 md:px-4`}>
           <div className="mb-12 text-center">
             <h2
