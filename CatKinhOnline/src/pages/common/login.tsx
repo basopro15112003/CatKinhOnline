@@ -85,7 +85,7 @@ export function Login({ setShowForm }: props) {
                       id="email"
                       type="text"
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="quochoangnguyen2003ct@example.com"
+                      placeholder="example@gmail.com"
                       required
                     />
                   </div>
@@ -97,9 +97,9 @@ export function Login({ setShowForm }: props) {
                           setShowForgotPasswordForm(true);
                           setShowLogin(false);
                         }}
-                        className="ml-auto text-sm underline hover:underline-offset-2"
+                        className="ml-auto text-sm hover:font-bold cursor-pointer underline hover:underline-offset-2"
                       >
-                        Quên mật khẩu hả? lấy lại ở đây nè.
+                        Quên mật khẩu?
                       </a>
                     </div>
                     <div className="relative">
