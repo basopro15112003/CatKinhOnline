@@ -22,7 +22,7 @@ export function Price() {
           setProduct(filtered);
           setTimeout(() => {
             setLoadingSkeleton(false);
-          }, 1000);
+          }, 2000);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -40,11 +40,11 @@ export function Price() {
           </h2>
           {loadingSkeleton ? (
             <>
-              <CardContent>
+              <CardContent> 
                 {" "}
                 <div className="mb-29 grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:w-auto md:gap-4">
-                  {product.map(() => (
-                    <Skeleton className="h-23 rounded-2xl bg-green-200"></Skeleton>
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <Skeleton key={index} className="h-23 rounded-2xl bg-green-200"></Skeleton>
                   ))}
                 </div>
               </CardContent>
