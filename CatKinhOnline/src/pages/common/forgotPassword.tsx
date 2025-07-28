@@ -54,8 +54,8 @@ export function ForgotPasswordForm() {
                   id="email"
                   type="text"
                     onChange={(e) => setEmail(e.target.value)}
-                  placeholder="quochoangnguyen2003ct@example.com"
-                  required
+                    placeholder="example@gmail.com"
+                    required
                 />
               </div>
             </div>
